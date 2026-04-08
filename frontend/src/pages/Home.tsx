@@ -15,8 +15,8 @@ export function Home() {
   return (
     <Layout>
       {/* Área Hero: Degradado y Tipografía */}
-      <section className="bg-gradient-to-r from-teal-500 to-gray-400 px-4 py-16 lg:px-10">
-        <IonGrid className="mx-auto max-w-[1400px]">
+      <section className="bg-linear-to-r from-teal-500 to-gray-400 px-4 py-16 lg:px-10">
+        <IonGrid className="mx-auto max-w-[350]">
           <IonRow className="min-h-[40vh] items-center">
             <IonCol size="12" sizeLg="7">
               <IonText color="light">
@@ -26,12 +26,16 @@ export function Home() {
               </IonText>
               
               <div className="mt-10 flex flex-wrap items-center gap-4">
-                {/* Botón de acción principal con renderizado nativo */}
-                <IonButton color="tertiary" size="large" className="font-bold tracking-wide">
+                {/* Botón navega a /agendar */}
+                <IonButton
+                  color="tertiary"
+                  size="large"
+                  className="font-bold tracking-wide"
+                  routerLink="/agendar"
+                >
                   Agenda Aqui!
                 </IonButton>
                 
-                {/* Enlace convertido a botón transparente para heredar área táctil nativa */}
                 <IonButton fill="clear" color="light" size="large" className="font-semibold">
                   Modifica Tu Cita Medica
                 </IonButton>
@@ -43,9 +47,8 @@ export function Home() {
 
       {/* Área de Características: Sistema de Tarjetas */}
       <section className="bg-white px-4 py-16 lg:px-10">
-        <IonGrid className="mx-auto max-w-[1400px]">
+        <IonGrid className="mx-auto max-w-[350]">
           <IonRow>
-            {/* Nodo 1 */}
             <IonCol size="12" sizeMd="4">
               <IonCard className="m-0 bg-teal-600 shadow-xl">
                 <IonCardHeader>
@@ -58,7 +61,6 @@ export function Home() {
               </IonCard>
             </IonCol>
             
-            {/* Nodo 2 */}
             <IonCol size="12" sizeMd="4">
               <IonCard className="m-0 bg-teal-600 shadow-xl">
                 <IonCardHeader>
@@ -71,7 +73,6 @@ export function Home() {
               </IonCard>
             </IonCol>
 
-            {/* Nodo 3 */}
             <IonCol size="12" sizeMd="4">
               <IonCard className="m-0 bg-teal-600 shadow-xl">
                 <IonCardHeader>
