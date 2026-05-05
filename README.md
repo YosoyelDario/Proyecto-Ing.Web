@@ -21,36 +21,44 @@ El Usuario objetivo que nosotros determinamos, es un usuario general. El cual po
 
 ## EP 1.3
 
-QUE HAY QUE HACER: Bocetos de UI/UX y prototipo en Figma de al menos 7 mockups o pantallas distintas, cada una correspondiente
-a una funcionalidad previamente definida en los requerimientos
-del proyecto. Cada pantalla deber´a presentar un dise˜no diferenciado, coherente con el flujo de navegaci´on y la jerarqu´ıa de informaci´on. Las interfaces deber´as ser prototipadas considerando
-expl´ıcitamente: versi´on m´ovil y web. El dise˜no deber´a evidenciar
-distribuci´on de contenido, componentes de navegaci´on (por ejemplo: men´u lateral en web, barra inferior en m´ovil), jerarqu´ıa visual
-y densidad de la informaci´on. Se deber´a Incluir en los mockups
-dos formularios relacionados al inicio de sesi´on de usuarios y registro, considerando los campos: Nombre de usuario, RUT, Correo Electr´onico, Regi´on, Comuna, Contrase˜na, Confirmaci´on de
-Contrase˜na y aceptaci´on de t´erminos y condiciones. Considerando
-validaciones visuales y dise˜no centrado en el usuario.
+QUE HAY QUE HACER: Bocetos de UI/UX y prototipo en Figma de al menos 7 mockups o pantallas distintas, cada una correspondiente a una funcionalidad previamente definida en los requerimientos del proyecto.
+
+Cada pantalla deberá presentar un diseño diferenciado, coherente con el flujo de navegación y la jerarquía de información. Ademas, las interfaces deberán ser prototipadas considerando explícitamente: versión móvil y web.
+- El diseño deberá evidenciar distribución de contenido, componentes de navegación (por ejemplo: menú lateral en web, barra inferior en móvil), jerarquía visual
+y densidad de la información. 
+- Se deberá Incluir en los mockups dos formularios relacionados al inicio de sesión de usuarios y registro, considerando los campos: Nombre de usuario, RUT, Correo Electronico, Region, Comuna, Contraseña, Confirmacion de
+Contraseñna y aceptacion de términos y condiciones. Considerando
+validaciones visuales y diseño centrado en el usuario.
 
 ## EP 1.4
 
-Definici´on de Arquitectura de Navegaci´on y Experiencia
-del Usuario. El equipo deber´a definir la arquitectura de navegaci´on de la aplicaci´on, describiendo la estructura de rutas, jerarqu´ıa de vistas, y flujo de interacci´on entre pantallas. La entrega
-deber´a incluir: (a) Rutas principales y secundarias; (b) Relaciones
-jer´arquicas entre vistas; (c) Flujo de navegaci´on entre funcionalidades; (d) diferenciaci´on de acceso seg´un roles (por ejemplo: usuario /administrador); (e) flujo de principales tareas (task flow), (f)
-puntos cr´ıticos de interacci´on; (g) coherencia de experiencia entre
-3
-dispositivos; (h) breve justificaci´on t´ecnica de las decisiones adoptadas, considerando usabilidad, eficiencia de interacci´on, claridad
+Definicion de Arquitectura de Navegacion y Experiencia
+del Usuario. El equipo debera definir la arquitectura de navegacion de la aplicacion, describiendo la estructura de rutas, jerarquıa de vistas, y flujo de interaccion entre pantallas. La entrega
+debera incluir: 
+- (a) Rutas principales y secundarias 
+- (b) Relaciones
+jerarquicas entre vistas
+- (c) Flujo de navegacion entre funcionalidades
+- (d) diferenciacion de acceso segun roles (por ejemplo: usuario /administrador)
+- (e) flujo de principales tareas (task flow)
+- (f) puntos criticos de interaccion
+- (g) coherencia de experiencia entre 3
+dispositivos
+- (h) breve justificacion tecnica de las decisiones adoptadas, considerando usabilidad, eficiencia de interaccion, claridad
 estructural y escalabilidad de la arquitectura frontend.
 
 ## EP 1.5
 
- Creaci´on del proyecto en Ionic con React, considerando:
-(a) Uso de react router; (b) Rutas p´ublicas y rutas protegidas; (c)
-Redirecciones (ejemplo: login obligatorio); (d) Estructura modular
+ Creacion del proyecto en Ionic con React, considerando:
+- (a) Uso de react router; 
+- (b) Rutas publicas y rutas protegidas;
+- (c)
+Redirecciones (ejemplo: login obligatorio);
+- (d) Estructura modular
 de vistas.
 
 
 ## EP 1.6
-Disenoo de pantallas principales e incorporando una estructura de navegaci´on funcional y coherente con la arquitectura
-previamente definida en ionic-react (al menos 4). Uso de componentes propios de Ionic (IonPage, IonHeader, IonContent, IonTabs, IonMenu, etc). Separaci´on estructural del c´odigo en carpetas
+Diseño de pantallas principales e incorporando una estructura de navegacion funcional y coherente con la arquitectura
+previamente definida en ionic-react (al menos 4). Uso de componentes propios de Ionic (IonPage, IonHeader, IonContent, IonTabs, IonMenu, etc). Separacion estructural del codigo en carpetas
 (pages, components, routes, services).
