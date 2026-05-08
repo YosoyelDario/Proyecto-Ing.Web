@@ -47,7 +47,16 @@ export default function Home() {
               aria-label="MediCita — inicio"
             >
               <span className="w-2 h-2 rounded-full bg-[#409dcc]" aria-hidden="true" />
-              MediCita
+              Municipalidad de Santo Domingo
+            </a>
+
+            <a
+              href="/"
+              className="flex items-center gap-2 text-[15px] font-medium tracking-wide text-[#1a2332] no-underline"
+              aria-label="MediCita — inicio"
+            >
+              <span className="w-2 h-2 rounded-full bg-[#ff5050]" aria-hidden="true" />
+              Teléfono emergencía: 1458 <br /> Teléfonos contacto: +563 2238 1603 / +563 5220 4200
             </a>
           </nav>
 
@@ -87,9 +96,9 @@ export default function Home() {
                 animate-[fadeUp_0.5s_ease_forwards_0.2s] opacity-0
               "
             >
-              Tu salud,
+              <em className="italic text-[#27a4e3]">Tu salud</em>
               <br />
-              <em className="italic text-[#4aa8d8]">tu tiempo.</em>
+              <em className="italic text-[#007ebc]">Tu tiempo</em>
             </h1>
 
             {/* Subtítulo */}
@@ -147,7 +156,7 @@ export default function Home() {
               >
                 Iniciar sesión
               </Link>
-            </div>s
+            </div>Si no tienes cuenta
 
             {/* ── Separador ── */}
             <div
@@ -155,7 +164,7 @@ export default function Home() {
               aria-hidden="true"
             >
               <span className="flex-1 h-px bg-[#d5dce6]" />
-              <span className="text-[12px] text-[#8a99ab] tracking-wide">o si prefieres</span>
+              <span className="text-[12px] text-[#8a99ab] tracking-wide">puedes optar por</span>
               <span className="flex-1 h-px bg-[#d5dce6]" />
             </div>
 

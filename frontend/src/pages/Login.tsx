@@ -2,6 +2,9 @@ import { useState } from 'react'
 import { IonPage, IonContent } from '@ionic/react'
 import { useNavigate } from 'react-router-dom'
 
+//Email del admin, hardcodeado.
+const ADMIN_EMAIL = "tuadmin@gmail.com" 
+
 export default function Login() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
@@ -11,8 +14,14 @@ export default function Login() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     // lógica de login aquí
+    localStorage.setItem('userEmail', email.toLowerCase())
+    
+    if (email.toLowerCase() == ADMIN_EMAIL){
+      navigate('/admin')
+    } else{
+      navigate('/home')
+    }
   }
-
   return (
     <IonPage>
       <IonContent fullscreen>
@@ -22,11 +31,11 @@ export default function Login() {
           <div className="flex-1 flex flex-col justify-center px-8 py-12 bg-white md:px-16 md:max-w-130">
 
             {/* Logo */}
-            <div className="mb-10">
+            <div className="mb-10 ml-35">
               <img
-                src="/assets/logo.png"
+                src="/assets/SantoDomingoLogo.png"
                 alt="MediCita logo"
-                className="h-16 w-auto object-contain"
+                className="h-40 w-auto object-contain"
               />
             </div>
 
@@ -124,11 +133,12 @@ export default function Login() {
               <button
                 type="submit"
                 className="
-                  w-full py-4 mt-2 rounded-xl
+                  w-full py-10 mt-0 rounded-lg
                   bg-[#3aada0] text-white
-                  text-[15px] font-medium tracking-wide
+                  text-[30px] font-medium tracking-wide
                   border-none cursor-pointer
                   transition-all duration-150
+                  shadow-md shadow-[#3aada0]/30 hover:shadow-lg
                   active:scale-[0.97] active:bg-[#2e968a] focus-visible:outline-2 focus-visible:outline-[#3aada0] focus-visible:outline-offset-2
                 "
                 style={{ WebkitTapHighlightColor: 'transparent' }}
@@ -189,4 +199,5 @@ export default function Login() {
       </IonContent>
     </IonPage>
   )
+  
 }

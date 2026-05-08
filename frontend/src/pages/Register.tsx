@@ -49,15 +49,15 @@ export default function Register() {
           <div className="flex-1 flex flex-col justify-center px-8 py-12 bg-white md:px-16 md:max-w-130">
 
             {/* Logo */}
-            <div className="mb-8">
+            <div className="mb-8 ml-35" >
               <img
-                src="/assets/logo.png"
+                src="/assets/SantoDomingoLogo.png"
                 alt="MediCita logo"
-                className="h-16 w-auto object-contain"
+                className="h-40 w-auto object-contain"
               />
             </div>
 
-            <h1 className="text-[28px] font-semibold text-[#1a2332] mb-1 tracking-tight">
+            <h1 className="text-[28px] font-semibold text-[#1a2332] mb-1">
               Crear cuenta
             </h1>
             <p className="text-[14px] text-[#7a8a9a] mb-7 font-light">
