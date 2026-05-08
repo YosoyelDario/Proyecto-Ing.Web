@@ -1,9 +1,7 @@
 import { useEffect, useRef } from 'react'
-import {
-  IonPage,
-  IonContent,
-} from '@ionic/react'
-import { Link } from 'react-router-dom'
+import { IonPage, IonContent } from '@ionic/react'
+import LogoSantoDomingo from '../components/LogoSantoDomingo'
+import BotonPrimario from '../components/BotonPrimario'
 
 export default function Home() {
   const headingRef = useRef<HTMLHeadingElement>(null)
@@ -12,27 +10,21 @@ export default function Home() {
     const link = document.createElement('link')
     link.rel = 'stylesheet'
     link.href =
-      'https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap'
+      'https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap'
     document.head.appendChild(link)
-
     headingRef.current?.focus()
   }, [])
 
   return (
     <IonPage>
-      {/*
-        IonContent maneja scroll nativo, safe-areas (notch, home bar)
-        y overscroll de iOS automáticamente.
-        fullscreen=true permite que el contenido vaya detrás del status bar.
-      */}
-      <IonContent fullscreen className="bg-[#f7f9fc]">
+      <IonContent fullscreen className="bg-[#f4faf9]">
 
         <div
           className="
             min-h-screen flex flex-col
             font-['DM_Sans',sans-serif]
-            text-[#1a2332]
-            bg-[#f7f9fc]
+            text-[#14302d]
+            bg-[#f4faf9]
           "
         >
 
@@ -41,23 +33,22 @@ export default function Home() {
             className="flex items-center justify-between px-6 pt-14 pb-4 md:px-12 md:pt-10"
             aria-label="Navegación principal"
           >
-            <a
-              href="/"
-              className="flex items-center gap-2 text-[15px] font-medium tracking-wide text-[#1a2332] no-underline"
-              aria-label="MediCita — inicio"
-            >
-              <span className="w-2 h-2 rounded-full bg-[#409dcc]" aria-hidden="true" />
-              Municipalidad de Santo Domingo
-            </a>
+            <LogoSantoDomingo />
 
-            <a
-              href="/"
-              className="flex items-center gap-2 text-[15px] font-medium tracking-wide text-[#1a2332] no-underline"
-              aria-label="MediCita — inicio"
-            >
-              <span className="w-2 h-2 rounded-full bg-[#ff5050]" aria-hidden="true" />
-              Teléfono emergencía: 1458 <br /> Teléfonos contacto: +563 2238 1603 / +563 5220 4200
-            </a>
+            {/* Teléfonos de contacto */}
+            <div className="flex flex-col items-end gap-0.5">
+              <a
+                href="tel:1458"
+                className="flex items-center gap-1.5 text-[12px] font-medium text-[#e05c5c] no-underline"
+                aria-label="Teléfono de emergencia 1458"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-[#e05c5c]" aria-hidden="true" />
+                Emergencia: 1458
+              </a>
+              <span className="text-[11px] text-[#7aa9a5] font-light">
+                +563 2238 1603 · +563 5220 4200
+              </span>
+            </div>
           </nav>
 
           {/* ── Hero ── */}
@@ -73,8 +64,8 @@ export default function Home() {
             {/* Eyebrow */}
             <p
               className="
-                text-[10px] font-medium tracking-[0.14em] uppercase
-                text-[#4aa8d8] mb-5
+                text-[10px] font-medium tracking-[0.16em] uppercase
+                text-[#3aada0] mb-5
                 animate-[fadeUp_0.5s_ease_forwards_0.1s] opacity-0
               "
               aria-hidden="true"
@@ -82,7 +73,7 @@ export default function Home() {
               Sistema de citas médicas
             </p>
 
-            {/* Heading principal */}
+            {/* Heading */}
             <h1
               ref={headingRef}
               tabIndex={-1}
@@ -90,21 +81,21 @@ export default function Home() {
               className="
                 font-['DM_Serif_Display',Georgia,serif]
                 text-[42px] leading-[1.1] tracking-tight
-                text-[#002463] font-normal
+                text-[#14302d] font-normal
                 mb-4 outline-none
                 md:text-[64px]
                 animate-[fadeUp_0.5s_ease_forwards_0.2s] opacity-0
               "
             >
-              <em className="italic text-[#27a4e3]">Tu salud</em>
+              <em className="italic text-[#3aada0]">Tu salud,</em>
               <br />
-              <em className="italic text-[#007ebc]">Tu tiempo</em>
+              <em className="italic text-[#2d8c81]">tu tiempo</em>
             </h1>
 
             {/* Subtítulo */}
             <p
               className="
-                text-[15px] font-light text-[#5a6a7e] leading-relaxed
+                text-[15px] font-light text-[#5a7e7b] leading-relaxed
                 max-w-75 mb-12
                 animate-[fadeUp_0.5s_ease_forwards_0.3s] opacity-0
               "
@@ -121,80 +112,58 @@ export default function Home() {
               role="group"
               aria-label="Opciones de acceso"
             >
-              {/* Registrarse — primario azul */}
-              <Link
+              <BotonPrimario
                 to="/register"
-                aria-label="Crear una cuenta nueva"
-                className="
-                  w-full py-4 rounded-xl
-                  bg-[#4aa8d8] text-white
-                  text-[15px] font-medium tracking-wide
-                  border border-[#4aa8d8]
-                  transition-all duration-150
-                  active:scale-[0.97] active:bg-[#3797c8]
-                  focus-visible:outline focus-visible:outline-[#4aa8d8] focus-visible:outline-offset-2
-                "
-                style={{ WebkitTapHighlightColor: 'transparent' }}
+                variante="solido"
+                fullWidth
+                ariaLabel="Crear una cuenta nueva"
               >
                 Registrarse
-              </Link>
+              </BotonPrimario>
 
-              {/* Iniciar sesión — outline */}
-              <Link
+              <BotonPrimario
                 to="/login"
-                aria-label="Iniciar sesión en tu cuenta"
-                className="
-                  w-full py-4 rounded-xl
-                  bg-white text-[#1a2332]
-                  text-[15px] font-medium tracking-wide
-                  border border-[#d5dce6]
-                  transition-all duration-150
-                  active:scale-[0.97] active:bg-[#eef4f9]
-                  focus-visible:outline focus-visible:outline-[#4aa8d8] focus-visible:outline-offset-2
-                "
-                style={{ WebkitTapHighlightColor: 'transparent' }}
+                variante="outline"
+                fullWidth
+                ariaLabel="Iniciar sesión en tu cuenta"
               >
                 Iniciar sesión
-              </Link>
-            </div>Si no tienes cuenta
+              </BotonPrimario>
+            </div>
 
             {/* ── Separador ── */}
             <div
               className="flex items-center gap-3 w-full max-w-70 mb-8 animate-[fadeUp_0.5s_ease_forwards_0.5s] opacity-0"
               aria-hidden="true"
             >
-              <span className="flex-1 h-px bg-[#d5dce6]" />
-              <span className="text-[12px] text-[#8a99ab] tracking-wide">puedes optar por</span>
-              <span className="flex-1 h-px bg-[#d5dce6]" />
+              <span className="flex-1 h-px bg-[#c8e4e1]" />
+              <span className="text-[12px] text-[#7aa9a5] tracking-wide">o si no tienes cuenta</span>
+              <span className="flex-1 h-px bg-[#c8e4e1]" />
             </div>
 
-            {/* ── Agendar sin cuenta — texto-enlace grande ── */}
-            <Link
-              to="/agendar"
-              aria-label="Agendar una cita médica sin necesidad de crear una cuenta"
-              className="
-                font-['DM_Serif_Display',Georgia,serif]
-                italic text-[22px] text-[#1a2332]
-                bg-transparent border-none
-                underline decoration-[#4aa8d8] decoration-[1.5px] underline-offset-4
-                transition-colors duration-200
-                active:text-[#4aa8d8]
-                focus-visible:outline focus-visible:outline-[#4aa8d8] focus-visible:outline-offset-4 focus-visible:rounded
-                cursor-pointer
-                animate-[fadeUp_0.5s_ease_forwards_0.55s] opacity-0
-                md:text-[26px]
-              "
-              style={{ WebkitTapHighlightColor: 'transparent' }}
-            >
-              Agendar sin crear cuenta →
-            </Link>
+            {/* ── Agendar sin cuenta ── */}
+            {/* ── Agendar sin cuenta ── */}
+<BotonPrimario
+  to="/agendar"
+  variante="texto"
+  ariaLabel="Agendar cita sin crear cuenta"
+  className="
+    font-['DM_Serif_Display',Georgia,serif]
+    italic text-[22px]
+    text-[#00f8e3]
+    animate-[fadeUp_0.5s_ease_forwards_0.55s] opacity-0
+    md:text-[26px]
+  "
+>
+  Agendar sin crear cuenta →
+</BotonPrimario>
 
           </main>
 
           {/* ── Footer ── */}
           <footer className="pb-10 text-center">
-            <p className="text-[11px] text-[#a0adb8] font-light">
-              © {new Date().getFullYear()} MediCita · Todos los derechos reservados
+            <p className="text-[11px] text-[#a8c5c2] font-light">
+              © {new Date().getFullYear()} Municipalidad Santo Domingo · Todos los derechos reservados
             </p>
           </footer>
 

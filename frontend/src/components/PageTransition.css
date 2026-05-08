@@ -1,0 +1,24 @@
+.pt-fadeUp, .pt-fadeIn, .pt-fadeLeft {
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: both;
+  will-change: transform, opacity;
+}
+
+.pt-fadeUp   { animation-name: pt-fadeUp; }
+.pt-fadeIn   { animation-name: pt-fadeIn; }
+.pt-fadeLeft { animation-name: pt-fadeLeft; }
+
+@keyframes pt-fadeUp {
+  from { opacity: 0; transform: translate3d(0, 18px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes pt-fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes pt-fadeLeft {
+  from { opacity: 0; transform: translate3d(18px, 0, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
