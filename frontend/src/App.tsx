@@ -56,6 +56,7 @@ export default function App() {
           /confirmacion?accion=agendada | cancelada | modificada
         */}
         <Route path="/confirmacion" element={<ConfirmacionCita />} />
+        <Route path="/consultar" element={<ConsultarCita />} />
 
         {/* ── RF6: Admin (protegido por AdminRuta) ── */}
         <Route

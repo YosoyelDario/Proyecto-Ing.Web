@@ -147,15 +147,21 @@ export default function Home() {
   to="/agendar"
   variante="texto"
   ariaLabel="Agendar cita sin crear cuenta"
-  className="
-    font-['DM_Serif_Display',Georgia,serif]
-    italic text-[22px]
-    text-[#00f8e3]
-    animate-[fadeUp_0.5s_ease_forwards_0.55s] opacity-0
-    md:text-[26px]
-  "
+  fullWidth
+  className="py-4!" rounded-xl
 >
-  Agendar sin crear cuenta →
+  Agendar sin crear cuenta
+</BotonPrimario>
+
+
+<BotonPrimario
+  to="/consultar"
+  variante="outline"
+  fullWidth
+  ariaLabel="Consultar el estado de tu cita"
+  className="animate-[fadeUp_0.5s_ease_forwards_0.45s] opacity-0"
+>
+  Consultar mi cita
 </BotonPrimario>
 
           </main>

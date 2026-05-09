@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { IonPage, IonContent } from '@ionic/react'
 import { useNavigate } from 'react-router-dom'
+import BotonPrimario from '../components/BotonPrimario'
 
 interface Medic {
   id: string
@@ -298,10 +299,25 @@ export default function Agendar() {
   }
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (rutError) return
-    console.log('Payload a enviar:', form)
-  }
+  e.preventDefault()
+  if (rutError) return
+
+  const medicoSeleccionado = MEDICOS.find(m => m.id === form.medicoId)
+
+  navigate('/confirmacion', {
+    state: {
+      cita: {
+        especialidad: form.especialidad,
+        medico:       medicoSeleccionado?.nombre ?? '',
+        fecha:        form.fecha,
+        hora:         form.hora,
+        rut:          form.rut,
+        nombre:       form.nombre,
+        email:        form.email,
+      },
+    },
+  })
+}
 
   const medicosFiltrados = MEDICOS.filter(m => m.especialidad === form.especialidad)
   const isFormComplete   = Object.values(form).every(v => v.trim() !== '') && !rutError
@@ -454,20 +470,14 @@ export default function Agendar() {
                 </div>
               </div>
 
-              <button
-                type="submit" disabled={!isFormComplete}
-                className="
-                  w-full py-4 mt-2 rounded-xl
-                  bg-[#4aa8d8] text-white
-                  text-[15px] font-medium tracking-wide
-                  border-none cursor-pointer
-                  transition-all duration-150
-                  active:scale-[0.97]
-                  disabled:bg-[#d5dce6] disabled:text-[#a0adb8] disabled:cursor-not-allowed disabled:active:scale-100
-                "
-              >
-                Confirmar Cita
-              </button>
+              <BotonPrimario
+  type="submit"
+  disabled={!isFormComplete}
+  fullWidth
+  className="py-4! [clip-path:inset(0_round_20px)]"
+>
+  Confirmar Cita
+</BotonPrimario> 
 
             </form>
           </main>

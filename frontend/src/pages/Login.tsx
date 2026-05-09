@@ -5,6 +5,7 @@ import PageTransition from '../components/PageTransition'
 import InputTexto     from '../components/InputTexto'
 import ContraInput    from '../components/ContraInput'
 import BotonPrimario  from '../components/BotonPrimario'
+import BotonVolver    from '../components/BotonVolver'    // ← nuevo
 
 const ADMIN_EMAIL = 'tuadmin@gmail.com'
 
@@ -33,6 +34,12 @@ export default function Login() {
   return (
     <IonPage>
       <IonContent fullscreen className="bg-[#f4faf9]">
+
+        {/* ── Botón volver — esquina superior izquierda ── */}
+        <div className="absolute top-4 left-4 z-10 safe-area-top">
+          <BotonVolver to="/" label="Inicio" />
+        </div>
+
         <div
           className="
             min-h-screen flex flex-col items-center justify-center

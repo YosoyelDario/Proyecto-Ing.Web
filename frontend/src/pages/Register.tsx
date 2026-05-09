@@ -6,6 +6,7 @@ import InputTexto       from '../components/InputTexto'
 import ContraInput      from '../components/ContraInput'
 import BotonPrimario    from '../components/BotonPrimario'
 import PageTransition   from '../components/PageTransition'
+import BotonVolver      from '../components/BotonVolver'   // ← nuevo
 
 interface FormState {
   nombre:          string
@@ -61,6 +62,12 @@ export default function Register() {
   return (
     <IonPage>
       <IonContent fullscreen className="bg-[#f4faf9]">
+
+        {/* ── Botón volver — posición absoluta esquina superior izquierda ── */}
+        <div className="absolute top-4 left-4 z-10 safe-area-top">
+          <BotonVolver to="/" label="Inicio" />
+        </div>
+
         <div
           className="
             min-h-screen flex flex-col items-center justify-center
@@ -134,19 +141,12 @@ export default function Register() {
                 error={errores.confirmPassword}
               />
 
-              {/*
-                Botón más grande:
-                - py-5     → más altura (antes py-4)
-                - text-base → 16px legible (antes text-[15px])
-                - tracking-wider → letras más espaciadas
-                - mt-2     → separación visual del último campo
-              */}
               <BotonPrimario
                 onClick={handleSubmit}
                 variante="solido"
                 fullWidth
                 type="submit"
-                className="!py-5 !text-base !tracking-wider mt-2"
+                className="py-5! text-base! tracking-wider! mt-2"
               >
                 Crear cuenta
               </BotonPrimario>
