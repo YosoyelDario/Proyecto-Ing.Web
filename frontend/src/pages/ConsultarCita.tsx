@@ -144,6 +144,8 @@ export default function ConsultarCita() {
               {cita && (
                 <PageTransition variante="fadeUp" duracion={300} delay={100}>
                   <div className="bg-white rounded-2xl shadow-sm border border-[#d5dce6] overflow-hidden">
+                    
+                    {/* Cabecera del resultado */}
                     <div className="bg-[#3aada0] px-6 py-4 flex items-center gap-3">
                       <span className="text-white text-[18px]">📋</span>
                       <div>
@@ -152,15 +154,35 @@ export default function ConsultarCita() {
                       </div>
                     </div>
 
+                    {/* Detalles de la cita */}
                     <div className="px-6 pt-2 pb-1">
                       {detalles.map(d => <FilaDetalle key={d.label} {...d} />)}
                     </div>
 
-                    <div className="px-6 pb-6 pt-3">
-                      <BotonPrimario to="/agendar" variante="outline" fullWidth>
-                        Agendar otra cita
+                    {/* ─── BLOQUE DE ACCIONES (MODIFICAR Y CANCELAR) ─── */}
+                    <div className="px-6 pb-6 pt-3 flex flex-col gap-3">
+                      
+                      {/* BOTÓN MODIFICAR (RF3) */}
+                      {/* Este botón envía al usuario a la nueva página pasando el código */}
+                      <BotonPrimario to={`/modificar/${codigo}`} variante="solido" fullWidth>
+                        📝 Modificar mi cita
                       </BotonPrimario>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        {/* BOTÓN CANCELAR (RF4) */}
+                        <BotonPrimario to={`/cancelar/${codigo}`} variante="outline" fullWidth className="!border-red-200 !text-red-500 hover:!bg-red-50">
+                          ❌ Cancelar
+                        </BotonPrimario>
+
+                        {/* BOTÓN AGENDAR OTRA */}
+                        <BotonPrimario to="/agendar" variante="outline" fullWidth>
+                          🔄 Otra cita
+                        </BotonPrimario>
+                      </div>
+                      
                     </div>
+                    {/* ─────────────────────────────────────────────── */}
+
                   </div>
                 </PageTransition>
               )}
