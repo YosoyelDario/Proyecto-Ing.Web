@@ -24,7 +24,7 @@ Para el desarrollo de la plataforma se tomaron en cuenta 2 roles:
 
 - **Rol Usuario (Paciente):** Persona que utiliza el sistema para agendar, consultar, modificar o cancelar horas médicas.
 
-- **Rol Administrador (Médico/Personal Municipal):** Funcionario que gestiona las disponibilidades, horas y atenciones a través de un panel de control.
+- **Rol Administrador (Personal Municipal):** Funcionario que gestiona las disponibilidades, horas y atenciones a través de un panel de control.
 
 | Requerimientos Funcionales  | Requerimientos No Funcionales |
 | ------------- |:-------------:|
@@ -75,13 +75,10 @@ estructural y escalabilidad de la arquitectura frontend.
 
 ## EP 1.5
 
- Creacion del proyecto en Ionic con React, considerando:
-- (a) Uso de react router; 
-- (b) Rutas publicas y rutas protegidas;
-- (c)
-Redirecciones (ejemplo: login obligatorio);
-- (d) Estructura modular
-de vistas.
+* **(a) Uso de React Router:** Se implementó `react-router-dom` para gestionar la navegación tipo Single Page Application (SPA), renderizando los componentes sin recargar el navegador.
+* **(b) Rutas públicas y protegidas:** Se definieron rutas públicas para el acceso general (`/login`, `/registro`, `/home`) y rutas protegidas (ej. `/admin`) que bloquean el renderizado de la vista si el usuario no tiene la sesión activa.
+* **(c) Redirecciones:** Se configuró una redirección automática (login obligatorio). Si un visitante intenta acceder directamente por URL a una ruta administrativa, es devuelto automáticamente a `/login`.
+* **(d) Estructura modular de vistas:** Cada pantalla se desarrolló como un componente funcional independiente, separando la lógica de la interfaz.
 
 
 ## EP 1.6
