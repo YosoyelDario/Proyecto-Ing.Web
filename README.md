@@ -18,7 +18,7 @@ Proyecto para la asignatura de Ingeniería Web y Móvil enfocado en reducir los 
 3. Instalar dependencias: `npm install`
 4. Levantar el servidor de desarrollo con Vite: `npm run dev`
 
-## [EP 1.1]
+## [EP 1.1] Definición de requerimientos
 
 Para el desarrollo de la plataforma se tomaron en cuenta 2 roles:
 
@@ -47,7 +47,15 @@ El Usuario objetivo que nosotros determinamos, es un usuario general. El cual po
 
 ## [EP 1.3] Diseño UI/UX y Prototipo en Figma
 
-Todos los bocetos de UI/UX estan dentro del Figma.
+El prototipo completo se encuentra en el enlace de Figma adjunto al inicio. Se han diseñado más de 7 pantallas distintas correspondientes a los requerimientos, considerando explícitamente las versiones móvil y web:
+
+1. **Pantalla de Inicio de Sesión:** Incluye formulario con validaciones visuales.
+2. **Pantalla de Registro:** Formulario que incluye Nombre de usuario, RUT, Correo Electrónico, Región, Comuna, Contraseña, Confirmación de Contraseña y aceptación de términos y condiciones.
+3. **Dashboard / Home:** Pantalla principal donde el paciente consulta su cita.
+4. **Agendamiento:** Interfaz para seleccionar especialidad, fecha y hora.
+5. **Modificar Cita:** Flujo para reagendar horas médicas.
+6. **Cancelar Cita:** Interfaz de confirmación de anulación.
+7. **Panel de Administración:** Vista exclusiva para personal municipal.
 
 ## EP 1.4
 
