@@ -10,6 +10,7 @@ import BotonVolver      from '../components/BotonVolver'
 
 interface FormState {
   nombre:          string
+  rut:             string
   email:           string
   password:        string
   confirmPassword: string
@@ -17,6 +18,7 @@ interface FormState {
 
 interface Errores {
   nombre?:          string
+  rut?:             string
   email?:           string
   password?:        string
   confirmPassword?: string
@@ -27,6 +29,10 @@ function validar(form: FormState): Errores {
   const e: Errores = {}
   if (!form.nombre.trim())
     e.nombre = 'El nombre es obligatorio.'
+  if (!form.rut.trim())
+    e.rut = 'El RUT es obligatorio.'
+  else if (!/^[0-9]{1,2}(\.[0-9]{3}){2}-[0-9kK]$/.test(form.rut.trim()))
+    e.rut = 'Ingresa un RUT válido. Ej: 12.345.678-9'
   if (!form.email.trim())
     e.email = 'El correo es obligatorio.'
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
@@ -41,6 +47,7 @@ function validar(form: FormState): Errores {
 export default function Register() {
   const [form, setForm] = useState<FormState>({
     nombre:          '',
+    rut:             '',
     email:           '',
     password:        '',
     confirmPassword: '',
@@ -109,6 +116,15 @@ export default function Register() {
                 placeholder="Juan Pérez"
                 required
                 error={errores.nombre}
+              />
+              <InputTexto
+                id="rut"
+                label="RUT"
+                value={form.rut}
+                onChange={set('rut')}
+                placeholder="12.345.678-9"
+                required
+                error={errores.rut}
               />
 
               <InputTexto
