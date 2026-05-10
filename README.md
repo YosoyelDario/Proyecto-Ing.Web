@@ -93,4 +93,8 @@ Se han desarrollado las pantallas principales asegurando coherencia con la arqui
   * `/pages`: Contiene las vistas completas de la aplicación.
   * `/components`: Almacena componentes de UI reutilizables.
   * `/routes`: Define la lógica de enrutamiento y las validaciones de las rutas protegidas.
+<<<<<<< HEAD
   * `/services`: Carpeta preparada para la futura integración con el backend y llamadas a la API.
+=======
+  * `/services`: Carpeta preparada para la futura integración con el backend y llamadas a la API.
+>>>>>>> f755517a09cb64fb3cede1759c72cee49f659e7c
