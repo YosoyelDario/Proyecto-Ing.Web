@@ -28,7 +28,7 @@ export default function ConsultarCita() {
     setBuscado(true)
 
     // Comparar limpiando puntos del RUT formateado
-    if (resultado && resultado.rut === rut.replace(/\./g, '').trim()) {
+    if (resultado && resultado.rut.replace(/\./g, '').trim() === rut.replace(/\./g, '').trim()) {
       setCita(resultado)
       setError(false)
     } else {
