@@ -33,12 +33,9 @@ export default function InputTexto({
     <div className={`flex flex-col gap-1.5 ${className}`}>
       <label
         htmlFor={id}
-        className="text-[13px] font-medium text-[#2c4a47] tracking-wide"
+        className="text-[13px] font-medium text-[#3aada0] uppercase tracking-wider"
       >
         {label}
-        {required && (
-          <span className="ml-1 text-[#e05c5c]" aria-hidden="true">*</span>
-        )}
       </label>
 
       <input
@@ -53,28 +50,29 @@ export default function InputTexto({
         aria-describedby={error ? `${id}-error` : hint ? `${id}-hint` : undefined}
         aria-invalid={!!error}
         className={`
-          w-full px-4 py-3.5 rounded-xl
+          w-full px-4 py-3 rounded-xl
           text-[15px] text-[#14302d]
           bg-white border
           placeholder:text-[#a8c5c2]
-          transition-colors duration-150
-          focus:outline-none focus:ring-2 focus:ring-[#3aada0]/30 focus:border-[#3aada0]
-          disabled:opacity-50 disabled:cursor-not-allowed
+          outline-none
+          transition-colors duration-200
+          focus:ring-2 focus:ring-[#3aada0]/20 focus:border-[#3aada0]
+          disabled:bg-[#f7f9fc] disabled:text-[#a0a0a0] disabled:cursor-not-allowed
           ${error
             ? 'border-[#e05c5c] focus:ring-[#e05c5c]/20 focus:border-[#e05c5c]'
-            : 'border-[#c8e4e1]'
+            : 'border-[#d5dce6]'
           }
         `}
       />
 
       {error && (
-        <p id={`${id}-error`} role="alert" className="text-[12px] text-[#e05c5c] mt-0.5">
+        <p id={`${id}-error`} role="alert" className="text-[12px] text-[#e05c5c]">
           {error}
         </p>
       )}
 
       {hint && !error && (
-        <p id={`${id}-hint`} className="text-[12px] text-[#7aa9a5] mt-0.5">
+        <p id={`${id}-hint`} className="text-[12px] text-[#7aa9a5]">
           {hint}
         </p>
       )}

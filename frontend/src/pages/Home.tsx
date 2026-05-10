@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { IonPage, IonContent } from '@ionic/react'
+import { IonPage, IonContent, IonHeader, IonFooter } from '@ionic/react'
 import LogoSantoDomingo from '../components/LogoSantoDomingo'
 import BotonPrimario from '../components/BotonPrimario'
 
@@ -18,7 +18,6 @@ export default function Home() {
   return (
     <IonPage>
       <IonContent fullscreen className="bg-[#f4faf9]">
-
         <div
           className="
             min-h-screen flex flex-col
@@ -27,29 +26,37 @@ export default function Home() {
             bg-[#f4faf9]
           "
         >
-
           {/* ── Navbar ── */}
-          <nav
-            className="flex items-center justify-between px-6 pt-14 pb-4 md:px-12 md:pt-10"
+          <IonHeader
+            className="ion-no-border relative bg-transparent shadow-none flex items-start justify-between px-6 pt-8 pb-4 md:px-12 md:pt-10"
             aria-label="Navegación principal"
           >
-            <LogoSantoDomingo />
-
-            {/* Teléfonos de contacto */}
-            <div className="flex flex-col items-end gap-0.5">
-              <a
-                href="tel:1458"
-                className="flex items-center gap-1.5 text-[12px] font-medium text-[#e05c5c] no-underline"
-                aria-label="Teléfono de emergencia 1458"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-[#e05c5c]" aria-hidden="true" />
-                Emergencia: 1458
-              </a>
-              <span className="text-[11px] text-[#7aa9a5] font-light">
-                +563 2238 1603 · +563 5220 4200
-              </span>
+            {/* Logo más grande */}
+            <div className="w-28 md:w-36">
+              <LogoSantoDomingo />
             </div>
-          </nav>
+
+            {/* Principales Contactos */}
+            <div className="flex flex-col items-end gap-1.5 pt-1">
+              <span className="flex items-center gap-1.5 text-[20px] font-semibold text-[#e05c5c]">
+                <span className="w-2 h-2 rounded-full bg-[#e05c5c]" aria-hidden="true" />
+                Principales Contactos
+              </span>
+              <div className="flex flex-col items-end gap-0.5 text-[13px] text-[#5a7e7b] font-light leading-relaxed">
+                <span>Teléfonos Generales: +563 2238 1603 / +563 5220 4200</span>
+                <span>Seguridad Ciudadana (24/7): 1458</span>
+                <span>
+                  Correo Electrónico:{' '}
+                  <a
+                    href="mailto:contacto@santodomingo.cl"
+                    className="text-[#3aada0] no-underline hover:underline"
+                  >
+                    contacto@santodomingo.cl
+                  </a>
+                </span>
+              </div>
+            </div>
+          </IonHeader>
 
           {/* ── Hero ── */}
           <main
@@ -60,7 +67,6 @@ export default function Home() {
               md:pb-24
             "
           >
-
             {/* Eyebrow */}
             <p
               className="
@@ -141,38 +147,41 @@ export default function Home() {
               <span className="flex-1 h-px bg-[#c8e4e1]" />
             </div>
 
-            {/* ── Agendar sin cuenta ── */}
-            {/* ── Agendar sin cuenta ── */}
-<BotonPrimario
-  to="/agendar"
-  variante="texto"
-  ariaLabel="Agendar cita sin crear cuenta"
-  fullWidth
-  className="py-4!" rounded-xl
->
-  Agendar sin crear cuenta
-</BotonPrimario>
+            {/* ── Botones secundarios — lado a lado ── */}
+            <div
+              className="
+                flex flex-row gap-4 w-full max-w-100
+                animate-[fadeUp_0.5s_ease_forwards_0.55s] opacity-0
+              "
+              role="group"
+              aria-label="Opciones sin cuenta"
+            >
+              <BotonPrimario
+                to="/agendar"
+                variante="outline"
+                fullWidth
+                ariaLabel="Agendar cita sin crear cuenta"
+              >
+                Agenda sin una cuenta
+              </BotonPrimario>
 
-
-<BotonPrimario
-  to="/consultar"
-  variante="outline"
-  fullWidth
-  ariaLabel="Consultar el estado de tu cita"
-  className="animate-[fadeUp_0.5s_ease_forwards_0.45s] opacity-0"
->
-  Consultar mi cita
-</BotonPrimario>
-
+              <BotonPrimario
+                to="/consultar"
+                variante="outline"
+                fullWidth
+                ariaLabel="Consultar el estado de tu cita"
+              >
+                Consultar mi cita
+              </BotonPrimario>
+            </div>
           </main>
 
           {/* ── Footer ── */}
-          <footer className="pb-10 text-center">
+          <IonFooter className="ion-no-border relative bg-transparent shadow-none pb-10 text-center">
             <p className="text-[11px] text-[#a8c5c2] font-light">
               © {new Date().getFullYear()} Municipalidad Santo Domingo · Todos los derechos reservados
             </p>
-          </footer>
-
+          </IonFooter>
         </div>
 
         <style>{`
@@ -181,7 +190,6 @@ export default function Home() {
             to   { opacity: 1; transform: translateY(0); }
           }
         `}</style>
-
       </IonContent>
     </IonPage>
   )

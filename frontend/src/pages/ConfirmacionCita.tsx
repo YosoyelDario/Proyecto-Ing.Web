@@ -92,7 +92,7 @@ export default function ConfirmacionCita() {
                     <path d="M20 6L9 17l-5-5" />
                   </svg>
                 </div>
-                <h1 className="text-[22px] font-semibold text-white text-opacity-100 tracking-tight mb-1">
+                <h1 className="text-[22px] font-semibold text-white! text-opacity-100 tracking-tight mb-1">
   ¡Cita confirmada!
 </h1>
                 <p className="text-[14px] text-white/70 font-light">

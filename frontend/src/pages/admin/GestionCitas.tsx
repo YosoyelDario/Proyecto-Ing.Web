@@ -1,9 +1,26 @@
 import { useEffect, useState } from 'react'
-import { IonPage, IonContent } from '@ionic/react'
+import {
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonButtons,
+  IonSearchbar,
+  IonSegment,
+  IonSegmentButton,
+  IonLabel,
+  IonList,
+  IonItem,
+  IonIcon
+} from '@ionic/react'
+import { chevronForwardOutline, createOutline, closeCircleOutline } from 'ionicons/icons'
 import { useNavigate, useLocation } from 'react-router-dom'
-import BotonVolver   from '../../components/BotonVolver'
-import BotonPrimario from '../../components/BotonPrimario'
-import FilaDetalle   from '../../components/FilaDetalle'
+import BotonVolver    from '../../components/BotonVolver'
+import BotonPrimario  from '../../components/BotonPrimario'
+import PageTransition from '../../components/PageTransition'
+
+const ADMIN_EMAIL = 'tuadmin@gmail.com'
 
 interface CitaDetalle {
   especialidad: string
@@ -19,7 +36,7 @@ type Filtro = 'todas' | 'proximas' | 'pasadas'
 
 /* ── Badge de estado ─────────────────────────────────────────────────────── */
 function BadgeEstado({ fecha }: { fecha: string }) {
-  const hoy    = new Date().toISOString().split('T')[0]
+  const hoy     = new Date().toISOString().split('T')[0]
   const proxima = fecha >= hoy
   return (
     <span className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
@@ -37,15 +54,27 @@ export default function GestionCitas() {
   const navigate  = useNavigate()
   const location  = useLocation()
 
-  // Lee filtro inicial desde query param ?filtro=proximas
-  const params       = new URLSearchParams(location.search)
+  const params        = new URLSearchParams(location.search)
   const filtroInicial = (params.get('filtro') as Filtro) || 'todas'
 
-  const [citas,         setCitas]         = useState<Record<string, CitaDetalle>>({})
-  const [filtro,        setFiltro]        = useState<Filtro>(filtroInicial)
-  const [busqueda,      setBusqueda]      = useState('')
+  const [autenticado, setAutenticado]     = useState(false)
+  const [cargando, setCargando]           = useState(true)
+  const [citas, setCitas]                 = useState<Record<string, CitaDetalle>>({})
+  const [filtro, setFiltro]               = useState<Filtro>(filtroInicial)
+  const [busqueda, setBusqueda]           = useState('')
   const [citaExpandida, setCitaExpandida] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
+
+  /* ── Guard de autenticación ──────────────────────────────────────────── */
+  useEffect(() => {
+    const emailGuardado = localStorage.getItem('userEmail')
+    if (!emailGuardado || emailGuardado.toLowerCase() !== ADMIN_EMAIL) {
+      navigate('/', { replace: true })
+      return
+    }
+    setAutenticado(true)
+    setCargando(false)
+  }, [navigate])
 
   /* ── Cargar citas ──────────────────────────────────────────────────────── */
   const cargarCitas = () => {
@@ -53,7 +82,7 @@ export default function GestionCitas() {
     setCitas(datos)
   }
 
-  useEffect(() => { cargarCitas() }, [])
+  useEffect(() => { if (autenticado) cargarCitas() }, [autenticado])
 
   /* ── Cancelar cita desde admin ─────────────────────────────────────────── */
   const handleCancelar = (codigo: string) => {
@@ -90,61 +119,86 @@ export default function GestionCitas() {
       weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
     })
 
+  if (cargando || !autenticado) return null
+
   /* ── Render ──────────────────────────────────────────────────────────────── */
   return (
     <IonPage>
-      <IonContent fullscreen className="bg-[#f4faf9]">
-        <div className="min-h-screen flex flex-col font-['DM_Sans',sans-serif]">
+      {/* ── Header ───────────────────────────────────────────────── */}
+      <IonHeader className="ion-no-border">
+        <IonToolbar style={{ '--background': '#3aada0', '--color': 'white', '--padding-top': '16px' }}>
+          <IonButtons slot="start" className="pl-4">
+            <BotonVolver to="/admin" label="Panel" className="!text-white/80 hover:!text-white" />
+          </IonButtons>
+          <IonButtons slot="end" className="pr-4">
+            <span className="text-[12px] text-white/60 font-mono">
+              {citasFiltradas.length} resultado{citasFiltradas.length !== 1 ? 's' : ''}
+            </span>
+          </IonButtons>
+        </IonToolbar>
 
-          {/* ── Header ───────────────────────────────────────────────── */}
-          <div className="bg-[#3aada0] px-6 pt-14 pb-6">
-            <div className="flex items-center justify-between mb-3">
-              <BotonVolver to="/admin" label="Panel" className="!text-white/80 hover:!text-white" />
-              <span className="text-[12px] text-white/60 font-mono">
-                {citasFiltradas.length} resultado{citasFiltradas.length !== 1 ? 's' : ''}
+        <IonToolbar style={{ '--background': '#3aada0', '--color': 'white' }}>
+          <IonTitle className="px-6 mb-2">
+            <PageTransition variante="fadeUp" duracion={400}>
+              <span className="text-[22px] font-semibold text-white tracking-tight">
+                Gestión de Citas
               </span>
-            </div>
-            <h1 className="text-[22px] font-semibold text-white tracking-tight mb-4">
-              Gestión de Citas
-            </h1>
+            </PageTransition>
+          </IonTitle>
+        </IonToolbar>
 
-            {/* Buscador */}
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[16px]">🔍</span>
-              <input
-                type="text"
-                value={busqueda}
-                onChange={e => setBusqueda(e.target.value)}
-                placeholder="Buscar por nombre, RUT, especialidad..."
-                className="w-full pl-9 pr-4 py-3 rounded-xl bg-white/20 text-white placeholder:text-white/50 text-[14px] outline-none border border-white/20 focus:border-white/50 transition-colors"
-              />
-            </div>
+        <IonToolbar style={{ '--background': '#3aada0', '--padding-bottom': '16px' }}>
+          <div className="px-6">
+            <IonSearchbar
+              value={busqueda}
+              onIonInput={e => setBusqueda(e.detail.value!)}
+              placeholder="Buscar por nombre, RUT, especialidad..."
+              style={{
+                '--background': 'rgba(255,255,255,0.2)',
+                '--color': 'white',
+                '--placeholder-color': 'rgba(255,255,255,0.5)',
+                '--icon-color': 'rgba(255,255,255,0.6)',
+                '--border-radius': '12px',
+                '--box-shadow': 'none',
+                padding: 0
+              }}
+            />
           </div>
+        </IonToolbar>
+      </IonHeader>
 
-          <div className="flex-1 px-5 py-4 flex flex-col gap-4 max-w-lg mx-auto w-full">
+      <IonContent fullscreen className="bg-[#f4faf9]">
+        <div className="flex-1 px-5 py-4 flex flex-col gap-4 max-w-lg mx-auto w-full font-['DM_Sans',sans-serif]">
 
-            {/* ── Filtros ──────────────────────────────────────────────── */}
-            <div className="flex gap-2">
-              {(['todas', 'proximas', 'pasadas'] as Filtro[]).map(f => (
-                <button
-                  key={f}
-                  type="button"
-                  onClick={() => setFiltro(f)}
-                  className={`flex-1 py-2 rounded-xl text-[13px] font-medium transition-colors border ${
-                    filtro === f
-                      ? 'bg-[#3aada0] text-white border-[#3aada0]'
-                      : 'bg-white text-[#7a8a9a] border-[#d5dce6] hover:border-[#3aada0]'
-                  }`}
-                >
-                  {f === 'todas' ? 'Todas' : f === 'proximas' ? 'Próximas' : 'Pasadas'}
-                </button>
-              ))}
-            </div>
+          {/* ── Filtros ──────────────────────────────────────────────── */}
+          <PageTransition variante="fadeUp" duracion={300} delay={100}>
+            <IonSegment 
+              value={filtro} 
+              onIonChange={e => setFiltro(e.detail.value as Filtro)}
+              mode="ios"
+              className="bg-white/50 border border-[#d5dce7] rounded-xl"
+            >
+              <IonSegmentButton value="todas">
+                <IonLabel className="text-[13px]">Todas</IonLabel>
+              </IonSegmentButton>
+              <IonSegmentButton value="proximas">
+                <IonLabel className="text-[13px]">Próximas</IonLabel>
+              </IonSegmentButton>
+              <IonSegmentButton value="pasadas">
+                <IonLabel className="text-[13px]">Pasadas</IonLabel>
+              </IonSegmentButton>
+            </IonSegment>
+          </PageTransition>
 
-            {/* ── Lista de citas ───────────────────────────────────────── */}
-            {citasFiltradas.length === 0 ? (
+          {/* ── Lista de citas ───────────────────────────────────────── */}
+          {citasFiltradas.length === 0 ? (
+            <PageTransition variante="fadeIn" duracion={400} delay={200}>
               <div className="flex flex-col items-center justify-center py-16 gap-3">
-                <span className="text-[48px]">📭</span>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#a0adb8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="3" width="20" height="18" rx="2" />
+                  <path d="M8 7h8M8 11h5" />
+                  <path d="M9 17l2-2 2 2" opacity="0.5" />
+                </svg>
                 <p className="text-[15px] font-medium text-[#1a2332]">Sin resultados</p>
                 <p className="text-[13px] text-[#7a8a9a] text-center">
                   {busqueda
@@ -152,105 +206,127 @@ export default function GestionCitas() {
                     : 'No hay citas registradas en esta categoría.'}
                 </p>
               </div>
-            ) : (
-              <div className="flex flex-col gap-5">
-                {citasFiltradas.map(([codigo, cita]) => (
-                  <div
-                    key={codigo}
-                    className="bg-white rounded-2xl border border-[#d5dce7] overflow-hidden shadow-sm hover:shadow-md transition-shadow "
-                  >
-                    {/* Cabecera de la tarjeta — click para expandir */}
-                    <button
-                      type="button"
-                      onClick={() => setCitaExpandida(
-                        citaExpandida === codigo ? null : codigo
-                      )}
-                      className="w-full px-6 py-6 flex items-center gap-5 text-left hover:bg-[#f7f9fc] transition-colors"
-                      style={{ WebkitTapHighlightColor: 'transparent' }}
+            </PageTransition>
+          ) : (
+            <IonList lines="none" className="bg-transparent p-0 flex flex-col gap-4">
+              {citasFiltradas.map(([codigo, cita], idx) => (
+                <PageTransition key={codigo} variante="fadeUp" duracion={300} delay={150 + idx * 80}>
+                  <div className="bg-white rounded-2xl border border-[#d5dce7] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+
+                    {/* Cabecera — click para expandir */}
+                    <IonItem
+                      button
+                      detail={false}
+                      onClick={() => {
+                        setCitaExpandida(citaExpandida === codigo ? null : codigo)
+                        setConfirmDelete(null)
+                      }}
+                      className="py-1 [--background-hover:#f7f9fc]"
                     >
-                      <div className="flex-1 min-w-0 pl-4 mb-1">
-                        <div className="flex items-center gap-3 mb-1">
-                          <p className="text-[15px] font-semibold text-[#1a2332] truncate">
+                      <div className="flex-1 min-w-0 py-3">
+                        <div className="flex items-center gap-2.5 mb-2">
+                          <p className="text-[17px] font-semibold text-[#1a2332] truncate m-0">
                             {cita.nombre}
                           </p>
                           <BadgeEstado fecha={cita.fecha} />
                         </div>
-                        <p className="text-[12px] text-[#7a8a9a]">
+                        <p className="text-[14px] text-[#7a8a9a] leading-relaxed m-0">
                           {cita.especialidad} · {formatearFecha(cita.fecha)} · {cita.hora}
                         </p>
-                        <p className="text-[11px] font-mono text-[#a0adb8] mt-0.5">#{codigo}</p>
+                        <p className="text-[12px] font-mono text-[#a0adb8] mt-1.5 m-0">#{codigo}</p>
                       </div>
-                      <svg
-                        viewBox="0 0 24 24" fill="none" stroke="#c8d3dc" strokeWidth={2}
-                        strokeLinecap="round" strokeLinejoin="round"
-                        className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${
+                      <IonIcon
+                        icon={chevronForwardOutline}
+                        className={`w-5 h-5 flex-shrink-0 text-[#c8d3dc] transition-transform duration-200 ${
                           citaExpandida === codigo ? 'rotate-90' : ''
                         }`}
-                      >
-                        <path d="M9 18l6-6-6-6" />
-                      </svg>
-                    </button>
+                      />
+                    </IonItem>
 
                     {/* Detalle expandido */}
                     {citaExpandida === codigo && (
                       <div className="border-t border-[#eef4f9]">
-                        <div className="px-5 pt-2 pb-1">
-                          <FilaDetalle icono="👨‍⚕️" label="Médico"       valor={cita.medico} />
-                          <FilaDetalle icono="🪪"  label="RUT"           valor={cita.rut} />
-                          <FilaDetalle icono="✉️"  label="Correo"        valor={cita.email} />
-                          <FilaDetalle icono="📅"  label="Fecha"         valor={formatearFecha(cita.fecha)} />
-                          <FilaDetalle icono="🕐"  label="Hora"          valor={cita.hora} />
+                        <div className="px-6 py-4 flex flex-col gap-3.5">
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[11px] font-semibold text-[#7a8a9a] uppercase tracking-wider">Médico</span>
+                            <span className="text-[15px] font-medium text-[#1a2332]">{cita.medico}</span>
+                          </div>
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[11px] font-semibold text-[#7a8a9a] uppercase tracking-wider">RUT</span>
+                            <span className="text-[15px] font-medium text-[#1a2332]">{cita.rut}</span>
+                          </div>
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[11px] font-semibold text-[#7a8a9a] uppercase tracking-wider">Correo</span>
+                            <span className="text-[15px] font-medium text-[#1a2332]">{cita.email}</span>
+                          </div>
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[11px] font-semibold text-[#3aada0] uppercase tracking-wider">Fecha</span>
+                            <span className="text-[15px] font-medium text-[#1a2332]">{formatearFecha(cita.fecha)}</span>
+                          </div>
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-[11px] font-semibold text-[#3aada0] uppercase tracking-wider">Hora</span>
+                            <span className="text-[15px] font-medium text-[#1a2332]">{cita.hora}</span>
+                          </div>
                         </div>
 
-                        {/* Acciones del admin */}
+                        {/* Acciones */}
                         {confirmDelete === codigo ? (
-                          <div className="px-5 pb-5 pt-3 flex flex-col gap-2">
-                            <p className="text-[13px] text-red-600 font-medium text-center mb-1">
+                          <div className="px-6 pb-5 pt-2 flex flex-col gap-3">
+                            <p className="text-[13px] text-[#e05c5c] font-medium text-center m-0">
                               ¿Confirmar cancelación de esta cita?
                             </p>
-                            <div className="grid grid-cols-2 gap-2">
-                              <button
-                                type="button"
+                            <div className="grid grid-cols-2 gap-3">
+                              <BotonPrimario
                                 onClick={() => handleCancelar(codigo)}
-                                className="py-2.5 rounded-xl bg-red-500 text-white text-[13px] font-medium hover:bg-red-600 transition-colors"
+                                fullWidth
+                                className="!bg-[#e05c5c] !border-[#e05c5c] hover:!bg-[#c94a4a] hover:!border-[#c94a4a] py-3! text-[13px]! rounded-xl!"
                               >
                                 Sí, cancelar
-                              </button>
-                              <button
-                                type="button"
+                              </BotonPrimario>
+                              <BotonPrimario
                                 onClick={() => setConfirmDelete(null)}
-                                className="py-2.5 rounded-xl border border-[#d5dce6] text-[#7a8a9a] text-[13px] font-medium hover:bg-[#f7f9fc] transition-colors"
+                                variante="outline"
+                                fullWidth
+                                className="py-3! text-[13px]! rounded-xl!"
                               >
                                 No, volver
-                              </button>
+                              </BotonPrimario>
                             </div>
                           </div>
                         ) : (
-                          <div className="px-5 pb-5 pt-3 grid grid-cols-2 gap-2">
+                          <div className="px-6 pb-5 pt-2 grid grid-cols-2 gap-3">
                             <BotonPrimario
-                              to={`/modificar/${codigo}`}
+                              to={`/modificar/${codigo}?origen=admin`}
                               variante="outline"
                               fullWidth
+                              className="py-3! text-[13px]! rounded-xl!"
                             >
-                              ✏️ Modificar
+                              <span className="flex items-center justify-center gap-1.5">
+                                <IonIcon icon={createOutline} className="w-[14px] h-[14px]" />
+                                Modificar
+                              </span>
                             </BotonPrimario>
-                            <button
-                              type="button"
+                            <BotonPrimario
                               onClick={() => setConfirmDelete(codigo)}
-                              className="py-3 rounded-xl border border-red-200 text-red-500 text-[13px] font-medium hover:bg-red-50 transition-colors"
+                              variante="outline"
+                              fullWidth
+                              className="!border-[#e05c5c]/30 !text-[#e05c5c] hover:!bg-red-50 py-3! text-[13px]! rounded-xl!"
                             >
-                              ❌ Cancelar
-                            </button>
+                              <span className="flex items-center justify-center gap-1.5">
+                                <IonIcon icon={closeCircleOutline} className="w-[14px] h-[14px]" />
+                                Cancelar
+                              </span>
+                            </BotonPrimario>
                           </div>
                         )}
                       </div>
                     )}
                   </div>
-                ))}
-              </div>
-            )}
+                </PageTransition>
+              ))}
+            </IonList>
+          )}
 
-          </div>
         </div>
       </IonContent>
     </IonPage>

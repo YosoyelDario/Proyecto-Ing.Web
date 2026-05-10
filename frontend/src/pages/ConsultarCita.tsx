@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { IonPage, IonContent } from '@ionic/react'
-import BotonPrimario from '../components/BotonPrimario'
-import BotonVolver from '../components/BotonVolver'
+import BotonPrimario  from '../components/BotonPrimario'
+import BotonVolver    from '../components/BotonVolver'
 import PageTransition from '../components/PageTransition'
-import FilaDetalle from '../components/FilaDetalle'
+import RutInput       from '../components/Rutinput'
 
 interface CitaDetalle {
   especialidad: string
@@ -27,7 +27,8 @@ export default function ConsultarCita() {
     const resultado = citas[codigo.trim()]
     setBuscado(true)
 
-    if (resultado && resultado.rut === rut.trim()) {
+    // Comparar limpiando puntos del RUT formateado
+    if (resultado && resultado.rut === rut.replace(/\./g, '').trim()) {
       setCita(resultado)
       setError(false)
     } else {
@@ -42,21 +43,15 @@ export default function ConsultarCita() {
       })
     : ''
 
-  const detalles = cita ? [
-    { icono: '🏥', label: 'Especialidad', valor: cita.especialidad },
-    { icono: '👨‍⚕️', label: 'Médico',       valor: cita.medico },
-    { icono: '📅', label: 'Fecha',         valor: fechaFormateada },
-    { icono: '🕐', label: 'Hora',          valor: cita.hora },
-    { icono: '🪪', label: 'RUT',           valor: cita.rut },
-    { icono: '👤', label: 'Nombre',        valor: cita.nombre },
-    { icono: '✉️', label: 'Correo',        valor: cita.email },
-  ] : []
-
-  const inputError = `w-full px-4 py-3.5 rounded-xl border bg-white text-[15px] outline-none transition-colors ${
-    buscado && error
-      ? 'border-red-400 focus:border-red-400'
-      : 'border-[#d5dce6] focus:border-[#3aada0]'
-  }`
+  const horaFormateada = cita
+    ? (() => {
+        const [h, m] = cita.hora.split(':')
+        const hr = parseInt(h, 10)
+        const ampm = hr >= 12 ? 'PM' : 'AM'
+        const hr12 = hr % 12 || 12
+        return `${hr12}:${m} ${ampm}`
+      })()
+    : ''
 
   return (
     <IonPage>
@@ -73,7 +68,7 @@ export default function ConsultarCita() {
               {/* Buscador */}
               <div className="bg-white rounded-2xl shadow-sm border border-[#d5dce6] p-6 flex flex-col gap-4">
                 <div>
-                  <h1 className="text-[22px] font-semibold text-[#1a2332] tracking-tight mb-1">
+                  <h1 className="text-[22px] font-semibold text-[#3aada0]! tracking-tight mb-1">
                     Consultar Cita
                   </h1>
                   <p className="text-[13px] text-[#7a8a9a] font-light">
@@ -83,7 +78,7 @@ export default function ConsultarCita() {
 
                 {/* Código */}
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="codigo" className="text-[13px] font-medium text-[#4aa8d8] uppercase tracking-wider">
+                  <label htmlFor="codigo" className="text-[13px] font-medium text-[#3aada0] uppercase tracking-wider">
                     Código de Cita
                   </label>
                   <input
@@ -93,37 +88,38 @@ export default function ConsultarCita() {
                     onChange={e => { setCodigo(e.target.value); setBuscado(false) }}
                     placeholder="Ej: 847293"
                     maxLength={6}
-                    className={`${inputError} font-mono`}
+                    className={`
+                      w-full px-4 py-3 rounded-xl border bg-white text-[15px] outline-none
+                      font-mono transition-colors duration-200
+                      focus:ring-2 focus:ring-[#3aada0]/20 focus:border-[#3aada0]
+                      ${buscado && error
+                        ? 'border-[#e05c5c] focus:border-[#e05c5c]'
+                        : 'border-[#d5dce6]'
+                      }
+                    `}
                   />
                 </div>
 
-                {/* RUT */}
-                <div className="flex flex-col gap-1.5">
-                  <label htmlFor="rut" className="text-[13px] font-medium text-[#4aa8d8] uppercase tracking-wider">
-                    RUT
-                  </label>
-                  <input
-                    id="rut"
-                    type="text"
-                    value={rut}
-                    onChange={e => { setRut(e.target.value); setBuscado(false) }}
-                    placeholder="Ej: 12345678-9"
-                    className={inputError}
-                  />
-                </div>
+                {/* RUT — componente reutilizable */}
+                <RutInput
+                  id="rut-consultar"
+                  label="RUT de verificación"
+                  value={rut}
+                  onChange={(valor) => { setRut(valor); setBuscado(false) }}
+                  required
+                />
 
                 {buscado && error && (
-                  <span className="text-[12px] text-red-500">
+                  <p className="text-[12px] text-[#e05c5c] -mt-1">
                     No se encontró ninguna cita con ese código y RUT.
-                  </span>
+                  </p>
                 )}
 
                 <BotonPrimario
                   onClick={handleBuscar}
                   disabled={codigo.trim().length !== 6 || rut.trim() === ''}
                   fullWidth
-                  className="py-4! [clip-path:inset(0_round_20px)]"
-                  
+                  className="py-5! text-base! tracking-wider! mt-2 rounded-xl!"
                 >
                   Buscar cita
                 </BotonPrimario>
@@ -133,10 +129,14 @@ export default function ConsultarCita() {
               {cita && (
                 <PageTransition variante="fadeUp" duracion={300} delay={100}>
                   <div className="bg-white rounded-2xl shadow-sm border border-[#d5dce6] overflow-hidden">
-                    
+
                     {/* Cabecera del resultado */}
                     <div className="bg-[#3aada0] px-6 py-4 flex items-center gap-3">
-                      <span className="text-white text-[18px]">📋</span>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+                        <rect x="9" y="3" width="6" height="4" rx="1" />
+                        <path d="M9 14l2 2 4-4" />
+                      </svg>
                       <div>
                         <p className="text-white text-[15px] font-semibold">Cita encontrada</p>
                         <p className="text-white/70 text-[12px] font-mono">#{codigo}</p>
@@ -144,33 +144,66 @@ export default function ConsultarCita() {
                     </div>
 
                     {/* Detalles de la cita */}
-                    <div className="px-6 pt-2 pb-1">
-                      {detalles.map(d => <FilaDetalle key={d.label} {...d} />)}
+                    <div className="px-6 py-5 flex flex-col gap-4">
+
+                      {/* Especialidad */}
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[11px] font-semibold text-[#7a8a9a] uppercase tracking-wider">Especialidad</span>
+                        <span className="text-[15px] font-medium text-[#1a2332]">{cita.especialidad}</span>
+                      </div>
+
+                      {/* Médico */}
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[11px] font-semibold text-[#7a8a9a] uppercase tracking-wider">Médico</span>
+                        <span className="text-[15px] font-medium text-[#1a2332]">{cita.medico}</span>
+                      </div>
+
+                      {/* Fecha y Hora — lado a lado */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[11px] font-semibold text-[#7a8a9a] uppercase tracking-wider">Fecha</span>
+                          <span className="text-[15px] font-medium text-[#1a2332] capitalize">{fechaFormateada}</span>
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[11px] font-semibold text-[#7a8a9a] uppercase tracking-wider">Hora</span>
+                          <span className="text-[15px] font-medium text-[#1a2332]">{horaFormateada}</span>
+                        </div>
+                      </div>
+
+                      {/* RUT */}
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[11px] font-semibold text-[#7a8a9a] uppercase tracking-wider">RUT</span>
+                        <span className="text-[15px] font-medium text-[#1a2332]">{cita.rut}</span>
+                      </div>
+
+                      {/* Nombre */}
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[11px] font-semibold text-[#7a8a9a] uppercase tracking-wider">Nombre</span>
+                        <span className="text-[15px] font-medium text-[#1a2332]">{cita.nombre}</span>
+                      </div>
+
                     </div>
 
-                    {/* ─── BLOQUE DE ACCIONES (MODIFICAR Y CANCELAR) ─── */}
+                    {/* Acciones */}
                     <div className="px-6 pb-6 pt-3 flex flex-col gap-3">
-                      
-                      {/* BOTÓN MODIFICAR (RF3) */}
-                      {/* Este botón envía al usuario a la nueva página pasando el código */}
                       <BotonPrimario to={`/modificar/${codigo}`} variante="solido" fullWidth>
-                        📝 Modificar mi cita
+                        Modificar mi cita
                       </BotonPrimario>
 
                       <div className="grid grid-cols-2 gap-3">
-                        {/* BOTÓN CANCELAR (RF4) */}
-                        <BotonPrimario to={`/cancelar/${codigo}`} variante="outline" fullWidth className="!border-red-200 !text-red-500 hover:!bg-red-50">
-                          ❌ Cancelar
+                        <BotonPrimario
+                          to={`/cancelar/${codigo}`}
+                          variante="outline"
+                          fullWidth
+                          className="!border-[#e05c5c]/30 !text-[#e05c5c] hover:!bg-red-50"
+                        >
+                          Cancelar
                         </BotonPrimario>
-
-                        {/* BOTÓN AGENDAR OTRA */}
                         <BotonPrimario to="/agendar" variante="outline" fullWidth>
-                          🔄 Otra cita
+                          Otra cita
                         </BotonPrimario>
                       </div>
-                      
                     </div>
-                    {/* ─────────────────────────────────────────────── */}
 
                   </div>
                 </PageTransition>

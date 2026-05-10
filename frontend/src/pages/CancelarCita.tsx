@@ -5,7 +5,39 @@ import BotonVolver    from '../components/BotonVolver'
 import BotonPrimario  from '../components/BotonPrimario'
 import PageTransition from '../components/PageTransition'
 import FilaDetalle    from '../components/FilaDetalle'
+import RutInput       from '../components/Rutinput'
 import { formatearFecha, type Cita } from '../services/citaServices'
+
+/* ── Iconos SVG inline ───────────────────────────────────────────────────── */
+const IconoCancelar = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e05c5c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="15" y1="9" x2="9" y2="15" />
+    <line x1="9" y1="9" x2="15" y2="15" />
+  </svg>
+)
+
+const IconoAlerta = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e05c5c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+    <line x1="12" y1="9" x2="12" y2="13" />
+    <line x1="12" y1="17" x2="12.01" y2="17" />
+  </svg>
+)
+
+const IconoCheck = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5}
+    strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
+    <path d="M20 6L9 17l-5-5" />
+  </svg>
+)
+
+const IconoSobre = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5a9a95" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="4" width="20" height="16" rx="2" />
+    <path d="M22 4L12 13 2 4" />
+  </svg>
+)
 
 /* ── Pasos del flujo ─────────────────────────────────────────────────────── */
 type Paso = 'verificar' | 'confirmar' | 'exito'
@@ -26,7 +58,7 @@ export default function CancelarCita() {
     const resultado = citas[codigo ?? '']
     setBuscado(true)
 
-    if (resultado && resultado.rut === rut.trim()) {
+    if (resultado && resultado.rut === rut.replace(/\./g, '').trim()) {
       setCita(resultado)
       setErrorRut(false)
       setPaso('confirmar')
@@ -42,13 +74,6 @@ export default function CancelarCita() {
     localStorage.setItem('citas_agendadas', JSON.stringify(citas))
     setPaso('exito')
   }
-
-  const inputClase = (conError: boolean) =>
-    `w-full px-4 py-3.5 rounded-xl border bg-white text-[15px] outline-none transition-colors ${
-      conError
-        ? 'border-red-400 focus:border-red-400'
-        : 'border-[#d5dce6] focus:border-[#3aada0]'
-    }`
 
   /* ── Render ──────────────────────────────────────────────────────────── */
   return (
@@ -68,9 +93,9 @@ export default function CancelarCita() {
 
                 {/* Encabezado */}
                 <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[20px]">❌</span>
-                    <h1 className="text-[22px] font-semibold text-[#1a2332] tracking-tight">
+                  <div className="flex items-center gap-2.5 mb-1">
+                    <IconoCancelar />
+                    <h1 className="text-[22px] font-semibold text-[#3aada0] tracking-tight">
                       Cancelar Cita
                     </h1>
                   </div>
@@ -80,36 +105,29 @@ export default function CancelarCita() {
                   </p>
                 </div>
 
-                {/* Código (solo lectura, referencia visual) */}
+                {/* Código (solo lectura) */}
                 <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-[#f7f9fc] border border-[#d5dce6]">
                   <span className="text-[13px] text-[#7a8a9a] font-medium">Código de cita</span>
                   <span className="font-mono text-[14px] font-semibold text-[#1a2332]">#{codigo}</span>
                 </div>
 
-                {/* RUT */}
-                <div className="flex flex-col gap-1.5">
-                  <label htmlFor="rut" className="text-[13px] font-medium text-[#e05c5c] uppercase tracking-wider">
-                    RUT de verificación
-                  </label>
-                  <input
-                    id="rut"
-                    type="text"
-                    value={rut}
-                    onChange={e => { setRut(e.target.value); setBuscado(false) }}
-                    placeholder="Ej: 12345678-9"
-                    className={inputClase(buscado && errorRut)}
-                    onKeyDown={e => e.key === 'Enter' && handleVerificar()}
-                  />
-                  {buscado && errorRut && (
-                    <span className="text-[12px] text-red-500">
-                      El RUT no coincide con el código ingresado.
-                    </span>
-                  )}
-                </div>
+                {/* RUT — componente reutilizable */}
+                <RutInput
+                  id="rut-cancelar"
+                  label="RUT de verificación"
+                  value={rut}
+                  onChange={(valor) => { setRut(valor); setBuscado(false) }}
+                  required
+                />
+                {buscado && errorRut && (
+                  <p className="text-[12px] text-[#e05c5c] -mt-2">
+                    El RUT no coincide con el código ingresado.
+                  </p>
+                )}
 
                 {/* Aviso */}
-                <div className="flex items-start gap-2 px-4 py-3 rounded-xl bg-red-50 border border-red-100">
-                  <span className="text-[16px] mt-0.5">⚠️</span>
+                <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl bg-red-50 border border-red-100">
+                  <span className="mt-0.5 shrink-0"><IconoAlerta /></span>
                   <p className="text-[12px] text-red-600 leading-relaxed">
                     Esta acción es irreversible. Una vez cancelada, deberás agendar una nueva cita.
                   </p>
@@ -121,7 +139,7 @@ export default function CancelarCita() {
                     onClick={handleVerificar}
                     disabled={rut.trim() === ''}
                     fullWidth
-                    className="!bg-red-500 !border-red-500 hover:!bg-red-600 hover:!border-red-600"
+                    className="py-5! text-base! tracking-wider! mt-2 rounded-xl bg-red-500! border-red-500! hover:bg-red-600! hover:border-red-600!"
                   >
                     Verificar y continuar
                   </BotonPrimario>
@@ -140,10 +158,10 @@ export default function CancelarCita() {
             {paso === 'confirmar' && cita && (
               <div className="flex flex-col gap-4">
 
-                {/* Tarjeta con datos de la cita */}
                 <div className="bg-white rounded-2xl shadow-sm border border-[#d5dce6] overflow-hidden">
-                  <div className="bg-red-500 px-6 py-4 flex items-center gap-3">
-                    <span className="text-white text-[18px]">⚠️</span>
+                  {/* Banda superior */}
+                  <div className="bg-[#e05c5c] px-6 py-4 flex items-center gap-3">
+                    <IconoAlerta />
                     <div>
                       <p className="text-white text-[15px] font-semibold">¿Confirmar cancelación?</p>
                       <p className="text-white/70 text-[12px] font-mono">#{codigo}</p>
@@ -154,16 +172,16 @@ export default function CancelarCita() {
                     <p className="text-[11px] font-semibold text-[#a0adb8] uppercase tracking-wider pt-3 pb-1">
                       Se cancelará la siguiente cita
                     </p>
-                    <FilaDetalle icono="🏥" label="Especialidad" valor={cita.especialidad} />
-                    <FilaDetalle icono="👨‍⚕️" label="Médico"       valor={cita.medico} />
-                    <FilaDetalle icono="📅" label="Fecha"         valor={formatearFecha(cita.fecha)} />
-                    <FilaDetalle icono="🕐" label="Hora"          valor={cita.hora} />
-                    <FilaDetalle icono="👤" label="Nombre"        valor={cita.nombre} />
+                    <FilaDetalle icono="" label="Especialidad" valor={cita.especialidad} />
+                    <FilaDetalle icono="" label="Médico"       valor={cita.medico} />
+                    <FilaDetalle icono="" label="Fecha"         valor={formatearFecha(cita.fecha)} />
+                    <FilaDetalle icono="" label="Hora"          valor={cita.hora} />
+                    <FilaDetalle icono="" label="Nombre"        valor={cita.nombre} />
                   </div>
 
                   {/* Aviso final */}
-                  <div className="mx-6 mb-4 mt-2 px-4 py-3 rounded-xl bg-red-50 border border-red-100 flex items-start gap-2">
-                    <span className="text-[14px] mt-0.5">❌</span>
+                  <div className="mx-6 mb-4 mt-2 px-4 py-3 rounded-xl bg-red-50 border border-red-100 flex items-start gap-2.5">
+                    <span className="mt-0.5 shrink-0"><IconoCancelar /></span>
                     <p className="text-[12px] text-red-600 leading-relaxed">
                       Esta acción no se puede deshacer. ¿Estás seguro de que deseas cancelar tu cita?
                     </p>
@@ -174,7 +192,7 @@ export default function CancelarCita() {
                     <BotonPrimario
                       onClick={handleCancelar}
                       fullWidth
-                      className="!bg-red-500 !border-red-500 hover:!bg-red-600 hover:!border-red-600"
+                      className="bg-[#e05c5c]! border-[#e05c5c]! hover:bg-[#c94a4a]! hover:border-[#c94a4a]! py-5! text-base! tracking-wider! mt-2 rounded-xl"
                     >
                       Sí, cancelar mi cita
                     </BotonPrimario>
@@ -182,6 +200,7 @@ export default function CancelarCita() {
                       onClick={() => setPaso('verificar')}
                       variante="outline"
                       fullWidth
+                      className="py-5! text-base! tracking-wider! mt-2"
                     >
                       No, mantener mi cita
                     </BotonPrimario>
@@ -200,10 +219,7 @@ export default function CancelarCita() {
                     className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mb-4"
                     style={{ animation: 'scaleIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both' }}
                   >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5}
-                      strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8">
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
+                    <IconoCheck />
                   </div>
                   <h1 className="text-[22px] font-semibold text-white tracking-tight mb-1">
                     Cita cancelada
@@ -215,7 +231,7 @@ export default function CancelarCita() {
 
                 {/* Mensaje informativo */}
                 <div className="mx-6 mt-6 mb-4 px-4 py-3.5 rounded-xl bg-[#f0faf9] border border-[#b5ddd9] flex items-start gap-3">
-                  <span className="text-[16px] mt-0.5">📩</span>
+                  <span className="mt-0.5 shrink-0"><IconoSobre /></span>
                   <p className="text-[12px] text-[#5a9a95] leading-relaxed">
                     Si proporcionaste un correo electrónico, recibirás una confirmación de cancelación.
                   </p>

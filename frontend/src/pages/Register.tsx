@@ -1,81 +1,81 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { IonPage, IonContent } from '@ionic/react'
 import { Link } from 'react-router-dom'
 import LogoSantoDomingo from '../components/LogoSantoDomingo'
 import InputTexto       from '../components/InputTexto'
-import ContraInput      from '../components/ContraInput'
+import RutInput         from '../components/Rutinput'
+import EmailInput       from '../components/Emailinput'
+import PasswordInput    from '../components/PasswordInput'
+import SelectInput      from '../components/Selectinput'
 import BotonPrimario    from '../components/BotonPrimario'
 import PageTransition   from '../components/PageTransition'
-import BotonVolver      from '../components/BotonVolver'   
+import BotonVolver      from '../components/BotonVolver'
 
-interface FormState {
-  nombre:          string
-  rut:             string
-  email:           string
-  password:        string
-  confirmPassword: string
+/* ─── Datos de regiones y comunas ────────────────────────────────────── */
+
+const REGIONES_COMUNAS: Record<string, string[]> = {
+  'Arica y Parinacota':           ['Arica', 'Camarones', 'General Lagos', 'Putre'],
+  'Tarapacá':                     ['Alto Hospicio', 'Camiña', 'Colchane', 'Huara', 'Iquique', 'Pica', 'Pozo Almonte'],
+  'Antofagasta':                  ['Antofagasta', 'Calama', 'María Elena', 'Mejillones', 'Ollagüe', 'San Pedro de Atacama', 'Sierra Gorda', 'Taltal', 'Tocopilla'],
+  'Atacama':                      ['Caldera', 'Chañaral', 'Copiapó', 'Diego de Almagro', 'Freirina', 'Huasco', 'Tierra Amarilla', 'Vallenar'],
+  'Coquimbo':                     ['Andacollo', 'Canela', 'Combarbalá', 'Coquimbo', 'Illapel', 'La Higuera', 'La Serena', 'Los Vilos', 'Monte Patria', 'Ovalle', 'Paihuano', 'Punitaqui', 'Río Hurtado', 'Salamanca', 'Vicuña'],
+  'Valparaíso':                   ['Algarrobo', 'Cabildo', 'Calera', 'Calle Larga', 'Cartagena', 'Casablanca', 'Catemu', 'Concón', 'El Quisco', 'El Tabo', 'Hijuelas', 'Isla de Pascua', 'Juan Fernández', 'La Cruz', 'La Ligua', 'Limache', 'Llaillay', 'Los Andes', 'Nogales', 'Olmué', 'Panquehue', 'Papudo', 'Petorca', 'Puchuncaví', 'Putaendo', 'Quillota', 'Quilpué', 'Quintero', 'Rinconada', 'San Antonio', 'San Esteban', 'San Felipe', 'Santa María', 'Santo Domingo', 'Valparaíso', 'Villa Alemana', 'Viña del Mar', 'Zapallar'],
+  "O'Higgins":                    ['Chépica', 'Chimbarongo', 'Codegua', 'Coinco', 'Coltauco', 'Doñihue', 'Graneros', 'La Estrella', 'Las Cabras', 'Litueche', 'Lolol', 'Machalí', 'Malloa', 'Marchigüe', 'Mostazal', 'Nancagua', 'Navidad', 'Olivar', 'Palmilla', 'Paredones', 'Peralillo', 'Peumo', 'Pichidegua', 'Pichilemu', 'Placilla', 'Pumanque', 'Quinta de Tilcoco', 'Rancagua', 'Rengo', 'Requínoa', 'San Fernando', 'San Vicente', 'Santa Cruz'],
+  'Maule':                        ['Cauquenes', 'Chanco', 'Colbún', 'Constitución', 'Curepto', 'Curicó', 'Empedrado', 'Hualañé', 'Licantén', 'Linares', 'Longaví', 'Maule', 'Molina', 'Parral', 'Pelarco', 'Pelluhue', 'Pencahue', 'Rauco', 'Retiro', 'Río Claro', 'Romeral', 'Sagrada Familia', 'San Clemente', 'San Javier', 'San Rafael', 'Talca', 'Teno', 'Vichuquén', 'Villa Alegre', 'Yerbas Buenas'],
+  'Ñuble':                        ['Bulnes', 'Chillán', 'Chillán Viejo', 'Cobquecura', 'Coelemu', 'Coihueco', 'El Carmen', 'Ninhue', 'Ñiquén', 'Pemuco', 'Pinto', 'Portezuelo', 'Quillón', 'Quirihue', 'Ránquil', 'San Carlos', 'San Fabián', 'San Ignacio', 'San Nicolás', 'Treguaco', 'Yungay'],
+  'Biobío':                       ['Alto Biobío', 'Antuco', 'Arauco', 'Cabrero', 'Cañete', 'Chiguayante', 'Concepción', 'Contulmo', 'Coronel', 'Curanilahue', 'Florida', 'Hualpén', 'Hualqui', 'Laja', 'Lebu', 'Los Álamos', 'Los Ángeles', 'Lota', 'Mulchén', 'Nacimiento', 'Negrete', 'Penco', 'Quilaco', 'Quilleco', 'San Pedro de la Paz', 'San Rosendo', 'Santa Bárbara', 'Santa Juana', 'Talcahuano', 'Tirúa', 'Tomé', 'Tucapel', 'Yumbel'],
+  'La Araucanía':                 ['Angol', 'Carahue', 'Cholchol', 'Collipulli', 'Cunco', 'Curacautín', 'Curarrehue', 'Ercilla', 'Freire', 'Galvarino', 'Gorbea', 'Lautaro', 'Loncoche', 'Lonquimay', 'Los Sauces', 'Lumaco', 'Melipeuco', 'Nueva Imperial', 'Padre Las Casas', 'Perquenco', 'Pitrufquén', 'Pucón', 'Purén', 'Renaico', 'Saavedra', 'Temuco', 'Teodoro Schmidt', 'Toltén', 'Traiguén', 'Victoria', 'Vilcún', 'Villarrica'],
+  'Los Ríos':                     ['Corral', 'Futrono', 'La Unión', 'Lago Ranco', 'Lanco', 'Los Lagos', 'Máfil', 'Mariquina', 'Paillaco', 'Panguipulli', 'Río Bueno', 'Valdivia'],
+  'Los Lagos':                    ['Ancud', 'Calbuco', 'Castro', 'Chaitén', 'Chonchi', 'Cochamó', 'Curaco de Vélez', 'Dalcahue', 'Fresia', 'Frutillar', 'Futaleufú', 'Hualaihué', 'Llanquihue', 'Los Muermos', 'Maullín', 'Osorno', 'Palena', 'Puerto Montt', 'Puerto Octay', 'Puerto Varas', 'Puqueldón', 'Purranque', 'Puyehue', 'Queilén', 'Quellón', 'Quemchi', 'Quinchao', 'Río Negro', 'San Juan de la Costa', 'San Pablo'],
+  'Aysén':                        ['Aysén', 'Chile Chico', 'Cisnes', 'Cochrane', 'Coyhaique', 'Guaitecas', 'Lago Verde', "O'Higgins", 'Río Ibáñez', 'Tortel'],
+  'Magallanes':                   ['Antártica', 'Cabo de Hornos', 'Laguna Blanca', 'Natales', 'Porvenir', 'Primavera', 'Punta Arenas', 'Río Verde', 'San Gregorio', 'Timaukel', 'Torres del Paine'],
+  'Metropolitana':                ['Alhué', 'Buin', 'Calera de Tango', 'Cerrillos', 'Cerro Navia', 'Colina', 'Conchalí', 'Curacaví', 'El Bosque', 'El Monte', 'Estación Central', 'Huechuraba', 'Independencia', 'Isla de Maipo', 'La Cisterna', 'La Florida', 'La Granja', 'La Pintana', 'La Reina', 'Lampa', 'Las Condes', 'Lo Barnechea', 'Lo Espejo', 'Lo Prado', 'Macul', 'Maipú', 'María Pinto', 'Melipilla', 'Ñuñoa', 'Padre Hurtado', 'Paine', 'Pedro Aguirre Cerda', 'Peñaflor', 'Peñalolén', 'Pirque', 'Providencia', 'Pudahuel', 'Puente Alto', 'Quilicura', 'Quinta Normal', 'Recoleta', 'Renca', 'San Bernardo', 'San Joaquín', 'San José de Maipo', 'San Miguel', 'San Pedro', 'San Ramón', 'Santiago', 'Talagante', 'Tiltil', 'Vitacura'],
 }
 
-interface Errores {
-  nombre?:          string
-  rut?:             string
-  email?:           string
-  password?:        string
-  confirmPassword?: string
-  terminos?:        string
-}
-
-function validar(form: FormState): Errores {
-  const e: Errores = {}
-  if (!form.nombre.trim())
-    e.nombre = 'El nombre es obligatorio.'
-  if (!form.rut.trim())
-    e.rut = 'El RUT es obligatorio.'
-  else if (!/^[0-9]{1,2}(\.[0-9]{3}){2}-[0-9kK]$/.test(form.rut.trim()))
-    e.rut = 'Ingresa un RUT válido. Ej: 12.345.678-9'
-  if (!form.email.trim())
-    e.email = 'El correo es obligatorio.'
-  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
-    e.email = 'Ingresa un correo válido.'
-  if (form.password.length < 8)
-    e.password = 'La contraseña debe tener al menos 8 caracteres.'
-  if (form.confirmPassword !== form.password)
-    e.confirmPassword = 'Las contraseñas no coinciden.'
-  return e
-}
+const REGIONES = Object.keys(REGIONES_COMUNAS).map(r => ({ value: r, label: r }))
 
 export default function Register() {
-  const [form, setForm] = useState<FormState>({
-    nombre:          '',
-    rut:             '',
-    email:           '',
-    password:        '',
-    confirmPassword: '',
-  })
-  const [errores, setErrores] = useState<Errores>({})
-  const [region, setRegion] = useState('')
-  const [comuna, setComuna] = useState('')
+  const [nombre, setNombre]     = useState('')
+  const [rut, setRut]           = useState('')
+  const [email, setEmail]       = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [region, setRegion]     = useState('')
+  const [comuna, setComuna]     = useState('')
   const [aceptaTerminos, setAceptaTerminos] = useState(false)
+  const [errorTerminos, setErrorTerminos]   = useState('')
 
-  const set = (key: keyof FormState) =>
-    (e: React.ChangeEvent<HTMLInputElement>) =>
-      setForm(prev => ({ ...prev, [key]: e.target.value }))
+  const comunasOpciones = useMemo(() => {
+    if (!region) return []
+    return (REGIONES_COMUNAS[region] || []).map(c => ({ value: c, label: c }))
+  }, [region])
+
+  const handleRegionChange = (valor: string) => {
+    setRegion(valor)
+    setComuna('')
+  }
 
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault()
-    const nuevosErrores = validar(form)
-    if (!aceptaTerminos) nuevosErrores.terminos = 'Debes aceptar los términos y condiciones.'
-    setErrores(nuevosErrores)
-    if (Object.keys(nuevosErrores).length > 0) return
-    // TODO: llamar al servicio de registro
-    console.log('Registrando:', { ...form, region, comuna, aceptaTerminos })
+
+    if (!aceptaTerminos) {
+      setErrorTerminos('Debes aceptar los términos y condiciones.')
+      return
+    }
+    setErrorTerminos('')
+
+    if (!nombre.trim() || !rut.trim() || !email.trim()) return
+    if (password.length < 8) return
+    if (password !== confirmPassword) return
+    if (!region || !comuna) return
+
+    console.log('Registrando:', { nombre, rut, email, password, region, comuna, aceptaTerminos })
   }
 
   return (
     <IonPage>
       <IonContent fullscreen className="bg-[#f4faf9]">
 
-        {/* ── Botón volver — posición absoluta esquina superior izquierda ── */}
         <div className="absolute top-4 left-4 z-10 safe-area-top">
           <BotonVolver to="/" label="Inicio" />
         </div>
@@ -88,105 +88,85 @@ export default function Register() {
             bg-[#f4faf9]
           "
         >
-          {/* ── Transición de entrada ── */}
           <PageTransition variante="fadeUp" className="w-full max-w-sm">
 
-            {/* Logo */}
             <div className="mb-8 flex justify-center">
               <LogoSantoDomingo />
             </div>
 
-            {/* Encabezado */}
-            <h1 className="text-[28px] font-semibold text-[#14302d] mb-1">
+            <h1 className="text-[28px] font-semibold text-[#3aada0]! mb-1">
               Crear cuenta
             </h1>
             <p className="text-[14px] text-[#7aa9a5] mb-7 font-light">
               Completa tus datos para registrarte
             </p>
 
-            {/* Formulario */}
             <div className="flex flex-col gap-4">
+
               <InputTexto
                 id="nombre"
                 label="Nombre completo"
                 type="text"
                 autoComplete="name"
-                value={form.nombre}
-                onChange={set('nombre')}
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
                 placeholder="Juan Pérez"
                 required
-                error={errores.nombre}
               />
-              <InputTexto
+
+              <RutInput
                 id="rut"
-                label="RUT"
-                value={form.rut}
-                onChange={set('rut')}
-                placeholder="12.345.678-9"
+                value={rut}
+                onChange={setRut}
                 required
-                error={errores.rut}
               />
 
-              <InputTexto
+              <EmailInput
                 id="reg-email"
-                label="Correo electrónico"
-                type="email"
-                autoComplete="email"
-                value={form.email}
-                onChange={set('email')}
-                placeholder="ejemplo@correo.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
-                error={errores.email}
               />
 
-              <ContraInput
+              <PasswordInput
                 id="reg-password"
                 label="Contraseña"
-                autoComplete="new-password"
-                value={form.password}
-                onChange={set('password')}
-                placeholder="Mínimo 8 caracteres"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={8}
-                error={errores.password}
               />
 
-              <ContraInput
+              <PasswordInput
                 id="confirm-password"
                 label="Confirmar contraseña"
-                autoComplete="new-password"
-                value={form.confirmPassword}
-                onChange={set('confirmPassword')}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Repite tu contraseña"
                 required
-                error={errores.confirmPassword}
+                confirmar={password}
               />
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[13px] font-medium text-[#4aa8d8] uppercase">
-                    Región
-                  </label>
-                  <input
-                    type="text"
-                    value={region}
-                    onChange={(e) => setRegion(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-[#d5dce6] outline-none focus:border-[#3aada0]"
-                    placeholder="Ej: Valparaíso"
-                  />
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[13px] font-medium text-[#4aa8d8] uppercase">
-                    Comuna
-                  </label>
-                  <input
-                    type="text"
-                    value={comuna}
-                    onChange={(e) => setComuna(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-[#d5dce6] outline-none focus:border-[#3aada0]"
-                    placeholder="Ej: Santo Domingo"
-                  />
-                </div>
+                <SelectInput
+                  id="region"
+                  label="Región"
+                  value={region}
+                  onChange={handleRegionChange}
+                  opciones={REGIONES}
+                  placeholder="Seleccionar..."
+                  required
+                />
+                <SelectInput
+                  id="comuna"
+                  label="Comuna"
+                  value={comuna}
+                  onChange={setComuna}
+                  opciones={comunasOpciones}
+                  placeholder={region ? 'Seleccionar...' : 'Elige región'}
+                  required
+                  disabled={!region}
+                />
               </div>
 
               <div className="flex items-start gap-3 mt-2">
@@ -194,7 +174,10 @@ export default function Register() {
                   type="checkbox"
                   id="terminos"
                   checked={aceptaTerminos}
-                  onChange={(e) => setAceptaTerminos(e.target.checked)}
+                  onChange={(e) => {
+                    setAceptaTerminos(e.target.checked)
+                    if (e.target.checked) setErrorTerminos('')
+                  }}
                   className="mt-1 w-4 h-4 accent-[#3aada0]"
                 />
                 <label htmlFor="terminos" className="text-[13px] text-[#7a8a9a] leading-snug">
@@ -202,9 +185,9 @@ export default function Register() {
                 </label>
               </div>
 
-              {errores.terminos && (
+              {errorTerminos && (
                 <p className="-mt-2 text-[12px] text-[#e05c5c]" role="alert">
-                  {errores.terminos}
+                  {errorTerminos}
                 </p>
               )}
 
@@ -219,7 +202,6 @@ export default function Register() {
               </BotonPrimario>
             </div>
 
-            {/* Link a login */}
             <p className="mt-6 text-[13px] text-center text-[#7aa9a5]">
               ¿Ya tienes cuenta?{' '}
               <Link

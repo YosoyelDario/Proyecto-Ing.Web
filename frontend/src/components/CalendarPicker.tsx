@@ -117,7 +117,7 @@ export default function CalendarPicker({ value, minDate, onChange, disabled }: C
             <button
               key={day} type="button" onClick={() => handleDayClick(day)} disabled={dis}
               className={`mx-auto w-9 h-9 flex items-center justify-center rounded-xl text-[13px] font-medium transition-all
-                ${sel ? 'bg-[#4aa8d8] text-white' : tod && !dis ? 'border border-[#4aa8d8] text-[#4aa8d8] hover:bg-[#eaf5fb]' : dis ? 'text-[#c8d3dc] cursor-not-allowed' : 'text-[#1a2332] hover:bg-[#eaf5fb] hover:text-[#4aa8d8]'}
+                ${sel ? 'bg-[#3aada0] text-white' : tod && !dis ? 'border border-[#3aada0] text-[#3aada0] hover:bg-[#eaf5fb]' : dis ? 'text-[#c8d3dc] cursor-not-allowed' : 'text-[#1a2332] hover:bg-[#eaf5fb] hover:text-[#4aa8d8]'}
               `}
             >
               {day}

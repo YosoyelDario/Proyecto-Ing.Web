@@ -1,11 +1,18 @@
 import { useState } from 'react'
-import { IonPage, IonContent } from '@ionic/react'
+import {
+  IonPage,
+  IonContent,
+  IonHeader,
+  IonToolbar,
+  IonButtons,
+  IonTitle,
+} from '@ionic/react'
 import { Link, useNavigate } from 'react-router-dom'
 import PageTransition from '../components/PageTransition'
-import InputTexto     from '../components/InputTexto'
-import ContraInput    from '../components/ContraInput'
+import EmailInput     from '../components/Emailinput'
+import PasswordInput  from '../components/PasswordInput'
 import BotonPrimario  from '../components/BotonPrimario'
-import BotonVolver    from '../components/BotonVolver'    // ← nuevo
+import BotonVolver    from '../components/BotonVolver'
 
 const ADMIN_EMAIL = 'tuadmin@gmail.com'
 
@@ -21,6 +28,13 @@ export default function Login() {
       setError('Completa todos los campos.')
       return
     }
+
+    // Validación básica de email antes de enviar
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+      setError('Ingresa un correo electrónico válido.')
+      return
+    }
+
     setError('')
     localStorage.setItem('userEmail', email.toLowerCase())
 
@@ -33,16 +47,23 @@ export default function Login() {
 
   return (
     <IonPage>
+
+      {/* ── Header Ionic con botón volver ── */}
+      <IonHeader className="ion-no-border">
+        <IonToolbar className="bg-[#f4faf9] [--background:#f4faf9]">
+          <IonButtons slot="start">
+            <BotonVolver to="/" label="Inicio" />
+          </IonButtons>
+          <IonTitle className="text-[15px] font-medium text-[#14302d] tracking-wide [--color:#14302d]">
+            
+          </IonTitle>
+        </IonToolbar>
+      </IonHeader>
+
       <IonContent fullscreen className="bg-[#f4faf9]">
-
-        {/* ── Botón volver — esquina superior izquierda ── */}
-        <div className="absolute top-4 left-4 z-10 safe-area-top">
-          <BotonVolver to="/" label="Inicio" />
-        </div>
-
         <div
           className="
-            min-h-screen flex flex-col items-center justify-center
+            min-h-full flex flex-col items-center justify-center
             px-6 py-12
             font-['DM_Sans',sans-serif]
             bg-[#f4faf9]
@@ -50,7 +71,7 @@ export default function Login() {
         >
           <PageTransition variante="fadeUp" className="w-full max-w-sm">
 
-            {/* ── Logo imagen ── */}
+            {/* ── Logo ── */}
             <div className="mb-8 flex justify-center">
               <img
                 src="/assets/SantoDomingoLogo.png"
@@ -60,7 +81,7 @@ export default function Login() {
             </div>
 
             {/* ── Encabezado ── */}
-            <h1 className="text-[28px] font-semibold text-[#14302d] mb-1">
+            <h1 className="text-[28px] font-semibold text-[#3aada0]! mb-1">
               Iniciar sesión
             </h1>
             <p className="text-[14px] text-[#7aa9a5] mb-7 font-light">
@@ -70,23 +91,16 @@ export default function Login() {
             {/* ── Formulario ── */}
             <div className="flex flex-col gap-4">
 
-              <InputTexto
-                id="email"
-                label="Correo electrónico"
-                type="email"
-                autoComplete="email"
+              <EmailInput
+                id="login-email"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="ejemplo@correo.com"
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
 
               <div className="flex flex-col gap-1.5">
-                {/* Label con "¿Olvidaste tu contraseña?" alineado a la derecha */}
-                <div className="flex items-center justify-between">
-                  <span className="text-[13px] font-medium text-[#2c4a47] tracking-wide">
-                    Contraseña <span className="text-[#e05c5c]">*</span>
-                  </span>
+                {/* Link "¿Olvidaste tu contraseña?" alineado arriba a la derecha */}
+                <div className="flex items-center justify-end">
                   <button
                     type="button"
                     className="text-[12px] text-[#3aada0] font-medium bg-transparent border-none cursor-pointer hover:underline"
@@ -95,14 +109,15 @@ export default function Login() {
                     ¿Olvidaste tu contraseña?
                   </button>
                 </div>
-                <ContraInput
-                  id="password"
-                  label=""
-                  autoComplete="current-password"
+                <PasswordInput
+                  id="login-password"
+                  label="Contraseña"
                   value={password}
-                  onChange={e => setPassword(e.target.value)}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
+                  minLength={8}
+                  mostrarFortaleza={false}
                 />
               </div>
 
