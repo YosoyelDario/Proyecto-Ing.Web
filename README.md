@@ -10,7 +10,7 @@ Proyecto para la asignatura de Ingeniería Web y Móvil enfocado en reducir los 
 
 
 ## Enlace Figma
-- [Link prototipo.](https://url-del-sitio.com)
+- [Link prototipo.](https://www.figma.com/design/9cu9UhylwpXm331wHddpt8/Proyecto-Web?node-id=0-1&t=uy2mEo6T7D8t4F7i-1)
 
 ## Instrucciones de ejecución del proyecto
 1. Clonar el repositorio: `git clone [url]`
@@ -38,12 +38,14 @@ Para el desarrollo de la plataforma se tomaron en cuenta 2 roles:
 
 
 ## [EP 1.2]  Justificacion del problema y analisis del usuario objetivo.
+
+#### Analisis del usuario objetivo
+El Usuario objetivo que nosotros determinamos, es un usuario general. El cual por lo general no está experimentado para realizar citas médicas de manera online, sino que provienen de un sistema el cual era algo más manual e humano, por lo que el diseño tiene que dar prioridad a la previsibilidad y a la disminución de pasos lógicos, eliminando la fricción procedimental para que una persona sin experiencia pueda finalizar el proceso de programación de manera independiente y sin ambigüedad técnica.
+
 #### Justificacion del problema
 Según la información proporcionada respecto a la situación actual con las citas médicas es la siguiente _**"Los usuarios deben esperar meses para consultas o exámenes debido a la
 sobre demanda y falta de organización"**_, El sistema (la página web) propone eliminar cuellos de botella administrativos a través de la centralización de datos y la visualización de disponibilidad en tiempo real, garantizando un flujo de agendamiento ordenado y la reducción de tiempos de espera.
 
-#### Analisis del usuario objetivo
-El Usuario objetivo que nosotros determinamos, es un usuario general. El cual por lo general no está experimentado para realizar citas médicas de manera online, sino que provienen de un sistema el cual era algo más manual e humano, por lo que el diseño tiene que dar prioridad a la previsibilidad y a la disminución de pasos lógicos, eliminando la fricción procedimental para que una persona sin experiencia pueda finalizar el proceso de programación de manera independiente y sin ambigüedad técnica.
 
 ## [EP 1.3] Diseño UI/UX y Prototipo en Figma
 
@@ -57,22 +59,36 @@ El prototipo completo se encuentra en el enlace de Figma adjunto al inicio. Se h
 6. **Cancelar Cita:** Interfaz de confirmación de anulación.
 7. **Panel de Administración:** Vista exclusiva para personal municipal.
 
-## EP 1.4
+## [EP 1.4]  Arquitectura de Navegación y Experiencia del Usuario
 
-Definicion de Arquitectura de Navegacion y Experiencia
-del Usuario. El equipo debera definir la arquitectura de navegacion de la aplicacion, describiendo la estructura de rutas, jerarquıa de vistas, y flujo de interaccion entre pantallas. La entrega
-debera incluir: 
-- (a) Rutas principales y secundarias 
-- (b) Relaciones
-jerarquicas entre vistas
-- (c) Flujo de navegacion entre funcionalidades
-- (d) diferenciacion de acceso segun roles (por ejemplo: usuario /administrador)
-- (e) flujo de principales tareas (task flow)
-- (f) puntos criticos de interaccion
-- (g) coherencia de experiencia entre 3
-dispositivos
-- (h) breve justificacion tecnica de las decisiones adoptadas, considerando usabilidad, eficiencia de interaccion, claridad
-estructural y escalabilidad de la arquitectura frontend.
+Para asegurar una navegación intuitiva y coherente con el código implementado, se definió la siguiente arquitectura de navegación basada en React Router:
+
+* **(a) Rutas principales y secundarias:**
+  * **Principales:** `/` (Home), `/login`, `/register`.
+  * **Secundarias (Flujo de Citas):** `/agendar`, `/consultar`, `/modificar`, `/cancelar`, `/confirmacion`.
+  * **Administrativas:** `/admin` (AdminPanel) y `/admin/gestion` (GestionCitas).
+
+* **(b) Relaciones jerárquicas entre vistas:**
+  * La aplicación utiliza una estructura plana para las rutas de usuario para facilitar el acceso rápido. Además, se implementan componentes envolventes (Layouts) como `AuthLayout.tsx` para mantener una jerarquía visual consistente en los flujos de autenticación, y `PageTransition.tsx` para suavizar la navegación entre vistas.
+
+* **(c) Flujo de navegación entre funcionalidades:**
+  * **Agendamiento:** `Home` -> `Agendar` (donde interactúa con `CalendarPicker.tsx` y `SelectInput.tsx`) -> `ConfirmacionCita`.
+  * **Gestión personal:** `Home` -> `ConsultarCita` -> (Opcional) `ModificarCita` o `CancelarCita`.
+
+* **(d) Diferenciación de acceso según roles:**
+  * Se definen claramente dos accesos. El Rol Usuario navega por las vistas públicas y de agendamiento. El Rol Administrador accede a la carpeta `/admin`. Para proteger esto a nivel de código, se implementó el componente `<AdminRuta />` (HOC - Higher Order Component), que intercepta la navegación y bloquea el acceso si el usuario no tiene los permisos necesarios.
+
+* **(e) Flujo de principales tareas (Task Flow):**
+  * **Agendar Cita:** `Ingreso a /agendar` -> `Selección de fecha/hora (CalendarPicker)` -> `Ingreso de datos (RutInput, InputTexto)` -> `Redirección a /confirmacion`.
+
+* **(f) Puntos críticos de interacción:**
+  * Los formularios de autenticación y agendamiento son críticos. Para mitigar errores, se modularizaron los inputs (`RutInput.tsx`, `EmailInput.tsx`, `PasswordInput.tsx`) centralizando las validaciones. Otro punto crítico es `ConfirmacionCita.tsx`, donde se le da la certeza al usuario de que el proceso en `citaServices.ts` fue exitoso.
+
+* **(g) Coherencia de experiencia entre dispositivos:**
+  * Apoyándonos en los componentes de Ionic, se garantiza la responsividad. Se utilizan contenedores flexibles que se adaptan a vistas móviles (ej. Bottom Tabs nativos de Ionic) y vistas de escritorio (menús laterales), manteniendo siempre presentes elementos como el `LogoSantoDomingo.tsx` y el `BotonVolver.tsx` para no perder al usuario.
+
+* **(h) Justificación técnica de las decisiones:**
+  * Se optó por una modularización en la carpeta `/components` (separando botones, inputs específicos y layouts) para maximizar la reutilización de código y la escalabilidad de la arquitectura frontend. Asimismo, la lógica de conexión a datos se extrajo completamente de las vistas hacia la carpeta `/services` (`AuthServices.ts`, `citaServices.ts`), asegurando que los componentes de React (`.tsx`) se enfoquen exclusivamente en la interfaz (UI) y la experiencia de usuario (UX).
 
 ## [EP 1.5] Creación del proyecto en Ionic con React
 
@@ -93,8 +109,4 @@ Se han desarrollado las pantallas principales asegurando coherencia con la arqui
   * `/pages`: Contiene las vistas completas de la aplicación.
   * `/components`: Almacena componentes de UI reutilizables.
   * `/routes`: Define la lógica de enrutamiento y las validaciones de las rutas protegidas.
-<<<<<<< HEAD
   * `/services`: Carpeta preparada para la futura integración con el backend y llamadas a la API.
-=======
-  * `/services`: Carpeta preparada para la futura integración con el backend y llamadas a la API.
->>>>>>> f755517a09cb64fb3cede1759c72cee49f659e7c
