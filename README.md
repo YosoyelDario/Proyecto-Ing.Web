@@ -1,11 +1,37 @@
-# Listas de espera y tiempos de atención excesivos
+# Listas de espera y tiempos de atención excesivos en la municipalidad de Santo Domingo
+Proyecto para la asignatura de Ingeniería Web y Móvil enfocado en reducir los tiempos de atención mediante el agendamiento eficiente de citas médicas.
+
+## Datos 
+**Universidad:** Pontificia Universidad Católica de Valparaíso
+
+**Curso y paralelo:** ICI4247-2 (Ingenieria web y movil, paralelo 2)
+
+**Integrantes:** Joaquín Antonio Cornejo Fernández, Vicente Miguel Martinez Estay, Dario Joaquin Fuentes Ponce y Francisco 
+
+
+## Enlace Figma
+- [Link prototipo.](https://url-del-sitio.com)
+
+## Instrucciones de ejecución del proyecto
+1. Clonar el repositorio: `git clone [url]`
+2. Acceder al directorio del frontend: `cd [nombre-de-la-carpeta]`
+3. Instalar dependencias: `npm install`
+4. Levantar el servidor de desarrollo con Vite: `npm run dev`
+
 ## EP 1.1
+
+Para el desarrollo de la plataforma se tomaron en cuenta 2 roles:
+
+- **Rol Usuario (Paciente):** Persona que utiliza el sistema para agendar, consultar, modificar o cancelar horas médicas.
+
+- **Rol Administrador (Médico/Personal Municipal):** Funcionario que gestiona las disponibilidades, horas y atenciones a través de un panel de control.
+
 | Requerimientos Funcionales  | Requerimientos No Funcionales |
 | ------------- |:-------------:|
 | RF 1: El usuario puede agendar una cita médica, iniciando o no sesión      | RNF 1: El sistema debe poseer una alta facilidad de uso, garantizando que el tiempo de capacitación (o de familiarización) necesario para que un usuario inexperto logre agendar una cita por primera vez sea inferior a 3 minutos     |
 | RF 2: El usuario es capaz de consultar su cita médica en la página web a través de un código referido único      | RNF 2: El sistema debe tener un tiempo de respuesta inferior a 10 segundos al momento en que el usuario consulta su cita médica con el código de referido.     |
 | RF 3: El usuario es capaz de modificar su cita médica      | RNF 3: El sistema debe garantizar una probabilidad de no disponibilidad inferior al 1% para asegurar que tanto pacientes como administradores tengan acceso continuo a la modificación y cancelación de citas.     |
-| RF 4: El usuario es capaz de cancelar su cita médica      |      |
+| RF 4: El usuario es capaz de cancelar su cita médica      | RNF 4: El acceso al panel administrativo debe estar protegido mediante autenticación para evitar que usuarios no autorizados manipulen las citas o accedan a datos de otros pacientes. |
 | RF 5: El sistema debe notificar mediante correo electrónico (si el usuario lo proporciona), su cita médica (confirmación o cancelación por el médico).      |      |
 | RF 6: El sistema debe contar con un panel administrativo que permite modificar las citas si el médico no se encuentra disponible, así como modificar la cita del usuario.      |      |
 | RF 7: El sistema debe comprobar que la cita ha sido agendada correctamente para evitar duplicaciones.      | |
@@ -13,11 +39,11 @@
 
 ## EP 1.2  Justificacion del problema y analisis del usuario objetivo.
 #### Justificacion del problema
-Segun la informacion proporcionada respecto a la situacion actual con las citas medicas es la siguiente _**"Los usuarios deben esperar meses para consultas o exámenes debido a la
-sobredemanda y falta de organización"**_, El sistema (la pagina web) propone eliminar cuellos de botella administrativos a través de la centralización de datos y la visualización de disponibilidad en tiempo real, garantizando un flujo de agendamiento ordenado y la reducción de tiempos de espera.
+Según la información proporcionada respecto a la situación actual con las citas médicas es la siguiente _**"Los usuarios deben esperar meses para consultas o exámenes debido a la
+sobre demanda y falta de organización"**_, El sistema (la página web) propone eliminar cuellos de botella administrativos a través de la centralización de datos y la visualización de disponibilidad en tiempo real, garantizando un flujo de agendamiento ordenado y la reducción de tiempos de espera.
 
 #### Analisis del usuario objetivo
-El Usuario objetivo que nosotros determinamos, es un usuario general. El cual por lo general no esta experimentado para realizar citas medicas de manera online, sino que provienen de un sistema el cual era algo mas manual e humano, por lo que el diseño tiene que dar prioridad a la previsibilidad y a la disminución de pasos lógicos, eliminando la fricción procedimental para que una persona sin experiencia pueda finalizar el proceso de programación de manera independiente y sin ambigüedad técnica.
+El Usuario objetivo que nosotros determinamos, es un usuario general. El cual por lo general no está experimentado para realizar citas médicas de manera online, sino que provienen de un sistema el cual era algo más manual e humano, por lo que el diseño tiene que dar prioridad a la previsibilidad y a la disminución de pasos lógicos, eliminando la fricción procedimental para que una persona sin experiencia pueda finalizar el proceso de programación de manera independiente y sin ambigüedad técnica.
 
 ## EP 1.3
 
