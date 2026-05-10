@@ -139,13 +139,6 @@ export default function AdminPanel() {
                   descripcion="Ver, modificar y cancelar citas de pacientes"
                   onClick={() => navigate('/admin/gestion')}
                 />
-                <TarjetaAcceso
-                  icono="⏳"
-                  titulo="Lista de Espera"
-                  descripcion="Pacientes en espera ordenados por fecha"
-                  onClick={() => navigate('/admin/gestion?filtro=proximas&origen=espera')}
-                  color="#4aa8d8"
-                />
               </div>
             </section>
 

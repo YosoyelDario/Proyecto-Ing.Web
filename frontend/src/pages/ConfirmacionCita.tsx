@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom'
 import BotonVolver from '../components/BotonVolver'
 import BotonPrimario from '../components/BotonPrimario'
 import { useEffect } from 'react'
+import FilaDetalle from '../components/FilaDetalle'
 
 
 interface CitaDetalle {
@@ -14,23 +15,6 @@ interface CitaDetalle {
   rut:          string
   nombre:       string
   email:        string
-}
-
-/* ── Fila de detalle ──────────────────────────────────────────────────────── */
-function FilaDetalle({ icono, label, valor }: { icono: string; label: string; valor: string }) {
-  return (
-    <div className="flex items-center justify-between py-4 border-b border-[#eef4f9] last:border-0">
-      <div className="flex items-center gap-3">
-        <span className="text-[18px] leading-none w-7 text-center">{icono}</span>
-        <span className="text-[13px] font-medium text-[#7a8a9a] uppercase tracking-wider">
-          {label}
-        </span>
-      </div>
-      <span className="text-[14px] font-medium text-[#1a2332] text-right max-w-[55%] leading-snug">
-        {valor}
-      </span>
-    </div>
-  )
 }
 
 /* ── Página principal ─────────────────────────────────────────────────────── */

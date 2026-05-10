@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { IonPage, IonContent } from '@ionic/react'
 import { useNavigate } from 'react-router-dom'
 import BotonPrimario from '../components/BotonPrimario'
+import CalendarPicker from '../components/CalendarPicker';
 
 interface Medic {
   id: string
@@ -32,179 +33,6 @@ const HORARIOS_DISPONIBLES: Record<string, string[]> = {
   'm1_2026-05-10': ['09:00', '09:30', '11:00'],
   'm1_2026-05-11': ['14:00', '15:30'],
   'm3_2026-05-10': ['10:00', '10:30'],
-}
-
-/* ─── CalendarPicker ────────────────────────────────────────────────────── */
-
-interface CalendarPickerProps {
-  value: string       // 'YYYY-MM-DD' o ''
-  minDate: string     // 'YYYY-MM-DD'
-  onChange: (date: string) => void
-  disabled?: boolean
-}
-
-const DIAS_SEMANA = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do']
-const MESES = [
-  'Enero','Febrero','Marzo','Abril','Mayo','Junio',
-  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre',
-]
-
-function CalendarPicker({ value, minDate, onChange, disabled }: CalendarPickerProps) {
-  const today = new Date()
-
-  const [viewYear, setViewYear]   = useState(today.getFullYear())
-  const [viewMonth, setViewMonth] = useState(today.getMonth())
-
-  // Sincronizar vista cuando llega un valor externo
-  useEffect(() => {
-    if (!value) return
-
-    const [y, m] = value.split('-').map(Number)
-    const timer = window.setTimeout(() => {
-      setViewYear(y)
-      setViewMonth(m - 1)
-    }, 0)
-
-    return () => window.clearTimeout(timer)
-  }, [value])
-
-  const [minY, minM, minD] = minDate ? minDate.split('-').map(Number) : [0, 0, 0]
-
-  const isDayDisabled = (day: number) => {
-    if (viewYear < minY) return true
-    if (viewYear === minY && viewMonth + 1 < minM) return true
-    if (viewYear === minY && viewMonth + 1 === minM && day < minD) return true
-    return false
-  }
-
-  const canGoPrev = () => {
-    if (viewYear > minY) return true
-    if (viewYear === minY && viewMonth + 1 > minM) return true
-    return false
-  }
-
-  const prevMonth = () => {
-    if (!canGoPrev()) return
-    if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1) }
-    else setViewMonth(m => m - 1)
-  }
-
-  const nextMonth = () => {
-    if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1) }
-    else setViewMonth(m => m + 1)
-  }
-
-  const handleDayClick = (day: number) => {
-    if (disabled || isDayDisabled(day)) return
-    const mm = String(viewMonth + 1).padStart(2, '0')
-    const dd = String(day).padStart(2, '0')
-    onChange(`${viewYear}-${mm}-${dd}`)
-  }
-
-  // Primer día del mes en base lunes (0=Lun … 6=Dom)
-  const firstWeekDay = ((new Date(viewYear, viewMonth, 1).getDay() + 6) % 7)
-  const daysInMonth  = new Date(viewYear, viewMonth + 1, 0).getDate()
-
-  const cells: (number | null)[] = [
-    ...Array(firstWeekDay).fill(null),
-    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
-  ]
-  while (cells.length % 7 !== 0) cells.push(null)
-
-  const selParts = value ? value.split('-').map(Number) : null
-  const isSelected = (day: number) =>
-    selParts !== null &&
-    selParts[0] === viewYear &&
-    selParts[1] === viewMonth + 1 &&
-    selParts[2] === day
-
-  const isToday = (day: number) =>
-    today.getFullYear() === viewYear &&
-    today.getMonth()    === viewMonth &&
-    today.getDate()     === day
-
-  return (
-    <div className={`rounded-2xl border border-[#d5dce6] bg-white overflow-hidden transition-opacity duration-300 select-none ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
-
-      {/* Header navegación */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[#eef4f9]">
-        <button
-          type="button"
-          onClick={prevMonth}
-          disabled={!canGoPrev()}
-          className="w-8 h-8 flex items-center justify-center rounded-lg text-[18px] text-[#7a8a9a] hover:bg-[#f7f9fc] disabled:opacity-25 disabled:cursor-not-allowed transition-colors"
-          aria-label="Mes anterior"
-        >
-          ‹
-        </button>
-
-        <span className="text-[14px] font-semibold text-[#1a2332] tracking-wide">
-          {MESES[viewMonth]} {viewYear}
-        </span>
-
-        <button
-          type="button"
-          onClick={nextMonth}
-          className="w-8 h-8 flex items-center justify-center rounded-lg text-[18px] text-[#7a8a9a] hover:bg-[#f7f9fc] transition-colors"
-          aria-label="Mes siguiente"
-        >
-          ›
-        </button>
-      </div>
-
-      {/* Cabecera días de la semana */}
-      <div className="grid grid-cols-7 border-b border-[#eef4f9]">
-        {DIAS_SEMANA.map(d => (
-          <div key={d} className="py-2 text-center text-[11px] font-semibold uppercase tracking-widest text-[#a0adb8]">
-            {d}
-          </div>
-        ))}
-      </div>
-
-      {/* Cuadrícula de días */}
-      <div className="grid grid-cols-7 gap-y-1 p-3">
-        {cells.map((day, idx) => {
-          if (day === null) return <div key={`blank-${idx}`} />
-
-          const dis = isDayDisabled(day)
-          const sel = isSelected(day)
-          const tod = isToday(day)
-
-          return (
-            <button
-              key={day}
-              type="button"
-              onClick={() => handleDayClick(day)}
-              disabled={dis}
-              className={`
-                mx-auto w-9 h-9 flex items-center justify-center rounded-xl text-[13px] font-medium transition-all duration-100
-                ${sel
-                  ? 'bg-[#4aa8d8] text-white'
-                  : tod && !dis
-                    ? 'border border-[#4aa8d8] text-[#4aa8d8] hover:bg-[#eaf5fb]'
-                    : dis
-                      ? 'text-[#c8d3dc] cursor-not-allowed'
-                      : 'text-[#1a2332] hover:bg-[#eaf5fb] hover:text-[#4aa8d8]'
-                }
-              `}
-            >
-              {day}
-            </button>
-          )
-        })}
-      </div>
-
-      {/* Leyenda */}
-      <div className="flex items-center gap-5 px-4 pb-3 text-[11px] text-[#a0adb8]">
-        <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-full bg-[#4aa8d8] inline-block" /> Seleccionado
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-full border border-[#4aa8d8] inline-block" /> Hoy
-        </span>
-      </div>
-    </div>
-  )
 }
 
 /* ─── Componente principal Agendar ──────────────────────────────────────── */
@@ -299,25 +127,36 @@ export default function Agendar() {
   }
 
   const handleSubmit = (e: React.FormEvent) => {
-  e.preventDefault()
-  if (rutError) return
+    e.preventDefault();
+    if (rutError) return;
 
-  const medicoSeleccionado = MEDICOS.find(m => m.id === form.medicoId)
+    // 1. Obtener citas actuales del storage
+    const citasGuardadas = JSON.parse(localStorage.getItem('citas_agendadas') || '{}');
+    
+    // 2. Verificar si existe duplicado (Mismo RUT + Mismo Médico + Misma Fecha)
+    const esDuplicada = Object.values(citasGuardadas).some((c: any) => 
+      c.rut === form.rut && 
+      c.medicoId === form.medicoId && 
+      c.fecha === form.fecha
+    );
 
-  navigate('/confirmacion', {
-    state: {
-      cita: {
-        especialidad: form.especialidad,
-        medico:       medicoSeleccionado?.nombre ?? '',
-        fecha:        form.fecha,
-        hora:         form.hora,
-        rut:          form.rut,
-        nombre:       form.nombre,
-        email:        form.email,
+    if (esDuplicada) {
+      alert("Atención: Ya existe una cita agendada para este RUT con el mismo médico en la fecha seleccionada.");
+      return; // Detiene la navegación
+    }
+
+    const medicoSeleccionado = MEDICOS.find(m => m.id === form.medicoId);
+
+    // 3. Si no es duplicada, procedemos 
+    navigate('/confirmacion', {
+      state: {
+        cita: {
+          ...form,
+          medico: medicoSeleccionado?.nombre ?? '',
+        },
       },
-    },
-  })
-}
+    });
+  };
 
   const medicosFiltrados = MEDICOS.filter(m => m.especialidad === form.especialidad)
   const isFormComplete   = Object.values(form).every(v => v.trim() !== '') && !rutError

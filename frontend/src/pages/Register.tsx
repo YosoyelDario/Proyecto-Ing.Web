@@ -6,7 +6,7 @@ import InputTexto       from '../components/InputTexto'
 import ContraInput      from '../components/ContraInput'
 import BotonPrimario    from '../components/BotonPrimario'
 import PageTransition   from '../components/PageTransition'
-import BotonVolver      from '../components/BotonVolver'   // ← nuevo
+import BotonVolver      from '../components/BotonVolver'   
 
 interface FormState {
   nombre:          string
@@ -20,6 +20,7 @@ interface Errores {
   email?:           string
   password?:        string
   confirmPassword?: string
+  terminos?:        string
 }
 
 function validar(form: FormState): Errores {
@@ -45,6 +46,9 @@ export default function Register() {
     confirmPassword: '',
   })
   const [errores, setErrores] = useState<Errores>({})
+  const [region, setRegion] = useState('')
+  const [comuna, setComuna] = useState('')
+  const [aceptaTerminos, setAceptaTerminos] = useState(false)
 
   const set = (key: keyof FormState) =>
     (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -53,10 +57,11 @@ export default function Register() {
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault()
     const nuevosErrores = validar(form)
+    if (!aceptaTerminos) nuevosErrores.terminos = 'Debes aceptar los términos y condiciones.'
     setErrores(nuevosErrores)
     if (Object.keys(nuevosErrores).length > 0) return
     // TODO: llamar al servicio de registro
-    console.log('Registrando:', form)
+    console.log('Registrando:', { ...form, region, comuna, aceptaTerminos })
   }
 
   return (
@@ -140,6 +145,52 @@ export default function Register() {
                 required
                 error={errores.confirmPassword}
               />
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[13px] font-medium text-[#4aa8d8] uppercase">
+                    Región
+                  </label>
+                  <input
+                    type="text"
+                    value={region}
+                    onChange={(e) => setRegion(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-[#d5dce6] outline-none focus:border-[#3aada0]"
+                    placeholder="Ej: Valparaíso"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[13px] font-medium text-[#4aa8d8] uppercase">
+                    Comuna
+                  </label>
+                  <input
+                    type="text"
+                    value={comuna}
+                    onChange={(e) => setComuna(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-[#d5dce6] outline-none focus:border-[#3aada0]"
+                    placeholder="Ej: Santo Domingo"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 mt-2">
+                <input
+                  type="checkbox"
+                  id="terminos"
+                  checked={aceptaTerminos}
+                  onChange={(e) => setAceptaTerminos(e.target.checked)}
+                  className="mt-1 w-4 h-4 accent-[#3aada0]"
+                />
+                <label htmlFor="terminos" className="text-[13px] text-[#7a8a9a] leading-snug">
+                  Acepto los términos y condiciones de uso y el tratamiento de mis datos personales.
+                </label>
+              </div>
+
+              {errores.terminos && (
+                <p className="-mt-2 text-[12px] text-[#e05c5c]" role="alert">
+                  {errores.terminos}
+                </p>
+              )}
 
               <BotonPrimario
                 onClick={handleSubmit}
