@@ -38,6 +38,10 @@ Para el desarrollo de la plataforma se tomaron en cuenta 2 roles:
 
 
 ## [EP 1.2]  Justificacion del problema y analisis del usuario objetivo.
+
+#### Analisis del usuario objetivo
+El Usuario objetivo que nosotros determinamos, es un usuario general. El cual por lo general no está experimentado para realizar citas médicas de manera online, sino que provienen de un sistema el cual era algo más manual e humano, por lo que el diseño tiene que dar prioridad a la previsibilidad y a la disminución de pasos lógicos, eliminando la fricción procedimental para que una persona sin experiencia pueda finalizar el proceso de programación de manera independiente y sin ambigüedad técnica.
+
 #### Justificacion del problema
 Según la información proporcionada respecto a la situación actual con las citas médicas es la siguiente _**"Los usuarios deben esperar meses para consultas o exámenes debido a la
 sobre demanda y falta de organización"**_, El sistema (la página web) propone eliminar cuellos de botella administrativos a través de la centralización de datos y la visualización de disponibilidad en tiempo real, garantizando un flujo de agendamiento ordenado y la reducción de tiempos de espera.
