@@ -1,0 +1,95 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Login – Ionic component overrides
+   Neutraliza los defaults de Ionic para mantener el diseño custom.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─ Header: fondo del diseño original, sin bordes ─ */
+.login-page .login-header ion-toolbar {
+  --background: #f4faf9;
+  --border-width: 0;
+  --min-height: 44px;
+  --padding-start: 4px;
+  --padding-end: 4px;
+}
+.login-page .login-header::after {
+  display: none !important;
+}
+.login-page .login-header ion-title {
+  --color: #14302d;
+}
+
+/* ─ Botón volver: texto natural ─ */
+.login-page .login-btn-volver {
+  --color: #1a2332;
+  --padding-start: 8px;
+  --padding-end: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.login-page .login-btn-volver ion-icon {
+  font-size: 18px;
+  margin-right: 4px;
+}
+
+/* ─ Subtítulo con IonNote ─ */
+.login-page .login-subtitle {
+  display: block;
+  font-size: 14px;
+  color: #7aa9a5;
+  font-weight: 300;
+  margin-bottom: 28px;
+}
+
+/* ─ Card del formulario: transparente, sin borde ni sombra ─ */
+.login-page .login-card {
+  --background: transparent;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+}
+.login-page .login-card ion-card-content {
+  padding: 0;
+}
+
+/* ─ Botón "Olvidaste contraseña": estilo link sutil ─ */
+.login-page .login-forgot {
+  --color: #3aada0;
+  --padding-start: 0;
+  --padding-end: 0;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  min-height: auto;
+  height: auto;
+}
+.login-page .login-forgot::part(native) {
+  padding: 0;
+  min-height: auto;
+}
+
+/* ─ Footer grid: sin padding Ionic ─ */
+.login-page .login-footer-grid {
+  padding: 0;
+  margin-top: 24px;
+  --ion-grid-padding: 0;
+}
+.login-page .login-footer-grid ion-col {
+  --ion-grid-column-padding: 0;
+  padding: 4px 0;
+}
+.login-page .login-footer-text {
+  font-size: 13px;
+  color: #7aa9a5;
+}
+
+/* ─ IonText: no romper layout ─ */
+.login-page ion-text {
+  display: contents;
+}
+.login-page ion-note {
+  letter-spacing: normal;
+}

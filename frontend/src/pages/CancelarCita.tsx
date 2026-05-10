@@ -95,7 +95,7 @@ export default function CancelarCita() {
                 <div>
                   <div className="flex items-center gap-2.5 mb-1">
                     <IconoCancelar />
-                    <h1 className="text-[22px] font-semibold text-[#3aada0] tracking-tight">
+                    <h1 className="text-[22px] font-semibold text-[#3aada0]! tracking-tight">
                       Cancelar Cita
                     </h1>
                   </div>

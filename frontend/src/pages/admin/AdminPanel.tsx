@@ -44,14 +44,14 @@ function TarjetaAcceso({ icono, titulo, descripcion, onClick }: {
       style={{ WebkitTapHighlightColor: 'transparent' }}
       className="w-full text-left bg-white rounded-2xl shadow-sm border border-[#d5dce6] p-5 flex items-center gap-4 hover:shadow-md hover:border-[#3aada0] transition-all duration-200 active:scale-[0.98]"
     >
-      <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-[#3aada0]/10">
+      <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-[#3aada0]/10">
         {icono}
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-[15px] font-semibold text-[#1a2332] mb-0.5">{titulo}</p>
         <p className="text-[12px] text-[#7a8a9a] font-light leading-snug">{descripcion}</p>
       </div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="#c8d3dc" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 flex-shrink-0">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#c8d3dc" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 shrink-0">
         <path d="M9 18l6-6-6-6" />
       </svg>
     </button>
@@ -192,7 +192,7 @@ export default function AdminPanel() {
                   }}
                   variante="outline"
                   fullWidth
-                  className="!border-[#e05c5c]/30 !text-[#e05c5c] hover:!bg-red-50 py-5! text-base! tracking-wider! rounded-xl!"
+                  className="border-[#e05c5c]/30! text-[#e05c5c]! hover:bg-red-50! py-5! text-base! tracking-wider! rounded-xl!"
                 >
                   Cerrar sesión
                 </BotonPrimario>

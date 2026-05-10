@@ -1,6 +1,22 @@
 import { useState, useMemo } from 'react'
-import { IonPage, IonContent } from '@ionic/react'
-import { Link } from 'react-router-dom'
+import {
+  IonPage,
+  IonContent,
+  IonHeader,
+  IonToolbar,
+  IonButtons,
+  IonButton,
+  IonIcon,
+  IonCard,
+  IonCardContent,
+  IonGrid,
+  IonRow,
+  IonCol,
+  IonText,
+  IonNote,
+} from '@ionic/react'
+import { arrowBack } from 'ionicons/icons'
+import { Link, useNavigate } from 'react-router-dom'
 import LogoSantoDomingo from '../components/LogoSantoDomingo'
 import InputTexto       from '../components/InputTexto'
 import RutInput         from '../components/Rutinput'
@@ -9,7 +25,7 @@ import PasswordInput    from '../components/PasswordInput'
 import SelectInput      from '../components/Selectinput'
 import BotonPrimario    from '../components/BotonPrimario'
 import PageTransition   from '../components/PageTransition'
-import BotonVolver      from '../components/BotonVolver'
+import '../styles/Register.css'
 
 /* ─── Datos de regiones y comunas ────────────────────────────────────── */
 
@@ -35,6 +51,8 @@ const REGIONES_COMUNAS: Record<string, string[]> = {
 const REGIONES = Object.keys(REGIONES_COMUNAS).map(r => ({ value: r, label: r }))
 
 export default function Register() {
+  const navigate = useNavigate()
+
   const [nombre, setNombre]     = useState('')
   const [rut, setRut]           = useState('')
   const [email, setEmail]       = useState('')
@@ -73,145 +91,178 @@ export default function Register() {
   }
 
   return (
-    <IonPage>
-      <IonContent fullscreen className="bg-[#f4faf9]">
+    <IonPage className="register-page">
 
-        <div className="absolute top-4 left-4 z-10 safe-area-top">
-          <BotonVolver to="/" label="Inicio" />
-        </div>
+      {/* ── Header solo con botón volver ── */}
+      <IonHeader className="ion-no-border register-header">
+        <IonToolbar className="safe-area-top">
+          <IonButtons slot="start">
+            <IonButton className="register-btn-volver" onClick={() => navigate('/')}>
+              <IonIcon slot="start" icon={arrowBack} />
+              Inicio
+            </IonButton>
+          </IonButtons>
+        </IonToolbar>
+      </IonHeader>
 
+      <IonContent fullscreen style={{ '--background': '#f4faf9' } as React.CSSProperties}>
         <div
           className="
             min-h-screen flex flex-col items-center justify-center
             px-6 py-12
             font-['DM_Sans',sans-serif]
-            bg-[#f4faf9]
           "
         >
           <PageTransition variante="fadeUp" className="w-full max-w-sm">
 
+            {/* ── Logo ── */}
             <div className="mb-8 flex justify-center">
               <LogoSantoDomingo />
             </div>
 
-            <h1 className="text-[28px] font-semibold text-[#3aada0]! mb-1">
-              Crear cuenta
-            </h1>
-            <p className="text-[14px] text-[#7aa9a5] mb-7 font-light">
-              Completa tus datos para registrarte
-            </p>
-
-            <div className="flex flex-col gap-4">
-
-              <InputTexto
-                id="nombre"
-                label="Nombre completo"
-                type="text"
-                autoComplete="name"
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                placeholder="Juan Pérez"
-                required
-              />
-
-              <RutInput
-                id="rut"
-                value={rut}
-                onChange={setRut}
-                required
-              />
-
-              <EmailInput
-                id="reg-email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-
-              <PasswordInput
-                id="reg-password"
-                label="Contraseña"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={8}
-              />
-
-              <PasswordInput
-                id="confirm-password"
-                label="Confirmar contraseña"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Repite tu contraseña"
-                required
-                confirmar={password}
-              />
-
-              <div className="grid grid-cols-2 gap-4">
-                <SelectInput
-                  id="region"
-                  label="Región"
-                  value={region}
-                  onChange={handleRegionChange}
-                  opciones={REGIONES}
-                  placeholder="Seleccionar..."
-                  required
-                />
-                <SelectInput
-                  id="comuna"
-                  label="Comuna"
-                  value={comuna}
-                  onChange={setComuna}
-                  opciones={comunasOpciones}
-                  placeholder={region ? 'Seleccionar...' : 'Elige región'}
-                  required
-                  disabled={!region}
-                />
-              </div>
-
-              <div className="flex items-start gap-3 mt-2">
-                <input
-                  type="checkbox"
-                  id="terminos"
-                  checked={aceptaTerminos}
-                  onChange={(e) => {
-                    setAceptaTerminos(e.target.checked)
-                    if (e.target.checked) setErrorTerminos('')
-                  }}
-                  className="mt-1 w-4 h-4 accent-[#3aada0]"
-                />
-                <label htmlFor="terminos" className="text-[13px] text-[#7a8a9a] leading-snug">
-                  Acepto los términos y condiciones de uso y el tratamiento de mis datos personales.
-                </label>
-              </div>
-
-              {errorTerminos && (
-                <p className="-mt-2 text-[12px] text-[#e05c5c]" role="alert">
-                  {errorTerminos}
-                </p>
-              )}
-
-              <BotonPrimario
-                onClick={handleSubmit}
-                variante="solido"
-                fullWidth
-                type="submit"
-                className="py-5! text-base! tracking-wider! mt-2"
-              >
+            {/* ── Encabezado ── */}
+            <IonText>
+              <h1 className="text-[28px] font-semibold text-[#3aada0]! mb-1">
                 Crear cuenta
-              </BotonPrimario>
-            </div>
+              </h1>
+            </IonText>
+            <IonNote className="register-subtitle">
+              Completa tus datos para registrarte
+            </IonNote>
 
-            <p className="mt-6 text-[13px] text-center text-[#7aa9a5]">
-              ¿Ya tienes cuenta?{' '}
-              <Link
-                to="/login"
-                className="text-[#3aada0] font-medium hover:underline"
-                style={{ WebkitTapHighlightColor: 'transparent' }}
-              >
-                Inicia sesión
-              </Link>
-            </p>
+            {/* ── Formulario dentro de IonCard ── */}
+            <IonCard className="register-card">
+              <IonCardContent>
+                <div className="flex flex-col gap-4">
+
+                  <InputTexto
+                    id="nombre"
+                    label="Nombre completo"
+                    type="text"
+                    autoComplete="name"
+                    value={nombre}
+                    onChange={(e) => setNombre(e.target.value)}
+                    placeholder="Juan Pérez"
+                    required
+                  />
+
+                  <RutInput
+                    id="rut"
+                    value={rut}
+                    onChange={setRut}
+                    required
+                  />
+
+                  <EmailInput
+                    id="reg-email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+
+                  <PasswordInput
+                    id="reg-password"
+                    label="Contraseña"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={8}
+                  />
+
+                  <PasswordInput
+                    id="confirm-password"
+                    label="Confirmar contraseña"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Repite tu contraseña"
+                    required
+                    confirmar={password}
+                  />
+
+                  {/* Región y Comuna con IonGrid */}
+                  <IonGrid className="register-grid">
+                    <IonRow>
+                      <IonCol>
+                        <SelectInput
+                          id="region"
+                          label="Región"
+                          value={region}
+                          onChange={handleRegionChange}
+                          opciones={REGIONES}
+                          placeholder="Seleccionar..."
+                          required
+                        />
+                      </IonCol>
+                      <IonCol>
+                        <SelectInput
+                          id="comuna"
+                          label="Comuna"
+                          value={comuna}
+                          onChange={setComuna}
+                          opciones={comunasOpciones}
+                          placeholder={region ? 'Seleccionar...' : 'Elige región'}
+                          required
+                          disabled={!region}
+                        />
+                      </IonCol>
+                    </IonRow>
+                  </IonGrid>
+
+                  {/* Términos y condiciones */}
+                  <div className="flex items-start gap-3 mt-2">
+                    <input
+                      type="checkbox"
+                      id="terminos"
+                      checked={aceptaTerminos}
+                      onChange={(e) => {
+                        setAceptaTerminos(e.target.checked)
+                        if (e.target.checked) setErrorTerminos('')
+                      }}
+                      className="mt-1 w-4 h-4 accent-[#3aada0]"
+                    />
+                    <label htmlFor="terminos" className="text-[13px] text-[#7a8a9a] leading-snug">
+                      Acepto los términos y condiciones de uso.
+                    </label>
+                  </div>
+
+                  {errorTerminos && (
+                    <IonText color="danger">
+                      <p className="-mt-2 text-[12px] m-0" role="alert">
+                        {errorTerminos}
+                      </p>
+                    </IonText>
+                  )}
+
+                  <BotonPrimario
+                    onClick={handleSubmit}
+                    variante="solido"
+                    fullWidth
+                    type="submit"
+                    className="py-5! text-base! tracking-wider! mt-2"
+                  >
+                    Crear cuenta
+                  </BotonPrimario>
+                </div>
+              </IonCardContent>
+            </IonCard>
+
+            {/* ── Footer ── */}
+            <IonGrid className="register-footer-grid">
+              <IonRow>
+                <IonCol className="text-center">
+                  <IonNote className="register-footer-text">
+                    ¿Ya tienes cuenta?{' '}
+                    <Link
+                      to="/login"
+                      className="text-[#3aada0] font-medium hover:underline"
+                      style={{ WebkitTapHighlightColor: 'transparent' }}
+                    >
+                      Inicia sesión
+                    </Link>
+                  </IonNote>
+                </IonCol>
+              </IonRow>
+            </IonGrid>
 
           </PageTransition>
         </div>

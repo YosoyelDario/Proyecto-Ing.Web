@@ -1,12 +1,28 @@
 import { useState, useEffect, useMemo } from 'react'
-import { IonPage, IonContent } from '@ionic/react'
+import {
+  IonPage,
+  IonContent,
+  IonHeader,
+  IonToolbar,
+  IonButtons,
+  IonButton,
+  IonIcon,
+  IonCard,
+  IonCardContent,
+  IonGrid,
+  IonRow,
+  IonCol,
+  IonText,
+  IonNote,
+} from '@ionic/react'
+import { arrowBack } from 'ionicons/icons'
 import { useNavigate } from 'react-router-dom'
-import BotonPrimario from '../components/BotonPrimario'
+import BotonPrimario  from '../components/BotonPrimario'
 import CalendarPicker from '../components/CalendarPicker'
 import PageTransition from '../components/PageTransition'
-import EmailInput from '../components/Emailinput';
-import InputTexto from '../components/InputTexto';
-import RutInput from '../components/Rutinput';
+import EmailInput     from '../components/Emailinput'
+import RutInput       from '../components/Rutinput'
+import '../styles/Agendar.css'
 
 interface Medic {
   id: string
@@ -128,23 +144,23 @@ export default function Agendar() {
   }
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (rutError) return;
+    e.preventDefault()
+    if (rutError) return
 
-    const citasGuardadas = JSON.parse(localStorage.getItem('citas_agendadas') || '{}');
+    const citasGuardadas = JSON.parse(localStorage.getItem('citas_agendadas') || '{}')
 
     const esDuplicada = Object.values(citasGuardadas).some((c: any) =>
       c.rut === form.rut &&
       c.medicoId === form.medicoId &&
       c.fecha === form.fecha
-    );
+    )
 
     if (esDuplicada) {
-      alert("Atención: Ya existe una cita agendada para este RUT con el mismo médico en la fecha seleccionada.");
-      return;
+      alert('Atención: Ya existe una cita agendada para este RUT con el mismo médico en la fecha seleccionada.')
+      return
     }
 
-    const medicoSeleccionado = MEDICOS.find(m => m.id === form.medicoId);
+    const medicoSeleccionado = MEDICOS.find(m => m.id === form.medicoId)
 
     navigate('/confirmacion', {
       state: {
@@ -153,182 +169,193 @@ export default function Agendar() {
           medico: medicoSeleccionado?.nombre ?? '',
         },
       },
-    });
-  };
+    })
+  }
 
   const medicosFiltrados = MEDICOS.filter(m => m.especialidad === form.especialidad)
   const isFormComplete   = Object.values(form).every(v => v.trim() !== '') && !rutError
 
   return (
-    <IonPage>
-      <IonContent fullscreen className="bg-[#f7f9fc]">
+    <IonPage className="agendar-page">
+
+      {/* ── Header solo con botón volver ── */}
+      <IonHeader className="ion-no-border agendar-header">
+        <IonToolbar>
+          <IonButtons slot="start">
+            <IonButton className="agendar-btn-volver" onClick={() => navigate(-1)}>
+              <IonIcon slot="start" icon={arrowBack} />
+              Volver
+            </IonButton>
+          </IonButtons>
+        </IonToolbar>
+      </IonHeader>
+
+      <IonContent fullscreen style={{ '--background': '#f7f9fc' } as React.CSSProperties}>
         <PageTransition variante="fadeUp" duracion={500}>
           <div className="min-h-screen flex flex-col items-center py-12 px-6 font-['DM_Sans',sans-serif] text-[#1a2332]">
 
-            <nav className="w-full max-w-150 flex items-center justify-between mb-8">
-              <button
-                onClick={() => navigate(-1)}
-                className="text-[14px] font-medium text-[#7a8a9a] bg-transparent border-none cursor-pointer"
-              >
-                ← Volver
-              </button>
-              <span className="text-[15px] font-medium tracking-wide flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#3aada0]" /> Municipalidad Santo Domingo
+            {/* ── Marca antes de la tarjeta ── */}
+            <div className="w-full max-w-150 flex justify-end mb-4 px-1">
+              <span className="text-[15px] font-medium tracking-wide flex items-center gap-2 text-[#1a2332]">
+                <span className="w-2 h-2 rounded-full bg-[#3aada0]" />
+                Municipalidad Santo Domingo
               </span>
-            </nav>
+            </div>
 
-            <main className="w-full max-w-150 bg-white rounded-2xl shadow-sm border border-[#d5dce6] p-8 md:p-10">
-              <PageTransition variante="fadeIn" duracion={400} delay={150}>
-                <h1 className="text-[28px] font-semibold mb-2 tracking-tight text-[#3aada0]!">Agendar Cita</h1>
-                <p className="text-[14px] text-[#7a8a9a]! mb-8 font-light">
-                  Siga los pasos para programar su atención médica.
-                </p>
-              </PageTransition>
-
-              <form onSubmit={handleSubmit} className="flex flex-col gap-8" noValidate>
-
-                {/* Paso 1 */}
-                <PageTransition variante="fadeUp" duracion={400} delay={200}>
-                  <div className="flex flex-col gap-5">
-                    <div className="flex flex-col gap-1.5">
-                      <label htmlFor="especialidad" className="text-[13px] font-medium text-[#3aada0] uppercase tracking-wider">
-                        1. Seleccione Especialidad
-                      </label>
-                      <select
-                        id="especialidad" name="especialidad"
-                        value={form.especialidad} onChange={handleInputChange} required
-                        className="w-full px-4 py-3.5 rounded-xl border border-[#d5dce6] bg-white text-[15px] outline-none focus:border-[#3aada0] focus:ring-2 focus:ring-[#3aada0]/20 appearance-none"
-                      >
-                        <option value="" disabled>Elegir especialidad...</option>
-                        {ESPECIALIDADES.map(esp => <option key={esp} value={esp}>{esp}</option>)}
-                      </select>
-                    </div>
-
-                    <div className={`flex flex-col gap-1.5 transition-opacity duration-300 ${form.especialidad ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
-                      <label htmlFor="medicoId" className="text-[13px] font-medium text-[#3aada0] uppercase tracking-wider">
-                        2. Seleccione Médico
-                      </label>
-                      <select
-                        id="medicoId" name="medicoId"
-                        value={form.medicoId} onChange={handleInputChange} required disabled={!form.especialidad}
-                        className="w-full px-4 py-3.5 rounded-xl border border-[#d5dce6] bg-white text-[15px] outline-none focus:border-[#3aada0] focus:ring-2 focus:ring-[#3aada0]/20 appearance-none disabled:bg-[#f7f9fc]"
-                      >
-                        <option value="" disabled>Elegir médico...</option>
-                        {medicosFiltrados.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
-                      </select>
-                    </div>
-                  </div>
+            {/* ── Tarjeta principal con IonCard ── */}
+            <IonCard className="agendar-card w-full max-w-150">
+              <IonCardContent>
+                <PageTransition variante="fadeIn" duracion={400} delay={150}>
+                  <IonText>
+                    <h1 className="text-[28px] font-semibold mb-2 tracking-tight text-[#3aada0]!">Agendar Cita</h1>
+                  </IonText>
+                  <IonNote className="text-[14px] text-[#7a8a9a]! mb-8 font-light block">
+                    Siga los pasos para programar su atención médica.
+                  </IonNote>
                 </PageTransition>
 
-                {/* Paso 2 — Calendario */}
-                <PageTransition variante="fadeUp" duracion={400} delay={300}>
-                  <div className={`flex flex-col gap-5 transition-opacity duration-300 ${form.medicoId ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
-                    <div className="flex flex-col gap-2">
-                      <label className="text-[13px] font-medium text-[#3aada0] uppercase tracking-wider">
-                        3. Seleccione Fecha
-                      </label>
-                      <CalendarPicker
-                        value={form.fecha}
-                        minDate={minDate}
-                        onChange={handleFechaChange}
-                        disabled={!form.medicoId}
+                <form onSubmit={handleSubmit} className="flex flex-col gap-8" noValidate>
+
+                  {/* Paso 1 */}
+                  <PageTransition variante="fadeUp" duracion={400} delay={200}>
+                    <div className="flex flex-col gap-5">
+                      <div className="flex flex-col gap-1.5">
+                        <label htmlFor="especialidad" className="text-[13px] font-medium text-[#3aada0] uppercase tracking-wider">
+                          1. Seleccione Especialidad
+                        </label>
+                        <select
+                          id="especialidad" name="especialidad"
+                          value={form.especialidad} onChange={handleInputChange} required
+                          className="w-full px-4 py-3.5 rounded-xl border border-[#d5dce6] bg-white text-[15px] outline-none focus:border-[#3aada0] focus:ring-2 focus:ring-[#3aada0]/20 appearance-none"
+                        >
+                          <option value="" disabled>Elegir especialidad...</option>
+                          {ESPECIALIDADES.map(esp => <option key={esp} value={esp}>{esp}</option>)}
+                        </select>
+                      </div>
+
+                      <div className={`flex flex-col gap-1.5 transition-opacity duration-300 ${form.especialidad ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
+                        <label htmlFor="medicoId" className="text-[13px] font-medium text-[#3aada0] uppercase tracking-wider">
+                          2. Seleccione Médico
+                        </label>
+                        <select
+                          id="medicoId" name="medicoId"
+                          value={form.medicoId} onChange={handleInputChange} required disabled={!form.especialidad}
+                          className="w-full px-4 py-3.5 rounded-xl border border-[#d5dce6] bg-white text-[15px] outline-none focus:border-[#3aada0] focus:ring-2 focus:ring-[#3aada0]/20 appearance-none disabled:bg-[#f7f9fc]"
+                        >
+                          <option value="" disabled>Elegir médico...</option>
+                          {medicosFiltrados.map(m => <option key={m.id} value={m.id}>{m.nombre}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                  </PageTransition>
+
+                  {/* Paso 2 — Calendario */}
+                  <PageTransition variante="fadeUp" duracion={400} delay={300}>
+                    <div className={`flex flex-col gap-5 transition-opacity duration-300 ${form.medicoId ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[13px] font-medium text-[#3aada0] uppercase tracking-wider">
+                          3. Seleccione Fecha
+                        </label>
+                        <CalendarPicker
+                          value={form.fecha}
+                          minDate={minDate}
+                          onChange={handleFechaChange}
+                          disabled={!form.medicoId}
+                        />
+                        {form.fecha && (
+                          <IonNote className="text-[12px] text-[#7a8a9a] mt-1 pl-1 block">
+                            Fecha seleccionada:{' '}
+                            <span className="font-medium text-[#1a2332]">
+                              {new Date(form.fecha + 'T00:00:00').toLocaleDateString('es-CL', {
+                                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+                              })}
+                            </span>
+                          </IonNote>
+                        )}
+                      </div>
+
+                      <div className={`flex flex-col gap-1.5 transition-opacity duration-300 ${form.fecha ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
+                        <label className="text-[13px] font-medium text-[#3aada0] uppercase tracking-wider">
+                          4. Horarios Disponibles
+                        </label>
+                        {availableHours.length > 0 ? (
+                          <IonGrid className="agendar-grid">
+                            <IonRow>
+                              {availableHours.map(hora => (
+                                <IonCol size="4" key={hora}>
+                                  <BotonPrimario
+                                    variante={form.hora === hora ? 'solido' : 'outline'}
+                                    onClick={() => setForm(prev => ({ ...prev, hora }))}
+                                    className="py-3! px-2! text-[14px]!"
+                                  >
+                                    {hora}
+                                  </BotonPrimario>
+                                </IonCol>
+                              ))}
+                            </IonRow>
+                          </IonGrid>
+                        ) : (
+                          <div className="px-4 py-3.5 rounded-xl border border-dashed border-[#d5dce6] bg-[#f7f9fc] text-[14px] text-[#7a8a9a] text-center">
+                            {form.fecha ? 'No hay horarios disponibles para esta fecha.' : 'Seleccione una fecha primero.'}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </PageTransition>
+
+                  {/* Paso 3 — Datos del paciente */}
+                  <PageTransition variante="fadeUp" duracion={400} delay={400}>
+                    <div className={`flex flex-col gap-4 pt-6 border-t border-[#eef4f9] transition-opacity duration-300 ${form.hora ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
+                      <IonText>
+                        <h2 className="text-[13px] font-medium text-[#3aada0]! uppercase tracking-wider mb-1">
+                          5. Datos Personales
+                        </h2>
+                      </IonText>
+
+                      <RutInput
+                        id="rut"
+                        label="RUT"
+                        value={form.rut}
+                        onChange={(valor) => handleInputChange({ target: { name: 'rut', value: valor } } as React.ChangeEvent<HTMLInputElement>)}
+                        placeholder="Ej: 12.345.678-9"
+                        required={true}
+                        disabled={!form.hora}
                       />
-                      {form.fecha && (
-                        <p className="text-[12px] text-[#7a8a9a] mt-1 pl-1">
-                          Fecha seleccionada:{' '}
-                          <span className="font-medium text-[#1a2332]">
-                            {new Date(form.fecha + 'T00:00:00').toLocaleDateString('es-CL', {
-                              weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-                            })}
-                          </span>
-                        </p>
-                      )}
-                    </div>
 
-                    <div className={`flex flex-col gap-1.5 transition-opacity duration-300 ${form.fecha ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
-                      <label className="text-[13px] font-medium text-[#3aada0] uppercase tracking-wider">
-                        4. Horarios Disponibles
-                      </label>
-                      {availableHours.length > 0 ? (
-                        <div className="grid grid-cols-3 gap-3">
-                          {availableHours.map(hora => (
-                            <BotonPrimario
-                              key={hora}
-                              variante={form.hora === hora ? 'solido' : 'outline'}
-                              onClick={() => setForm(prev => ({ ...prev, hora }))}
-                              className="py-3! px-2! text-[14px]!"
-                            >
-                              {hora}
-                            </BotonPrimario>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="px-4 py-3.5 rounded-xl border border-dashed border-[#d5dce6] bg-[#f7f9fc] text-[14px] text-[#7a8a9a] text-center">
-                          {form.fecha ? 'No hay horarios disponibles para esta fecha.' : 'Seleccione una fecha primero.'}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </PageTransition>
+                      <div className="flex flex-col gap-1.5">
+                        <label htmlFor="nombre" className="text-[13px] font-medium text-[#3aada0]!">Nombre Completo</label>
+                        <input
+                          id="nombre" name="nombre" type="text"
+                          value={form.nombre} onChange={handleInputChange}
+                          placeholder="Juan Pérez" required disabled={!form.hora}
+                          className="w-full px-4 py-3.5 rounded-xl border border-[#d5dce6] bg-white text-[15px] outline-none focus:border-[#3aada0] disabled:bg-[#f7f9fc]"
+                        />
+                      </div>
 
-                {/* Paso 3 — Datos del paciente */}
-<PageTransition variante="fadeUp" duracion={400} delay={400}>
-  <div className={`flex flex-col gap-4 pt-6 border-t border-[#eef4f9] transition-opacity duration-300 ${form.hora ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
-    <h2 className="text-[13px] font-medium text-[#3aada0]! uppercase tracking-wider mb-1">
-      5. Datos Personales
-    </h2>
-
-    <RutInput
-      id="rut"
-      label="RUT"
-      value={form.rut}
-      onChange={(valor) => handleInputChange({ target: { name: 'rut', value: valor } } as React.ChangeEvent<HTMLInputElement>)}
-      placeholder="Ej: 12.345.678-9"
-      required={true}
-      disabled={!form.hora}
-    />
-
-    <div className="flex flex-col gap-1.5">
-
-                      <label htmlFor="nombre" className="text-[13px] font-medium text-[#3aada0]!">Nombre Completo</label>
-
-                      <input
-
-                        id="nombre" name="nombre" type="text"
-
-                        value={form.nombre} onChange={handleInputChange}
-
-                        placeholder="Juan Pérez" required disabled={!form.hora}
-
-                        className="w-full px-4 py-3.5 rounded-xl border border-[#d5dce6] bg-white text-[15px] outline-none focus:border-[#3aada0] disabled:bg-[#f7f9fc]"
-
+                      <EmailInput
+                        id="email"
+                        label="Correo Electrónico"
+                        value={form.email}
+                        onChange={handleInputChange}
+                        placeholder="ejemplo@correo.com"
+                        required={true}
+                        disabled={!form.hora}
                       />
-
                     </div>
+                  </PageTransition>
 
-    <EmailInput
-      id="email"
-      label="Correo Electrónico"
-      value={form.email}
-      onChange={handleInputChange}
-      placeholder="ejemplo@correo.com"
-      required={true}
-      disabled={!form.hora}
-    />
-  </div>
-</PageTransition>
+                  <BotonPrimario
+                    type="submit"
+                    disabled={!isFormComplete}
+                    fullWidth
+                    className="py-4! [clip-path:inset(0_round_20px)]"
+                  >
+                    Confirmar Cita
+                  </BotonPrimario>
 
-                <BotonPrimario
-                  type="submit"
-                  disabled={!isFormComplete}
-                  fullWidth
-                  className="py-4! [clip-path:inset(0_round_20px)]"
-                >
-                  Confirmar Cita
-                </BotonPrimario>
-
-              </form>
-            </main>
+                </form>
+              </IonCardContent>
+            </IonCard>
           </div>
         </PageTransition>
       </IonContent>

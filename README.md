@@ -18,13 +18,13 @@ Proyecto para la asignatura de Ingeniería Web y Móvil enfocado en reducir los 
 3. Instalar dependencias: `npm install`
 4. Levantar el servidor de desarrollo con Vite: `npm run dev`
 
-## EP 1.1
+## [EP 1.1] Definición de requerimientos
 
 Para el desarrollo de la plataforma se tomaron en cuenta 2 roles:
 
 - **Rol Usuario (Paciente):** Persona que utiliza el sistema para agendar, consultar, modificar o cancelar horas médicas.
 
-- **Rol Administrador (Médico/Personal Municipal):** Funcionario que gestiona las disponibilidades, horas y atenciones a través de un panel de control.
+- **Rol Administrador (Personal Municipal):** Funcionario que gestiona las disponibilidades, horas y atenciones a través de un panel de control.
 
 | Requerimientos Funcionales  | Requerimientos No Funcionales |
 | ------------- |:-------------:|
@@ -37,7 +37,7 @@ Para el desarrollo de la plataforma se tomaron en cuenta 2 roles:
 | RF 7: El sistema debe comprobar que la cita ha sido agendada correctamente para evitar duplicaciones.      | |
 
 
-## EP 1.2  Justificacion del problema y analisis del usuario objetivo.
+## [EP 1.2]  Justificacion del problema y analisis del usuario objetivo.
 #### Justificacion del problema
 Según la información proporcionada respecto a la situación actual con las citas médicas es la siguiente _**"Los usuarios deben esperar meses para consultas o exámenes debido a la
 sobre demanda y falta de organización"**_, El sistema (la página web) propone eliminar cuellos de botella administrativos a través de la centralización de datos y la visualización de disponibilidad en tiempo real, garantizando un flujo de agendamiento ordenado y la reducción de tiempos de espera.
@@ -45,16 +45,17 @@ sobre demanda y falta de organización"**_, El sistema (la página web) propone 
 #### Analisis del usuario objetivo
 El Usuario objetivo que nosotros determinamos, es un usuario general. El cual por lo general no está experimentado para realizar citas médicas de manera online, sino que provienen de un sistema el cual era algo más manual e humano, por lo que el diseño tiene que dar prioridad a la previsibilidad y a la disminución de pasos lógicos, eliminando la fricción procedimental para que una persona sin experiencia pueda finalizar el proceso de programación de manera independiente y sin ambigüedad técnica.
 
-## EP 1.3
+## [EP 1.3] Diseño UI/UX y Prototipo en Figma
 
-QUE HAY QUE HACER: Bocetos de UI/UX y prototipo en Figma de al menos 7 mockups o pantallas distintas, cada una correspondiente a una funcionalidad previamente definida en los requerimientos del proyecto.
+El prototipo completo se encuentra en el enlace de Figma adjunto al inicio. Se han diseñado más de 7 pantallas distintas correspondientes a los requerimientos, considerando explícitamente las versiones móvil y web:
 
-Cada pantalla deberá presentar un diseño diferenciado, coherente con el flujo de navegación y la jerarquía de información. Ademas, las interfaces deberán ser prototipadas considerando explícitamente: versión móvil y web.
-- El diseño deberá evidenciar distribución de contenido, componentes de navegación (por ejemplo: menú lateral en web, barra inferior en móvil), jerarquía visual
-y densidad de la información. 
-- Se deberá Incluir en los mockups dos formularios relacionados al inicio de sesión de usuarios y registro, considerando los campos: Nombre de usuario, RUT, Correo Electronico, Region, Comuna, Contraseña, Confirmacion de
-Contraseñna y aceptacion de términos y condiciones. Considerando
-validaciones visuales y diseño centrado en el usuario.
+1. **Pantalla de Inicio de Sesión:** Incluye formulario con validaciones visuales.
+2. **Pantalla de Registro:** Formulario que incluye Nombre de usuario, RUT, Correo Electrónico, Región, Comuna, Contraseña, Confirmación de Contraseña y aceptación de términos y condiciones.
+3. **Dashboard / Home:** Pantalla principal donde el paciente consulta su cita.
+4. **Agendamiento:** Interfaz para seleccionar especialidad, fecha y hora.
+5. **Modificar Cita:** Flujo para reagendar horas médicas.
+6. **Cancelar Cita:** Interfaz de confirmación de anulación.
+7. **Panel de Administración:** Vista exclusiva para personal municipal.
 
 ## EP 1.4
 
@@ -73,18 +74,23 @@ dispositivos
 - (h) breve justificacion tecnica de las decisiones adoptadas, considerando usabilidad, eficiencia de interaccion, claridad
 estructural y escalabilidad de la arquitectura frontend.
 
-## EP 1.5
+## [EP 1.5] Creación del proyecto en Ionic con React
 
- Creacion del proyecto en Ionic con React, considerando:
-- (a) Uso de react router; 
-- (b) Rutas publicas y rutas protegidas;
-- (c)
-Redirecciones (ejemplo: login obligatorio);
-- (d) Estructura modular
-de vistas.
+El proyecto base fue inicializado utilizando Ionic con React, estructurando la navegación de la siguiente manera:
+
+* **(a) Uso de React Router:** Se implementó `react-router-dom` para gestionar la navegación tipo Single Page Application (SPA), renderizando los componentes sin recargar el navegador.
+* **(b) Rutas públicas y protegidas:** Se definieron rutas públicas para el acceso general (`/login`, `/registro`, `/home`) y rutas protegidas (ej. `/admin`) que bloquean el renderizado de la vista si el usuario no tiene la sesión activa.
+* **(c) Redirecciones:** Se configuró una redirección automática (login obligatorio). Si un visitante intenta acceder directamente por URL a una ruta administrativa, es devuelto automáticamente a `/login`.
+* **(d) Estructura modular de vistas:** Cada pantalla se desarrolló como un componente funcional independiente, separando la lógica de la interfaz.
 
 
-## EP 1.6
-Diseño de pantallas principales e incorporando una estructura de navegacion funcional y coherente con la arquitectura
-previamente definida en ionic-react (al menos 4). Uso de componentes propios de Ionic (IonPage, IonHeader, IonContent, IonTabs, IonMenu, etc). Separacion estructural del codigo en carpetas
-(pages, components, routes, services).
+## [EP 1.6] Diseño de pantallas principales y estructura
+
+Se han desarrollado las pantallas principales asegurando coherencia con la arquitectura definida.
+
+* **Uso de Componentes Ionic:** Para asegurar el diseño adaptativo y el comportamiento nativo, las vistas utilizan los componentes estructurales de Ionic: `<IonPage>`, `<IonHeader>`, `<IonContent>`, `<IonMenu>` (para la navegación web) y `<IonTabs>` (para dispositivos móviles).
+* **Separación estructural del código:** El proyecto mantiene un código ordenado dividido en las siguientes carpetas:
+  * `/pages`: Contiene las vistas completas de la aplicación.
+  * `/components`: Almacena componentes de UI reutilizables.
+  * `/routes`: Define la lógica de enrutamiento y las validaciones de las rutas protegidas.
+  * `/services`: Carpeta preparada para la futura integración con el backend y llamadas a la API.

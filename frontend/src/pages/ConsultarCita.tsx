@@ -195,7 +195,7 @@ export default function ConsultarCita() {
                           to={`/cancelar/${codigo}`}
                           variante="outline"
                           fullWidth
-                          className="!border-[#e05c5c]/30 !text-[#e05c5c] hover:!bg-red-50"
+                          className="border-[#e05c5c]/30! text-[#e05c5c]! hover:bg-red-50!"
                         >
                           Cancelar
                         </BotonPrimario>

@@ -1,0 +1,79 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Agendar – Ionic component overrides
+   Neutraliza los defaults de Ionic para mantener el diseño custom.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─ Header: transparente, sin bordes ─ */
+.agendar-page .agendar-header ion-toolbar {
+  --background: transparent;
+  --border-width: 0;
+  --min-height: 44px;
+  --padding-start: 8px;
+  --padding-end: 8px;
+}
+.agendar-page .agendar-header::after {
+  display: none !important;
+}
+
+/* ─ Botón volver: texto natural sin uppercase ─ */
+.agendar-page .agendar-btn-volver {
+  --color: #7a8a9a;
+  --padding-start: 4px;
+  --padding-end: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.agendar-page .agendar-btn-volver ion-icon {
+  font-size: 18px;
+  margin-right: 4px;
+}
+
+/* ─ IonCard principal: replica la tarjeta blanca original ─ */
+.agendar-page .agendar-card {
+  --background: #fff;
+  margin: 0;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid #d5dce6;
+  overflow: hidden;
+}
+.agendar-page .agendar-card ion-card-content {
+  padding: 32px;
+  padding-top: 32px;
+}
+@media (min-width: 768px) {
+  .agendar-page .agendar-card ion-card-content {
+    padding: 40px;
+  }
+}
+
+/* ─ IonGrid: sin padding extra ─ */
+.agendar-page .agendar-grid {
+  padding: 0;
+  --ion-grid-padding: 0;
+}
+.agendar-page .agendar-grid ion-col {
+  --ion-grid-column-padding: 0;
+  padding: 6px;
+}
+.agendar-page .agendar-grid ion-row {
+  gap: 0;
+}
+
+/* ─ IonText / IonNote: no romper layout ─ */
+.agendar-page ion-text {
+  display: contents;
+}
+.agendar-page ion-note {
+  letter-spacing: normal;
+}
+
+/* ─ IonLabel dentro de nav: estilo original ─ */
+.agendar-page .agendar-brand {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+  color: #1a2332;
+}

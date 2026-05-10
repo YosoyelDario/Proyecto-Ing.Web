@@ -1,0 +1,86 @@
+
+/* ─ Header: fondo del diseño original, sin bordes ─ */
+.register-page .register-header ion-toolbar {
+  --background: #f4faf9;
+  --border-width: 0;
+  --min-height: 44px;
+  --padding-start: 4px;
+  --padding-end: 4px;
+}
+.register-page .register-header::after {
+  display: none !important;
+}
+
+/* ─ Botón volver: texto natural ─ */
+.register-page .register-btn-volver {
+  --color: #1a2332;
+  --padding-start: 8px;
+  --padding-end: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.register-page .register-btn-volver ion-icon {
+  font-size: 18px;
+  margin-right: 4px;
+}
+
+/* ─ Subtítulo con IonNote ─ */
+.register-page .register-subtitle {
+  display: block;
+  font-size: 14px;
+  color: #7aa9a5;
+  font-weight: 300;
+  margin-bottom: 28px;
+}
+
+/* ─ Card del formulario: transparente, sin borde ni sombra ─ */
+.register-page .register-card {
+  --background: transparent;
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+}
+.register-page .register-card ion-card-content {
+  padding: 0;
+}
+
+/* ─ Grid región/comuna: sin padding Ionic ─ */
+.register-page .register-grid {
+  padding: 0;
+  --ion-grid-padding: 0;
+}
+.register-page .register-grid ion-col {
+  --ion-grid-column-padding: 0;
+}
+.register-page .register-grid ion-col:first-child {
+  padding: 0 8px 0 0;
+}
+.register-page .register-grid ion-col:last-child {
+  padding: 0 0 0 8px;
+}
+
+/* ─ Footer grid: sin padding Ionic ─ */
+.register-page .register-footer-grid {
+  padding: 0;
+  margin-top: 24px;
+  --ion-grid-padding: 0;
+}
+.register-page .register-footer-grid ion-col {
+  --ion-grid-column-padding: 0;
+  padding: 0;
+}
+.register-page .register-footer-text {
+  font-size: 13px;
+  color: #7aa9a5;
+}
+
+/* ─ IonText: no romper layout ─ */
+.register-page ion-text {
+  display: contents;
+}
+.register-page ion-note {
+  letter-spacing: normal;
+}

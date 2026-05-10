@@ -6,13 +6,23 @@ import {
   IonToolbar,
   IonButtons,
   IonTitle,
+  IonButton,
+  IonIcon,
+  IonCard,
+  IonCardContent,
+  IonText,
+  IonNote,
+  IonGrid,
+  IonRow,
+  IonCol,
 } from '@ionic/react'
+import { arrowBack } from 'ionicons/icons'
 import { Link, useNavigate } from 'react-router-dom'
 import PageTransition from '../components/PageTransition'
 import EmailInput     from '../components/Emailinput'
 import PasswordInput  from '../components/PasswordInput'
 import BotonPrimario  from '../components/BotonPrimario'
-import BotonVolver    from '../components/BotonVolver'
+import '../styles/Login.css'
 
 const ADMIN_EMAIL = 'tuadmin@gmail.com'
 
@@ -29,7 +39,6 @@ export default function Login() {
       return
     }
 
-    // Validación básica de email antes de enviar
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
       setError('Ingresa un correo electrónico válido.')
       return
@@ -46,27 +55,29 @@ export default function Login() {
   }
 
   return (
-    <IonPage>
+    <IonPage className="login-page">
 
       {/* ── Header Ionic con botón volver ── */}
-      <IonHeader className="ion-no-border">
-        <IonToolbar className="bg-[#f4faf9] [--background:#f4faf9]">
+      <IonHeader className="ion-no-border login-header">
+        <IonToolbar>
           <IonButtons slot="start">
-            <BotonVolver to="/" label="Inicio" />
+            <IonButton className="login-btn-volver" onClick={() => navigate('/')}>
+              <IonIcon slot="start" icon={arrowBack} />
+              Inicio
+            </IonButton>
           </IonButtons>
-          <IonTitle className="text-[15px] font-medium text-[#14302d] tracking-wide [--color:#14302d]">
+          <IonTitle className="text-[15px] font-medium tracking-wide">
             
           </IonTitle>
         </IonToolbar>
       </IonHeader>
 
-      <IonContent fullscreen className="bg-[#f4faf9]">
+      <IonContent fullscreen style={{ '--background': '#f4faf9' } as React.CSSProperties}>
         <div
           className="
             min-h-full flex flex-col items-center justify-center
             px-6 py-12
             font-['DM_Sans',sans-serif]
-            bg-[#f4faf9]
           "
         >
           <PageTransition variante="fadeUp" className="w-full max-w-sm">
@@ -81,86 +92,99 @@ export default function Login() {
             </div>
 
             {/* ── Encabezado ── */}
-            <h1 className="text-[28px] font-semibold text-[#3aada0]! mb-1">
-              Iniciar sesión
-            </h1>
-            <p className="text-[14px] text-[#7aa9a5] mb-7 font-light">
-              Ingresa tus credenciales para continuar
-            </p>
-
-            {/* ── Formulario ── */}
-            <div className="flex flex-col gap-4">
-
-              <EmailInput
-                id="login-email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-
-              <div className="flex flex-col gap-1.5">
-                {/* Link "¿Olvidaste tu contraseña?" alineado arriba a la derecha */}
-                <div className="flex items-center justify-end">
-                  <button
-                    type="button"
-                    className="text-[12px] text-[#3aada0] font-medium bg-transparent border-none cursor-pointer hover:underline"
-                    style={{ WebkitTapHighlightColor: 'transparent' }}
-                  >
-                    ¿Olvidaste tu contraseña?
-                  </button>
-                </div>
-                <PasswordInput
-                  id="login-password"
-                  label="Contraseña"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  minLength={8}
-                  mostrarFortaleza={false}
-                />
-              </div>
-
-              {/* Error global */}
-              {error && (
-                <p role="alert" className="text-[12px] text-[#e05c5c] -mt-1">
-                  {error}
-                </p>
-              )}
-
-              <BotonPrimario
-                onClick={handleSubmit}
-                variante="solido"
-                fullWidth
-                type="submit"
-                className="py-5! text-base! tracking-wider! mt-2"
-              >
+            <IonText>
+              <h1 className="text-[28px] font-semibold text-[#3aada0]! mb-1">
                 Iniciar sesión
-              </BotonPrimario>
-            </div>
+              </h1>
+            </IonText>
+            <IonNote className="login-subtitle">
+              Ingresa tus credenciales para continuar
+            </IonNote>
+
+            {/* ── Formulario dentro de IonCard ── */}
+            <IonCard className="login-card">
+              <IonCardContent>
+                <div className="flex flex-col gap-4">
+
+                  <EmailInput
+                    id="login-email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+
+                  <div className="flex flex-col gap-1.5">
+                    {/* Link "¿Olvidaste tu contraseña?" */}
+                    <div className="flex items-center justify-end">
+                      <IonButton fill="clear" size="small" className="login-forgot">
+                        ¿Olvidaste tu contraseña?
+                      </IonButton>
+                    </div>
+                    <PasswordInput
+                      id="login-password"
+                      label="Contraseña"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      required
+                      minLength={8}
+                      mostrarFortaleza={false}
+                    />
+                  </div>
+
+                  {/* Error global */}
+                  {error && (
+                    <IonText color="danger">
+                      <p role="alert" className="text-[12px] -mt-1 m-0">
+                        {error}
+                      </p>
+                    </IonText>
+                  )}
+
+                  <BotonPrimario
+                    onClick={handleSubmit}
+                    variante="solido"
+                    fullWidth
+                    type="submit"
+                    className="py-5! text-base! tracking-wider! mt-2"
+                  >
+                    Iniciar sesión
+                  </BotonPrimario>
+                </div>
+              </IonCardContent>
+            </IonCard>
 
             {/* ── Footer del form ── */}
-            <p className="mt-6 text-[13px] text-center text-[#7aa9a5]">
-              ¿No tienes cuenta?{' '}
-              <Link
-                to="/register"
-                className="text-[#3aada0] font-medium hover:underline"
-                style={{ WebkitTapHighlightColor: 'transparent' }}
-              >
-                Regístrate
-              </Link>
-            </p>
-
-            <p className="mt-3 text-[13px] text-center text-[#7aa9a5]">
-              ¿Prefieres no registrarte?{' '}
-              <Link
-                to="/agendar"
-                className="text-[#3aada0] font-medium hover:underline"
-                style={{ WebkitTapHighlightColor: 'transparent' }}
-              >
-                Agendar sin cuenta
-              </Link>
-            </p>
+            <IonGrid className="login-footer-grid">
+              <IonRow>
+                <IonCol className="text-center">
+                  <IonNote className="login-footer-text">
+                    ¿No tienes cuenta?{' '}
+                    <Link
+                      to="/register"
+                      className="text-[#3aada0] font-medium hover:underline"
+                      style={{ WebkitTapHighlightColor: 'transparent' }}
+                    >
+                      Regístrate
+                    </Link>
+                  </IonNote>
+                </IonCol>
+              </IonRow>
+              <IonRow>
+                <IonCol className="text-center">
+                  <IonNote className="login-footer-text">
+                    ¿Prefieres no registrarte?{' '}
+                    <Link
+                      to="/agendar"
+                      className="text-[#3aada0] font-medium hover:underline"
+                      style={{ WebkitTapHighlightColor: 'transparent' }}
+                    >
+                      Agendar sin cuenta
+                    </Link>
+                  </IonNote>
+                </IonCol>
+              </IonRow>
+            </IonGrid>
 
           </PageTransition>
         </div>

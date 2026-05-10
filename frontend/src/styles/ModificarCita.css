@@ -1,0 +1,87 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ModificarCita – Ionic component overrides
+   Neutraliza los defaults de Ionic para mantener el diseño custom.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─ IonCard: quitar margin/shadow de Ionic, aplicar los del diseño original ─ */
+.mc-page .mc-card {
+  --background: #fff;
+  margin: 0;
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: 1px solid #d5dce6;
+  overflow: hidden;
+}
+.mc-page .mc-card ion-card-content {
+  padding: 0;
+}
+
+/* ─ IonHeader flotante, transparente, sin línea inferior ─ */
+.mc-page .mc-header ion-toolbar {
+  --background: transparent;
+  --border-width: 0;
+  --min-height: 44px;
+  --padding-start: 4px;
+  --padding-end: 4px;
+}
+.mc-page .mc-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+.mc-page .mc-header::after {
+  display: none !important;
+}
+
+/* ─ Botón volver: texto natural sin uppercase de Ionic ─ */
+.mc-page .mc-btn-volver {
+  --color: #1a2332;
+  --padding-start: 8px;
+  --padding-end: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.mc-page .mc-btn-volver ion-icon {
+  font-size: 18px;
+  margin-right: 4px;
+}
+
+/* ─ IonGrid/Col/Row: sin padding extra ─ */
+.mc-page .mc-grid {
+  padding: 0;
+  --ion-grid-padding: 0;
+}
+.mc-page .mc-grid ion-col {
+  --ion-grid-column-padding: 0;
+  padding: 4px;
+}
+.mc-page .mc-grid ion-row {
+  gap: 0;
+}
+
+/* ─ IonText hereda colores, no rompe layout ─ */
+.mc-page ion-text {
+  display: contents;
+}
+
+/* ─ Animación del ícono de éxito ─ */
+.mc-page .mc-success-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  animation: mc-scaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes mc-scaleIn {
+  from { transform: scale(0); }
+  to   { transform: scale(1); }
+}

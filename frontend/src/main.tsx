@@ -9,8 +9,8 @@ import '@ionic/react/css/normalize.css'
 import '@ionic/react/css/structure.css'
 import '@ionic/react/css/typography.css'
 
-import './index.css'
-import App from './App.tsx'
+import '../routes/index.css'
+import App from '../routes/App.tsx'
 
 setupIonicReact()
 

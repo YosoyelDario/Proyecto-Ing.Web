@@ -1,29 +1,29 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
 // Páginas universales
-import Home     from './pages/Home'
-import Login    from './pages/Login'
-import Register from './pages/Register'
+import Home     from '../src/pages/Home'
+import Login    from '../src/pages/Login'
+import Register from '../src/pages/Register'
 
 // RF1 — Agendar cita
-import Agendar from './pages/Agendar'
+import Agendar from '../src/pages/Agendar'
 
 // RF2 — Consultar cita por código referido
-import ConsultarCita from './pages/ConsultarCita'
+import ConsultarCita from '../src/pages/ConsultarCita'
 
 // RF3 — Modificar cita
-import ModificarCita from './pages/ModificarCita'
+import ModificarCita from '../src/pages/ModificarCita'
 
 // RF4 — Cancelar cita
-import CancelarCita from './pages/CancelarCita'
+import CancelarCita from '../src/pages/CancelarCita'
 
 // RF5 — Confirmación de cita (post-acción)
-import ConfirmacionCita from './pages/ConfirmacionCita'
+import ConfirmacionCita from '../src/pages/ConfirmacionCita'
 
 // RF6 — Panel administrativo
-import AdminRuta    from './components/AdminRuta'
-import AdminPanel   from './pages/admin/AdminPanel'
-import GestionCitas from './pages/admin/GestionCitas'
+import AdminRuta    from '../src/components/AdminRuta'
+import AdminPanel   from '../src/pages/admin/AdminPanel'
+import GestionCitas from '../src/pages/admin/GestionCitas'
 
 export default function App() {
   return (

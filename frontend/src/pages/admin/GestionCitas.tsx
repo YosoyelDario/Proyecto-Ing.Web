@@ -128,7 +128,7 @@ export default function GestionCitas() {
       <IonHeader className="ion-no-border">
         <IonToolbar style={{ '--background': '#3aada0', '--color': 'white', '--padding-top': '16px' }}>
           <IonButtons slot="start" className="pl-4">
-            <BotonVolver to="/admin" label="Panel" className="!text-white/80 hover:!text-white" />
+            <BotonVolver to="/admin" label="Panel" className="text-white/80! hover:text-white!" />
           </IonButtons>
           <IonButtons slot="end" className="pr-4">
             <span className="text-[12px] text-white/60 font-mono">
@@ -237,7 +237,7 @@ export default function GestionCitas() {
                       </div>
                       <IonIcon
                         icon={chevronForwardOutline}
-                        className={`w-5 h-5 flex-shrink-0 text-[#c8d3dc] transition-transform duration-200 ${
+                        className={`w-5 h-5 shrink-0 text-[#c8d3dc] transition-transform duration-200 ${
                           citaExpandida === codigo ? 'rotate-90' : ''
                         }`}
                       />
@@ -279,7 +279,7 @@ export default function GestionCitas() {
                               <BotonPrimario
                                 onClick={() => handleCancelar(codigo)}
                                 fullWidth
-                                className="!bg-[#e05c5c] !border-[#e05c5c] hover:!bg-[#c94a4a] hover:!border-[#c94a4a] py-3! text-[13px]! rounded-xl!"
+                                className="bg-[#e05c5c]! border-[#e05c5c]! hover:bg-[#c94a4a]! hover:border-[#c94a4a]! py-3! text-[13px]! rounded-xl!"
                               >
                                 Sí, cancelar
                               </BotonPrimario>
@@ -302,7 +302,7 @@ export default function GestionCitas() {
                               className="py-3! text-[13px]! rounded-xl!"
                             >
                               <span className="flex items-center justify-center gap-1.5">
-                                <IonIcon icon={createOutline} className="w-[14px] h-[14px]" />
+                                <IonIcon icon={createOutline} className="w-3.5 h-3.5" />
                                 Modificar
                               </span>
                             </BotonPrimario>
@@ -310,10 +310,10 @@ export default function GestionCitas() {
                               onClick={() => setConfirmDelete(codigo)}
                               variante="outline"
                               fullWidth
-                              className="!border-[#e05c5c]/30 !text-[#e05c5c] hover:!bg-red-50 py-3! text-[13px]! rounded-xl!"
+                              className="border-[#e05c5c]/30! text-[#e05c5c]! hover:bg-red-50! py-3! text-[13px]! rounded-xl!"
                             >
                               <span className="flex items-center justify-center gap-1.5">
-                                <IonIcon icon={closeCircleOutline} className="w-[14px] h-[14px]" />
+                                <IonIcon icon={closeCircleOutline} className="w-3.5 h-3.5" />
                                 Cancelar
                               </span>
                             </BotonPrimario>
