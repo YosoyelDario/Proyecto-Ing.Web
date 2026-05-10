@@ -6,7 +6,7 @@ Proyecto para la asignatura de Ingeniería Web y Móvil enfocado en reducir los 
 
 **Curso y paralelo:** ICI4247-2 (Ingenieria web y movil, paralelo 2)
 
-**Integrantes:** Joaquín Antonio Cornejo Fernández, Vicente Miguel Martinez Estay, Dario Joaquin Fuentes Ponce y Francisco 
+**Integrantes:** Joaquín Antonio Cornejo Fernández, Vicente Miguel Martinez Estay, Dario Joaquin Fuentes Ponce y Francisco Javier Andres Carrasco Bugueño
 
 
 ## Enlace Figma
