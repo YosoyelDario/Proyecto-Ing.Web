@@ -110,3 +110,14 @@ Se han desarrollado las pantallas principales asegurando coherencia con la arqui
   * `/components`: Almacena componentes de UI reutilizables.
   * `/routes`: Define la lógica de enrutamiento y las validaciones de las rutas protegidas.
   * `/services`: Carpeta preparada para la futura integración con el backend y llamadas a la API.
+
+## [EP 2.2] Configuración y modelado de la base de datos
+
+Se diseñó y modeló una base de datos relacional normalizada en el motor ... que garantiza integridad de datos, escalabilidad y rastrabilidad de operaciones.
+
+[![Modelo Relacional BD](MRBD.svg)](https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&dark=auto#G15XuZiZSME72Jdc94foB3b8Xev6xYGZnJ)
+
+Se modeló la BD a usar considerando 8 entidades como se observa en el modelo relacional. Algunas de las decisiones claves tomadas fueron:
+* **Calendario flexible:** Se usó un modelo de horarios recurrentes al cual se le pueden agregar excepciones puntuales (feriados, permisos, licencias, etc).
+* **Código de referencia para citas:** Se usara un formato `YYMMDDCCC` de codigo auto-generado para entregar un codigo referencial a los pacientes diferente al id interno.
+* **Trazabilidad de cambios:** Se implementó la entidadd cambiosCita cuyo objetivo es llevar trazabilidad total de quién, cuándo y qué se cambio en el sistema.
