@@ -115,7 +115,7 @@ Se han desarrollado las pantallas principales asegurando coherencia con la arqui
 
 Se diseñó y modeló una base de datos relacional normalizada en el motor ... que garantiza integridad de datos, escalabilidad y rastrabilidad de operaciones.
 
-[![Modelo Relacional BD](Base)](https://github.com/YosoyelDario/Proyecto-Ing.Web/blob/Rama-Vicho/DiagramaBaseFinal.png?raw=true)
+[![Modelo Relacional BD](DiagramaBaseFinal.png)](https://github.com/YosoyelDario/Proyecto-Ing.Web/blob/Rama-Vicho/DiagramaBaseFinal.png?raw=true)
 
 Se modeló la BD a usar considerando 8 entidades como se observa en el modelo relacional. Algunas de las decisiones claves tomadas fueron:
 * **Calendario flexible:** Se usó un modelo de horarios recurrentes al cual se le pueden agregar excepciones puntuales (feriados, permisos, licencias, etc).
