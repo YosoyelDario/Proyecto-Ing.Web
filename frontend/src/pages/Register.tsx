@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { AuthService } from '../services/AuthServices'
 import {
   IonPage,
   IonContent,
@@ -73,7 +74,9 @@ export default function Register() {
     setComuna('')
   }
 
-  const handleSubmit = (e?: React.FormEvent) => {
+  const [errorRegistro, setErrorRegistro] = useState('')
+
+  const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault()
 
     if (!aceptaTerminos) {
@@ -81,13 +84,27 @@ export default function Register() {
       return
     }
     setErrorTerminos('')
+    setErrorRegistro('')
 
     if (!nombre.trim() || !rut.trim() || !email.trim()) return
     if (password.length < 8) return
     if (password !== confirmPassword) return
     if (!region || !comuna) return
 
-    console.log('Registrando:', { nombre, rut, email, password, region, comuna, aceptaTerminos })
+    try {
+      await AuthService.registrarUsuario({
+        rut,
+        nombre_completo: nombre,
+        email,
+        password,
+        region,
+        comuna
+      })
+      navigate('/register-success')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      setErrorRegistro(error.message)
+    }
   }
 
   return (
@@ -229,6 +246,15 @@ export default function Register() {
                     <IonText color="danger">
                       <p className="-mt-2 text-[12px] m-0" role="alert">
                         {errorTerminos}
+                      </p>
+                    </IonText>
+                  )}
+
+                  {/* Renderizado de error de servidor */}
+                  {errorRegistro && (
+                    <IonText color="danger">
+                      <p className="mt-1 mb-2 text-[14px] font-medium text-center" role="alert">
+                        {errorRegistro}
                       </p>
                     </IonText>
                   )}

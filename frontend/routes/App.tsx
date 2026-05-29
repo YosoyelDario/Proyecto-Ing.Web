@@ -24,6 +24,7 @@ import ConfirmacionCita from '../src/pages/ConfirmacionCita'
 import AdminRuta    from '../src/components/AdminRuta'
 import AdminPanel   from '../src/pages/admin/AdminPanel'
 import GestionCitas from '../src/pages/admin/GestionCitas'
+import RegisterSuccess from '../src/pages/RegisterSuccess';
 
 export default function App() {
   return (
@@ -33,6 +34,7 @@ export default function App() {
         <Route path="/"         element={<Home />} />
         <Route path="/login"    element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/register-success" element={<RegisterSuccess />} /> {/* Nueva ruta */}
 
         {/* ── RF1: Agendar ── */}
         <Route path="/agendar" element={<Agendar />} />
