@@ -23,7 +23,7 @@ import PageTransition from '../components/PageTransition'
 import EmailInput     from '../components/Emailinput'
 import RutInput       from '../components/Rutinput'
 import '../styles/Agendar.css'
-
+import { AuthService } from '../services/AuthServices'
 interface Medic {
   id: string
   nombre: string
@@ -81,18 +81,17 @@ export default function Agendar() {
   }, [])
 
   useEffect(() => {
-    const isAuthenticated = false
-    if (isAuthenticated) {
-      setTimeout(() => {
-        setForm(prev => ({
-          ...prev,
-          rut: '12345678-5',
-          nombre: 'Usuario Autenticado',
-          email: 'usuario@correo.com',
-        }))
-      }, 0)
-    }
-  }, [])
+  const usuario = AuthService.obtenerUsuario()
+  if (usuario) {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setForm(prev => ({
+      ...prev,
+      rut:    usuario.rut,
+      nombre: usuario.nombre_completo,
+      email:  usuario.email,
+    }))
+  }
+}, [])
 
   useEffect(() => {
     setTimeout(() => {

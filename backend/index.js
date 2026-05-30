@@ -4,6 +4,8 @@ require('dotenv').config()
 
 const profesionalesRouter = require('./src/routes/profesionales') 
 const authRouter = require('./src/routes/auth')
+const ubicacionesRouter = require('./src/routes/ubicaciones')
+const citasRouter = require('./src/routes/citas')
 
 const app = express()
 
@@ -12,6 +14,8 @@ app.use(express.json())
 
 app.use('/api', profesionalesRouter)
 app.use('/api/auth', authRouter)
+app.use('/api', ubicacionesRouter)
+app.use('/api/citas', citasRouter)
 
 app.get('/', (req, res) => {
   res.json({ mensaje: 'API Santo Domingo funcionando' })
