@@ -1,62 +1,72 @@
 import { useState } from 'react'
 import { IonPage, IonContent } from '@ionic/react'
-import BotonPrimario  from '../components/BotonPrimario'
-import BotonVolver    from '../components/BotonVolver'
-import PageTransition from '../components/PageTransition'
-import RutInput       from '../components/Rutinput'
-
-interface CitaDetalle {
-  especialidad: string
-  medico:       string
-  fecha:        string
-  hora:         string
-  rut:          string
-  nombre:       string
-  email:        string
-}
+import BotonPrimario    from '../components/BotonPrimario'
+import BotonVolver      from '../components/BotonVolver'
+import PageTransition   from '../components/PageTransition'
+import { consultarCitaPorCodigo, type Cita } from '../services/citaServices'
 
 export default function ConsultarCita() {
-  const [rut, setRut]         = useState('')
-  const [codigo, setCodigo]   = useState('')
-  const [cita, setCita]       = useState<CitaDetalle | null>(null)
-  const [error, setError]     = useState(false)
-  const [buscado, setBuscado] = useState(false)
+  const [codigo,  setCodigo]  = useState('')
+  const [rut,     setRut]     = useState('')
+  const [cita,    setCita]    = useState<Cita | null>(null)
+  const [error,   setError]   = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const handleBuscar = () => {
-    const citas = JSON.parse(localStorage.getItem('citas_agendadas') || '{}')
-    const resultado = citas[codigo.trim()]
-    setBuscado(true)
+  const handleBuscar = async () => {
+    if (!codigo.trim() || !rut.trim()) return
+    setLoading(true)
+    setError('')
+    setCita(null)
 
-    // Comparar limpiando puntos del RUT formateado
-    if (resultado && resultado.rut.replace(/\./g, '').trim() === rut.replace(/\./g, '').trim()) {
+    try {
+      const resultado = await consultarCitaPorCodigo(codigo.trim().toUpperCase())
+
+      if (!resultado) {
+        setError('No se encontró ninguna cita con ese código.')
+        return
+      }
+
+      // Verificar RUT (comparar sin puntos ni guión para mayor tolerancia)
+      const rutLimpio = (s: string) => s.replace(/[.\-]/g, '').trim().toLowerCase()
+      const rutCita = resultado.rut_paciente || resultado.rut || ''
+      
+      if (rutLimpio(rutCita) !== rutLimpio(rut)) {
+        setError('El RUT ingresado no coincide con el registrado para esta cita.')
+        return
+      }
+
       setCita(resultado)
-      setError(false)
-    } else {
-      setCita(null)
-      setError(true)
+    } catch {
+      setError('Error al consultar la cita. Intente nuevamente.')
+    } finally {
+      setLoading(false)
     }
   }
 
-  const fechaFormateada = cita
+  const fechaFormateada = cita?.fecha
     ? new Date(cita.fecha + 'T00:00:00').toLocaleDateString('es-CL', {
         weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
       })
     : ''
 
-  const horaFormateada = cita
+  const horaFormateada = cita?.hora
     ? (() => {
         const [h, m] = cita.hora.split(':')
         const hr = parseInt(h, 10)
-        const ampm = hr >= 12 ? 'PM' : 'AM'
-        const hr12 = hr % 12 || 12
-        return `${hr12}:${m} ${ampm}`
+        return `${hr % 12 || 12}:${m} ${hr >= 12 ? 'PM' : 'AM'}`
       })()
     : ''
+
+  const ESTADO_COLORS: Record<string, string> = {
+    Agendada:   'bg-[#e1f5ee] text-[#085041]',
+    Completada: 'bg-[#e6f1fb] text-[#0c447c]',
+    Cancelada:  'bg-[#fde8e8] text-[#a32d2d]',
+    NoAsiste:   'bg-[#faeeda] text-[#633806]',
+  }
 
   return (
     <IonPage>
       <IonContent fullscreen className="bg-[#f4faf9]">
-
         <div className="absolute top-4 left-4 z-10">
           <BotonVolver to="/" label="Inicio" />
         </div>
@@ -68,60 +78,47 @@ export default function ConsultarCita() {
               {/* Buscador */}
               <div className="bg-white rounded-2xl shadow-sm border border-[#d5dce6] p-6 flex flex-col gap-4">
                 <div>
-                  <h1 className="text-[22px] font-semibold text-[#3aada0]! tracking-tight mb-1">
-                    Consultar Cita
-                  </h1>
+                  <h1 className="text-[22px] font-semibold text-[#3aada0]! tracking-tight mb-1">Consultar Cita</h1>
                   <p className="text-[13px] text-[#7a8a9a] font-light">
-                    Ingresa tu código de confirmación y RUT para ver los detalles de tu cita.
+                    Ingresa tu código de cita y RUT para ver los detalles.
                   </p>
                 </div>
 
-                {/* Código */}
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor="codigo" className="text-[13px] font-medium text-[#3aada0] uppercase tracking-wider">
                     Código de Cita
                   </label>
                   <input
-                    id="codigo"
-                    type="text"
-                    value={codigo}
-                    onChange={e => { setCodigo(e.target.value); setBuscado(false) }}
-                    placeholder="Ej: 847293"
-                    maxLength={6}
-                    className={`
-                      w-full px-4 py-3 rounded-xl border bg-white text-[15px] outline-none
-                      font-mono transition-colors duration-200
-                      focus:ring-2 focus:ring-[#3aada0]/20 focus:border-[#3aada0]
-                      ${buscado && error
-                        ? 'border-[#e05c5c] focus:border-[#e05c5c]'
-                        : 'border-[#d5dce6]'
-                      }
-                    `}
+                    id="codigo" type="text" value={codigo}
+                    onChange={e => { setCodigo(e.target.value.toUpperCase()); setError('') }}
+                    placeholder="Ej: A3BX7YZQ"
+                    className="w-full px-4 py-3 rounded-xl border border-[#d5dce6] bg-white text-[15px] outline-none font-mono focus:ring-2 focus:ring-[#3aada0]/20 focus:border-[#3aada0]"
                   />
                 </div>
 
-                {/* RUT — componente reutilizable */}
-                <RutInput
-                  id="rut-consultar"
-                  label="RUT de verificación"
-                  value={rut}
-                  onChange={(valor) => { setRut(valor); setBuscado(false) }}
-                  required
-                />
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="rut" className="text-[13px] font-medium text-[#3aada0] uppercase tracking-wider">
+                    RUT de verificación
+                  </label>
+                  <input
+                    id="rut" type="text" value={rut}
+                    onChange={e => { setRut(e.target.value); setError('') }}
+                    placeholder="Ej: 12345678-9"
+                    className="w-full px-4 py-3 rounded-xl border border-[#d5dce6] bg-white text-[15px] outline-none focus:ring-2 focus:ring-[#3aada0]/20 focus:border-[#3aada0]"
+                  />
+                </div>
 
-                {buscado && error && (
-                  <p className="text-[12px] text-[#e05c5c] -mt-1">
-                    No se encontró ninguna cita con ese código y RUT.
-                  </p>
+                {error && (
+                  <p className="text-[12px] text-[#e05c5c]">{error}</p>
                 )}
 
                 <BotonPrimario
                   onClick={handleBuscar}
-                  disabled={codigo.trim().length !== 6 || rut.trim() === ''}
+                  disabled={!codigo.trim() || !rut.trim() || loading}
                   fullWidth
                   className="py-5! text-base! tracking-wider! mt-2 rounded-xl!"
                 >
-                  Buscar cita
+                  {loading ? 'Buscando...' : 'Buscar cita'}
                 </BotonPrimario>
               </div>
 
@@ -129,82 +126,52 @@ export default function ConsultarCita() {
               {cita && (
                 <PageTransition variante="fadeUp" duracion={300} delay={100}>
                   <div className="bg-white rounded-2xl shadow-sm border border-[#d5dce6] overflow-hidden">
-
-                    {/* Cabecera del resultado */}
-                    <div className="bg-[#3aada0] px-6 py-4 flex items-center gap-3">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
-                        <rect x="9" y="3" width="6" height="4" rx="1" />
-                        <path d="M9 14l2 2 4-4" />
-                      </svg>
-                      <div>
-                        <p className="text-white text-[15px] font-semibold">Cita encontrada</p>
-                        <p className="text-white/70 text-[12px] font-mono">#{codigo}</p>
+                    <div className="bg-[#3aada0] px-6 py-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
+                          <rect x="9" y="3" width="6" height="4" rx="1" />
+                          <path d="M9 14l2 2 4-4" />
+                        </svg>
+                        <div>
+                          <p className="text-white text-[15px] font-semibold">Cita encontrada</p>
+                          <p className="text-white/70 text-[12px] font-mono">{cita.codigo_referencia}</p>
+                        </div>
                       </div>
+                      <span className={`text-[11px] font-medium px-3 py-1 rounded-full ${ESTADO_COLORS[cita.estado] ?? 'bg-gray-100 text-gray-600'}`}>
+                        {cita.estado}
+                      </span>
                     </div>
 
-                    {/* Detalles de la cita */}
                     <div className="px-6 py-5 flex flex-col gap-4">
-
-                      {/* Especialidad */}
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-[11px] font-semibold text-[#7a8a9a] uppercase tracking-wider">Especialidad</span>
-                        <span className="text-[15px] font-medium text-[#1a2332]">{cita.especialidad}</span>
-                      </div>
-
-                      {/* Médico */}
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-[11px] font-semibold text-[#7a8a9a] uppercase tracking-wider">Médico</span>
-                        <span className="text-[15px] font-medium text-[#1a2332]">{cita.medico}</span>
-                      </div>
-
-                      {/* Fecha y Hora — lado a lado */}
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-[11px] font-semibold text-[#7a8a9a] uppercase tracking-wider">Fecha</span>
-                          <span className="text-[15px] font-medium text-[#1a2332] capitalize">{fechaFormateada}</span>
+                      {[
+                        { label: 'Especialidad', valor: cita.especialidad },
+                        { label: 'Médico',       valor: cita.medico },
+                        { label: 'Fecha',        valor: fechaFormateada },
+                        { label: 'Hora',         valor: horaFormateada },
+                      ].map(({ label, valor }) => (
+                        <div key={label} className="flex flex-col gap-0.5">
+                          <span className="text-[11px] font-semibold text-[#7a8a9a] uppercase tracking-wider">{label}</span>
+                          <span className="text-[15px] font-medium text-[#1a2332] capitalize">{valor}</span>
                         </div>
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-[11px] font-semibold text-[#7a8a9a] uppercase tracking-wider">Hora</span>
-                          <span className="text-[15px] font-medium text-[#1a2332]">{horaFormateada}</span>
-                        </div>
-                      </div>
-
-                      {/* RUT */}
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-[11px] font-semibold text-[#7a8a9a] uppercase tracking-wider">RUT</span>
-                        <span className="text-[15px] font-medium text-[#1a2332]">{cita.rut}</span>
-                      </div>
-
-                      {/* Nombre */}
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-[11px] font-semibold text-[#7a8a9a] uppercase tracking-wider">Nombre</span>
-                        <span className="text-[15px] font-medium text-[#1a2332]">{cita.nombre}</span>
-                      </div>
-
+                      ))}
                     </div>
 
-                    {/* Acciones */}
-                    <div className="px-6 pb-6 pt-3 flex flex-col gap-3">
-                      <BotonPrimario to={`/modificar/${codigo}`} variante="solido" fullWidth>
-                        Modificar mi cita
-                      </BotonPrimario>
-
-                      <div className="grid grid-cols-2 gap-3">
+                    {cita.estado === 'Agendada' && (
+                      <div className="px-6 pb-6 pt-3 flex flex-col gap-3">
+                        <BotonPrimario to={`/modificar/${cita.codigo_referencia}`} variante="solido" fullWidth>
+                          Modificar mi cita
+                        </BotonPrimario>
                         <BotonPrimario
-                          to={`/cancelar/${codigo}`}
+                          to={`/cancelar/${cita.codigo_referencia}`}
                           variante="outline"
                           fullWidth
                           className="border-[#e05c5c]/30! text-[#e05c5c]! hover:bg-red-50!"
                         >
-                          Cancelar
-                        </BotonPrimario>
-                        <BotonPrimario to="/agendar" variante="outline" fullWidth>
-                          Otra cita
+                          Cancelar cita
                         </BotonPrimario>
                       </div>
-                    </div>
-
+                    )}
                   </div>
                 </PageTransition>
               )}
@@ -212,7 +179,6 @@ export default function ConsultarCita() {
             </div>
           </PageTransition>
         </div>
-
       </IonContent>
     </IonPage>
   )

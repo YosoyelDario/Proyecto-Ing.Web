@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react'
 import {
   IonPage,
@@ -23,8 +24,8 @@ import EmailInput     from '../components/Emailinput'
 import PasswordInput  from '../components/PasswordInput'
 import BotonPrimario  from '../components/BotonPrimario'
 import '../styles/Login.css'
+import { AuthService } from '../services/AuthServices'
 
-const ADMIN_EMAIL = 'tuadmin@gmail.com'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -33,26 +34,25 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error,    setError]    = useState('')
 
-  const handleSubmit = () => {
-    if (!email.trim() || !password.trim()) {
-      setError('Completa todos los campos.')
-      return
-    }
+  const handleSubmit = async () => {
+  if (!email.trim() || !password.trim()) {
+    setError('Completa todos los campos.')
+    return
+  }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
-      setError('Ingresa un correo electrónico válido.')
-      return
-    }
+  try {
+    const data = await AuthService.loginUsuario(email, password)
+    AuthService.guardarSesion(data.token, data.usuario)
 
-    setError('')
-    localStorage.setItem('userEmail', email.toLowerCase())
-
-    if (email.toLowerCase() === ADMIN_EMAIL) {
+    if (data.usuario.is_admin) {
       navigate('/admin')
     } else {
       navigate('/')
     }
+  } catch (error: any) {
+    setError(error.message)
   }
+}
 
   return (
     <IonPage className="login-page">

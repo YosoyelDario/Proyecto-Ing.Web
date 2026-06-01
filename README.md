@@ -115,9 +115,20 @@ Se han desarrollado las pantallas principales asegurando coherencia con la arqui
 
 Se diseñó y modeló una base de datos relacional normalizada en el motor ... que garantiza integridad de datos, escalabilidad y rastrabilidad de operaciones.
 
-[![Modelo Relacional BD](MRBD.svg)](https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&dark=auto#G15XuZiZSME72Jdc94foB3b8Xev6xYGZnJ)
+[![Modelo Relacional BD](DiagramaBaseFinal.png)](https://github.com/YosoyelDario/Proyecto-Ing.Web/blob/Rama-Vicho/DiagramaBaseFinal.png?raw=true)
 
 Se modeló la BD a usar considerando 8 entidades como se observa en el modelo relacional. Algunas de las decisiones claves tomadas fueron:
 * **Calendario flexible:** Se usó un modelo de horarios recurrentes al cual se le pueden agregar excepciones puntuales (feriados, permisos, licencias, etc).
 * **Código de referencia para citas:** Se usara un formato `YYMMDDCCC` de codigo auto-generado para entregar un codigo referencial a los pacientes diferente al id interno.
 * **Trazabilidad de cambios:** Se implementó la entidadd cambiosCita cuyo objetivo es llevar trazabilidad total de quién, cuándo y qué se cambio en el sistema.
+
+## Si quieren probar esta version con la base de datos sin usar prisma, unicamente postgresql, realizar lo siguiente:
+
+1. Crear Base de datos vacia en postgresql (pg4admin) con el nombre de santo_domingo
+2. El init.sql moverlo al disco local C:
+3. Una vez la base de datos creada, hacer click derecho en santo_domingo (la base de datos) y hacer click en PSQL Tool
+4. Esa linea de comandos, les permitira ejecutar el init.sql (que es la estructura de la base de datos definida en la imagen de arriba), para ejecutar el init, pegar "\i C:/init.sql" y ejecutar
+5. Revisar si en las tablas de la base de datos se creo correctamente.
+6. Recomienzo utilizar pnpm porque es mas seguro, para instalar packages tanto en frontend como backend.
+7. Unicamente esta la posibilidad de crear cuentas, si lo quieren probar, deben duplicar el .env example y borrar el "example", posteriormente modificar el DB_PASSWORD=tu_password (porque seugramente tengas lo mismo, y si no, sabes lo que estas haciendo xd)
+8. Prueben a crear un usuario, pueden revisar la completitud tanto en pg4admin, haciendo click derecho en las tablas y viendo la data de la tabla usuario, o sino con F12 en el navegador
