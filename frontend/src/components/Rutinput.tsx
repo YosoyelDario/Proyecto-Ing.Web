@@ -5,6 +5,7 @@ interface RutInputProps {
   label?: string
   value: string
   onChange: (valor: string) => void
+  onBlur?: () => void // 1. Propiedad añadida a la interfaz
   placeholder?: string
   required?: boolean
   disabled?: boolean
@@ -15,7 +16,6 @@ interface RutInputProps {
  * Valida el dígito verificador del RUT chileno (módulo 11).
  */
 function validarRutModulo11(rutCompleto: string): boolean {
-  // Limpiar puntos para validar
   const limpio = rutCompleto.replace(/\./g, '')
   if (!/^[0-9]+-[0-9kK]$/.test(limpio)) return false
 
@@ -39,17 +39,14 @@ function validarRutModulo11(rutCompleto: string): boolean {
  * Formatea un RUT limpio (solo dígitos + K) al formato XX.XXX.XXX-X
  */
 function formatearRut(valor: string): string {
-  // Quitar todo excepto dígitos y K
-  let limpio = valor.replace(/[^0-9kK]/g, '').toUpperCase()
+  const limpio = valor.replace(/[^0-9kK]/g, '').toUpperCase()
   if (limpio.length === 0) return ''
 
-  // Separar cuerpo y dígito verificador
   const dv = limpio.slice(-1)
   const cuerpo = limpio.slice(0, -1)
 
   if (cuerpo.length === 0) return limpio
 
-  // Agregar puntos al cuerpo
   const cuerpoConPuntos = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
 
   return `${cuerpoConPuntos}-${dv}`
@@ -60,6 +57,7 @@ export default function RutInput({
   label = 'RUT',
   value,
   onChange,
+  onBlur, // 2. Desestructuración de la propiedad
   placeholder = '12.345.678-9',
   required = false,
   disabled = false,
@@ -70,48 +68,52 @@ export default function RutInput({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value
-
-    // Filtrar: solo números, puntos, guión y K
     const filtrado = raw.replace(/[^0-9.\-kK]/g, '')
 
     onChange(filtrado)
 
-    // Limpiar error mientras escribe
     if (error) setError(null)
   }
 
   const handleBlur = () => {
     setTocado(true)
 
+    // 3. Ejecución del onBlur externo al finalizar el evento
+    const triggerExternalBlur = () => {
+      if (onBlur) onBlur()
+    }
+
     if (value.trim() === '') {
       if (required) setError('El RUT es obligatorio.')
       else setError(null)
+      triggerExternalBlur()
       return
     }
 
-    // Intentar formatear
     const limpio = value.replace(/[^0-9kK]/g, '')
     if (limpio.length < 2) {
       setError('RUT incompleto.')
+      triggerExternalBlur()
       return
     }
 
     const formateado = formatearRut(limpio)
     onChange(formateado)
 
-    // Validar formato
     if (!/^[0-9]{1,2}(\.[0-9]{3}){2}-[0-9kK]$/.test(formateado)) {
       setError('Formato inválido. Ej: 12.345.678-9')
+      triggerExternalBlur()
       return
     }
 
-    // Validar módulo 11
     if (!validarRutModulo11(formateado)) {
       setError('RUT inválido.')
+      triggerExternalBlur()
       return
     }
 
     setError(null)
+    triggerExternalBlur()
   }
 
   const tieneError = tocado && !!error
