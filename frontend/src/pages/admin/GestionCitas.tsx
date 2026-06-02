@@ -138,10 +138,29 @@ export default function GestionCitas() {
     return pasaFiltro && pasaBusqueda
   })
 
-  const formatearFecha = (f: string) =>
-    new Date(f + 'T00:00:00').toLocaleDateString('es-CL', {
-      weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
-    })
+const formatearFecha = (f: string) => {
+  if (!f) return 'Sin fecha'
+  
+  // Cortar para usar solo YYYY-MM-DD
+  const limpio = f.split('T')[0]
+  const partes = limpio.split('-')
+  
+  if (partes.length !== 3) return f
+
+  const anio = parseInt(partes[0], 10)
+  const mes  = parseInt(partes[1], 10) - 1 // En JS los meses van de 0 a 11
+  const dia  = parseInt(partes[2], 10)
+
+  // Creamos la fecha usando enteros locales (evita desfases y errores de "Invalid Date")
+  const fechaObjeto = new Date(anio, mes, dia)
+
+  return fechaObjeto.toLocaleDateString('es-CL', {
+    weekday: 'short', 
+    day: 'numeric', 
+    month: 'short', 
+    year: 'numeric',
+  })
+}
 
   if (cargando || !autenticado) return null
 

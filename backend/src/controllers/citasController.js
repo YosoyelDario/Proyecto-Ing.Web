@@ -99,31 +99,36 @@ const crearNuevaCita = async (req, res) => {
   }
 }
 
-// ── PATCH /api/citas/:id  (modificar fecha/hora) ─────────────────────────
+// ── PATCH /api/citas/:codigo  (modificar fecha/hora) ─────────────────────────
 const actualizarCita = async (req, res) => {
   const { fecha, hora } = req.body
-  const idCita = parseInt(req.params.id, 10)
+  const { codigo } = req.params
 
   if (!fecha || !hora) {
     return res.status(400).json({ error: 'Se requieren fecha y hora nuevas.' })
   }
 
   try {
-    const cita = await getCitaPorCodigo(req.params.id)
-    // Si no viene por código, buscar por id
-    const citaActual = cita || await getCitaById(idCita)
+    //Buscamos la cita usando el parámetro correcto de la URL
+    const citaActual = await getCitaPorCodigo(codigo)
 
-    if (!citaActual) return res.status(404).json({ error: 'Cita no encontrada.' })
+    if (!citaActual) {
+      return res.status(404).json({ error: 'Cita no encontrada.' })
+    }
 
     const idEditor = req.usuario?.id || null
+    
+    // Ejecutamos la query de actualización real en PostgreSQL
     const actualizada = await modificarCita(citaActual.id, fecha, hora, idEditor)
+    
+    // Respondemos con éxito (200 OK)
     res.json({ mensaje: 'Cita modificada exitosamente.', cita: actualizada })
   } catch (err) {
     if (err.code === '23505') {
       return res.status(409).json({ error: 'Ese horario ya fue tomado. Por favor elija otro.' })
     }
-    console.error(err)
-    res.status(500).json({ error: 'Error al modificar la cita' })
+    console.error('Error interno al actualizar cita:', err)
+    res.status(500).json({ error: 'Error interno al modificar la cita.' })
   }
 }
 

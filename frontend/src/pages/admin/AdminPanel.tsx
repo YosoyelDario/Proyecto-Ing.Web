@@ -14,6 +14,7 @@ interface CitaDetalle {
   rut:          string
   nombre:       string
   email:        string
+  estado?:       'Agendada' | 'Completada' | 'Cancelada' | 'NoAsiste'
 }
 
 interface Estadisticas {
@@ -99,8 +100,14 @@ export default function AdminPanel() {
         let pasadas  = 0
 
         for (const c of listaCitas) {
-          if (c.fecha >= hoy) proximas++
-          else pasadas++
+          if (c.estado === 'Cancelada' || c.estado === 'NoAsiste'){
+          pasadas++}
+          else if (c.fecha >= hoy){
+            proximas++}
+          else{
+            pasadas++
+          } 
+
           porEspecialidad[c.especialidad] = (porEspecialidad[c.especialidad] || 0) + 1
         }
 

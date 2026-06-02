@@ -26,9 +26,9 @@ export default function ConsultarCita() {
         return
       }
 
-      // Verificar RUT (comparar sin puntos ni guión para mayor tolerancia)
+      // Validación de RUT limpia y directa utilizando la respuesta real del servidor
       const rutLimpio = (s: string) => s.replace(/[.\-]/g, '').trim().toLowerCase()
-      const rutCita = resultado.rut_paciente || resultado.rut || ''
+      const rutCita = resultado.rut || ''
       
       if (rutLimpio(rutCita) !== rutLimpio(rut)) {
         setError('El RUT ingresado no coincide con el registrado para esta cita.')
@@ -36,7 +36,8 @@ export default function ConsultarCita() {
       }
 
       setCita(resultado)
-    } catch {
+    } catch (err) {
+      console.error(err)
       setError('Error al consultar la cita. Intente nuevamente.')
     } finally {
       setLoading(false)
@@ -44,9 +45,18 @@ export default function ConsultarCita() {
   }
 
   const fechaFormateada = cita?.fecha
-    ? new Date(cita.fecha + 'T00:00:00').toLocaleDateString('es-CL', {
-        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-      })
+    ? (() => {
+        const partes = cita.fecha.split('T')[0].split('-')
+        if (partes.length !== 3) return cita.fecha
+        
+        const anio = parseInt(partes[0], 10)
+        const mes  = parseInt(partes[1], 10) - 1
+        const dia  = parseInt(partes[2], 10)
+        
+        return new Date(anio, mes, dia).toLocaleDateString('es-CL', {
+          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+        })
+      })()
     : ''
 
   const horaFormateada = cita?.hora

@@ -21,8 +21,10 @@ export interface Cita {
   estado: string
   medico: string
   especialidad: string
-  nombre?: string
+  // Datos paciente
+  id_paciente?: number | null // ID de la tabla usuario si está registrado
   rut?: string
+  nombre?: string
   email?: string
 }
 
