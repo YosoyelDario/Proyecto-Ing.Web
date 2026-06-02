@@ -6,6 +6,9 @@
 -- -----------------------------------------------------------------------------
 -- 1. especialidad
 -- -----------------------------------------------------------------------------
+SET client_encoding = 'UTF8';
+
+
 CREATE TABLE especialidad (
   id     SERIAL       PRIMARY KEY,
   nombre VARCHAR(64)  NOT NULL UNIQUE

@@ -19,10 +19,13 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import PageTransition from '../components/PageTransition'
 import CalendarPicker from '../components/CalendarPicker'
 import BotonPrimario  from '../components/BotonPrimario'
+import { consultarCitaPorCodigo } from '../services/citaServices'
+import { apiFetch } from '../services/AuthServices'
 import '../styles/ModificarCita.css'
 
-/* ── Tipos ────────────────────────────────────────────────────────────────── */
+// Tipos 
 interface CitaDetalle {
+  id_medico:    number
   especialidad: string
   medico:       string
   fecha:        string
@@ -32,27 +35,20 @@ interface CitaDetalle {
   email:        string
 }
 
-/* ── Data de horarios ─────────────────────────────────────────────────────── */
-const HORARIOS_DISPONIBLES: Record<string, string[]> = {
-  'm1_2026-05-10': ['09:00', '09:30', '11:00'],
-  'm1_2026-05-11': ['14:00', '15:30'],
-  'm3_2026-05-10': ['10:00', '10:30'],
-}
-
-const MEDICOS = [
-  { id: 'm1', nombre: 'Dr. Roberto Sánchez', especialidad: 'Medicina General' },
-  { id: 'm2', nombre: 'Dra. Ana López',      especialidad: 'Medicina General' },
-  { id: 'm3', nombre: 'Dr. Carlos Vega',     especialidad: 'Pediatría' },
-  { id: 'm4', nombre: 'Dra. María Paz',      especialidad: 'Dermatología' },
-]
-
 type Paso = 'editar' | 'exito'
 
-/* ── Helpers ──────────────────────────────────────────────────────────────── */
-const formatearFecha = (f: string) =>
-  new Date(f + 'T00:00:00').toLocaleDateString('es-CL', {
+// Helpers 
+const formatearFecha = (f: string) => {
+  if (!f) return 'Sin fecha'
+  const partes = f.split('T')[0].split('-')
+  if (partes.length !== 3) return f
+  const anio = parseInt(partes[0], 10)
+  const mes  = parseInt(partes[1], 10) - 1
+  const dia  = parseInt(partes[2], 10)
+  return new Date(anio, mes, dia).toLocaleDateString('es-CL', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
   })
+}
 
 const formatearHora12 = (hora: string) => {
   const [h, m] = hora.split(':')
@@ -62,7 +58,7 @@ const formatearHora12 = (hora: string) => {
   return `${hr12}:${m} ${ampm}`
 }
 
-/* ── Componente principal ────────────────────────────────────────────────── */
+// Componente principal
 export default function ModificarCita() {
   const { codigo } = useParams<{ codigo: string }>()
   const navigate   = useNavigate()
@@ -78,6 +74,7 @@ export default function ModificarCita() {
   const [nuevaHora,        setNuevaHora]        = useState('')
   const [horasDisponibles, setHorasDisponibles] = useState<string[]>([])
   const [noEncontrada,     setNoEncontrada]     = useState(false)
+  const [loading,          setLoading]          = useState(true)
 
   const minDate = useMemo(() => {
     const t  = new Date()
@@ -86,45 +83,113 @@ export default function ModificarCita() {
     return `${t.getFullYear()}-${mm}-${dd}`
   }, [])
 
+  // Cargar datos iniciales desde la base de datos
   useEffect(() => {
-    if (!codigo) { setNoEncontrada(true); return }
-    const citas     = JSON.parse(localStorage.getItem('citas_agendadas') || '{}')
-    const resultado = citas[codigo]
-    if (resultado) {
-      setCitaOriginal(resultado)
-      setNuevaFecha(resultado.fecha)
-    } else {
-      setNoEncontrada(true)
+    async function cargarCita() {
+      if (!codigo) { setNoEncontrada(true); setLoading(false); return }
+      
+      try {
+        setLoading(true)
+        const resultado = await consultarCitaPorCodigo(codigo.toUpperCase())
+        
+        if (resultado) {
+          // Adaptamos la respuesta de la API a la interfaz CitaDetalle del formulario
+          const citaMapeada: CitaDetalle = {
+            id_medico:    resultado.id_medico,
+            especialidad: resultado.especialidad,
+            medico:       resultado.medico,
+            fecha:        resultado.fecha.split('T')[0], // Limpiamos marcas ISO de Postgres
+            hora:         resultado.hora.slice(0, 5),    // Tomamos HH:MM
+            rut:          resultado.rut || '',
+            nombre:       resultado.nombre || '',
+            email:        resultado.email || ''
+          }
+          setCitaOriginal(citaMapeada)
+          setNuevaFecha(citaMapeada.fecha)
+          setNoEncontrada(false)
+        } else {
+          setNoEncontrada(true)
+        }
+      } catch (err) {
+        console.error('Error cargando cita:', err)
+        setNoEncontrada(true)
+      } finally {
+        setLoading(false)
+      }
     }
+    
+    cargarCita()
   }, [codigo])
 
+  // Buscar bloques horarios disponibles según el médico elegido
   useEffect(() => {
-    if (!citaOriginal || !nuevaFecha) {
-      setHorasDisponibles([])
-      setNuevaHora('')
-      return
-    }
-    const medico = MEDICOS.find(m => m.nombre === citaOriginal.medico)
-    if (!medico) { setHorasDisponibles([]); setNuevaHora(''); return }
+      async function consultarHorasBackend() {
+        // Si no hay cita cargada o no se ha elegido una fecha, limpiamos los estados
+        if (!citaOriginal || !nuevaFecha) {
+          setHorasDisponibles([])
+          setNuevaHora('')
+          return
+        }
 
-    const key   = `${medico.id}_${nuevaFecha}`
-    const horas = HORARIOS_DISPONIBLES[key] || []
-    setHorasDisponibles(horas)
-    setNuevaHora(prev => horas.includes(prev) ? prev : '')
+        // Tomamos el ID del médico desde la cita devuelta por el backend
+        const medicoId = citaOriginal.id_medico
+        if (!medicoId) {
+          setHorasDisponibles([])
+          setNuevaHora('')
+          return
+        }
+
+        try {
+        const url = `/api/citas/disponibilidad?id_medico=${medicoId}&fecha=${nuevaFecha}`
+        const respuesta = await apiFetch(url, { method: 'GET' })
+
+        if (respuesta.ok) {
+          const data = await respuesta.json().catch(() => ({}));
+          const horas = data.horarios || []
+          setHorasDisponibles(horas)
+          setNuevaHora(prev => horas.includes(prev) ? prev : '')
+        } else {
+          setHorasDisponibles([])
+          setNuevaHora('')
+        }
+      } catch (err) {
+        console.error('Error al consultar disponibilidad real:', err)
+        setHorasDisponibles([])
+        setNuevaHora('')
+      }
+    }
+
+    consultarHorasBackend()
   }, [nuevaFecha, citaOriginal])
 
-  /* ── Guardar modificación ──────────────────────────────────────────────── */
-  const handleGuardar = () => {
+  // Guardar modificación (se envia la peticion al backend) 
+  const handleGuardar = async () => {
     if (!citaOriginal || !nuevaFecha || !nuevaHora || !codigo) return
 
-    const citas = JSON.parse(localStorage.getItem('citas_agendadas') || '{}')
-    citas[codigo] = {
-      ...citaOriginal,
-      fecha: nuevaFecha,
-      hora:  nuevaHora,
+    try {
+      // 🚀 LLAMADA CORREGIDA AL PATCH DEL BACKEND
+      const respuesta = await apiFetch(`/api/citas/${codigo.toUpperCase()}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          fecha: nuevaFecha, // Sincronizado: el backend espera 'fecha'
+          hora:  nuevaHora   // Sincronizado: el backend espera 'hora'
+        })
+      })
+
+      // Si el servidor responde con un código de error (400, 404, 500, etc.)
+      if (!respuesta.ok) {
+        const data = await respuesta.json().catch(() => null)
+        console.error('Detalle del error del servidor:', data) // Esto te dirá el error real en la consola F12
+        alert(data?.error || data?.message || 'No se pudo reagendar la hora médica.')
+        return
+      }
+
+      // Si todo salió bien (200 OK), avanzamos al paso de éxito
+      setPaso('exito')
+    } catch (err) {
+      console.error('Error al guardar cambios de la cita:', err)
+      alert('Error de conexión con el servidor. Reintente.')
     }
-    localStorage.setItem('citas_agendadas', JSON.stringify(citas))
-    setPaso('exito')
   }
 
   const puedeGuardar =
@@ -132,7 +197,18 @@ export default function ModificarCita() {
     nuevaHora  !== '' &&
     (nuevaFecha !== citaOriginal?.fecha || nuevaHora !== citaOriginal?.hora)
 
-  /* ── Pantalla: cita no encontrada ───────────────────────────────────────── */
+  //Estado de Carga Inicial 
+  if (loading) {
+    return (
+      <IonPage>
+        <IonContent className="ion-padding bg-[#f4faf9] text-center flex items-center justify-center">
+          <p className="mt-20 text-[#7a8a9a] font-medium">Cargando detalles de la cita...</p>
+        </IonContent>
+      </IonPage>
+    )
+  }
+    
+  //Pantalla: cita no encontrada 
   if (noEncontrada) {
     return (
       <IonPage className="mc-page">
@@ -177,7 +253,7 @@ export default function ModificarCita() {
     )
   }
 
-  /* ── Render principal ────────────────────────────────────────────────────── */
+  //Render principal 
   return (
     <IonPage className="mc-page">
       <IonHeader className="ion-no-border mc-header" translucent>

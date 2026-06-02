@@ -19,10 +19,12 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import BotonVolver    from '../../components/BotonVolver'
 import BotonPrimario  from '../../components/BotonPrimario'
 import PageTransition from '../../components/PageTransition'
+import { AuthService, apiFetch } from '../../services/AuthServices'
 
-const ADMIN_EMAIL = 'tuadmin@gmail.com'
 
 interface CitaDetalle {
+  id: number
+  codigo_referencia: string
   especialidad: string
   medico:       string
   fecha:        string
@@ -30,13 +32,19 @@ interface CitaDetalle {
   rut:          string
   nombre:       string
   email:        string
+  estado:       'Agendada' | 'Completada' | 'Cancelada' | 'NoAsiste'
 }
 
 type Filtro = 'todas' | 'proximas' | 'pasadas'
 
-/* ── Badge de estado ─────────────────────────────────────────────────────── */
-function BadgeEstado({ fecha }: { fecha: string }) {
-  const hoy     = new Date().toISOString().split('T')[0]
+// Estado 
+function BadgeEstado({ estado, fecha }: { estado: string, fecha: string }) {
+  const hoy = new Date().toISOString().split('T')[0]
+  
+  if (estado === 'Cancelada') {
+    return <span className="inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-red-100 text-red-600">Cancelada</span>
+  }
+  
   const proxima = fecha >= hoy
   return (
     <span className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold ${
@@ -49,7 +57,7 @@ function BadgeEstado({ fecha }: { fecha: string }) {
   )
 }
 
-/* ── Componente principal ────────────────────────────────────────────────── */
+// Principal
 export default function GestionCitas() {
   const navigate  = useNavigate()
   const location  = useLocation()
@@ -59,16 +67,15 @@ export default function GestionCitas() {
 
   const [autenticado, setAutenticado]     = useState(false)
   const [cargando, setCargando]           = useState(true)
-  const [citas, setCitas]                 = useState<Record<string, CitaDetalle>>({})
+  const [citas, setCitas]                 = useState<CitaDetalle[]>([])
   const [filtro, setFiltro]               = useState<Filtro>(filtroInicial)
   const [busqueda, setBusqueda]           = useState('')
   const [citaExpandida, setCitaExpandida] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
 
-  /* ── Guard de autenticación ──────────────────────────────────────────── */
+  // Guard de autenticación conectado al sessionStorage
   useEffect(() => {
-    const emailGuardado = localStorage.getItem('userEmail')
-    if (!emailGuardado || emailGuardado.toLowerCase() !== ADMIN_EMAIL) {
+    if (!AuthService.esAdmin()) {
       navigate('/', { replace: true })
       return
     }
@@ -76,48 +83,84 @@ export default function GestionCitas() {
     setCargando(false)
   }, [navigate])
 
-  /* ── Cargar citas ──────────────────────────────────────────────────────── */
-  const cargarCitas = () => {
-    const datos = JSON.parse(localStorage.getItem('citas_agendadas') || '{}')
-    setCitas(datos)
+  // Cargar citas desde la api de postgre
+  const cargarCitas = async () => {
+    try {
+      const response = await apiFetch('/api/citas/all')
+      if (response.ok) {
+        const datos: CitaDetalle[] = await response.json()
+        setCitas(datos)
+      }
+    } catch (error) {
+      console.error('Error al cargar la lista de citas:', error)
+    }
   }
 
-  useEffect(() => { if (autenticado) cargarCitas() }, [autenticado])
+  useEffect(() => { 
+    if (autenticado) cargarCitas() 
+  }, [autenticado])
 
-  /* ── Cancelar cita desde admin ─────────────────────────────────────────── */
-  const handleCancelar = (codigo: string) => {
-    const datos = JSON.parse(localStorage.getItem('citas_agendadas') || '{}')
-    delete datos[codigo]
-    localStorage.setItem('citas_agendadas', JSON.stringify(datos))
-    setCitas(datos)
-    setConfirmDelete(null)
-    setCitaExpandida(null)
+  // Cancelar cita llamando al endpoint del server
+  const handleCancelar = async (codigo: string) => {
+    try {
+      // desde /api/citas/:codigo/cancelar del backend
+      const response = await apiFetch(`/api/citas/${codigo}/cancelar`, {
+        method: 'PATCH'
+      })
+      if (response.ok) {
+        await cargarCitas() // Recargar lista viva desde Postgres
+        setConfirmDelete(null)
+        setCitaExpandida(null)
+      }
+    } catch (error) {
+      console.error('Error al cancelar la cita en el servidor:', error)
+    }
   }
 
-  /* ── Filtrar y buscar ──────────────────────────────────────────────────── */
+  // Filtrar y buscar
   const hoy = new Date().toISOString().split('T')[0]
 
-  const citasFiltradas = Object.entries(citas).filter(([, c]) => {
+  const citasFiltradas = citas.filter((c) => {
     const pasaFiltro =
       filtro === 'todas'    ? true :
-      filtro === 'proximas' ? c.fecha >= hoy :
-                              c.fecha <  hoy
+      filtro === 'proximas' ? c.fecha >= hoy && c.estado !== 'Cancelada' :
+                              c.fecha <  hoy || c.estado === 'Cancelada'
 
     const terminoBusqueda = busqueda.toLowerCase()
     const pasaBusqueda =
       busqueda === '' ||
-      c.nombre.toLowerCase().includes(terminoBusqueda) ||
-      c.rut.toLowerCase().includes(terminoBusqueda) ||
-      c.especialidad.toLowerCase().includes(terminoBusqueda) ||
-      c.medico.toLowerCase().includes(terminoBusqueda)
+      (c.nombre && c.nombre.toLowerCase().includes(terminoBusqueda)) ||
+      (c.rut && c.rut.toLowerCase().includes(terminoBusqueda)) ||
+      (c.especialidad && c.especialidad.toLowerCase().includes(terminoBusqueda)) ||
+      (c.medico && c.medico.toLowerCase().includes(terminoBusqueda)) ||
+      (c.codigo_referencia && c.codigo_referencia.toLowerCase().includes(terminoBusqueda))
 
     return pasaFiltro && pasaBusqueda
   })
 
-  const formatearFecha = (f: string) =>
-    new Date(f + 'T00:00:00').toLocaleDateString('es-CL', {
-      weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
-    })
+const formatearFecha = (f: string) => {
+  if (!f) return 'Sin fecha'
+  
+  // Cortar para usar solo YYYY-MM-DD
+  const limpio = f.split('T')[0]
+  const partes = limpio.split('-')
+  
+  if (partes.length !== 3) return f
+
+  const anio = parseInt(partes[0], 10)
+  const mes  = parseInt(partes[1], 10) - 1 // En JS los meses van de 0 a 11
+  const dia  = parseInt(partes[2], 10)
+
+  // Creamos la fecha usando enteros locales (evita desfases y errores de "Invalid Date")
+  const fechaObjeto = new Date(anio, mes, dia)
+
+  return fechaObjeto.toLocaleDateString('es-CL', {
+    weekday: 'short', 
+    day: 'numeric', 
+    month: 'short', 
+    year: 'numeric',
+  })
+}
 
   if (cargando || !autenticado) return null
 
@@ -209,126 +252,133 @@ export default function GestionCitas() {
             </PageTransition>
           ) : (
             <IonList lines="none" className="bg-transparent p-0 flex flex-col gap-4">
-              {citasFiltradas.map(([codigo, cita], idx) => (
-                <PageTransition key={codigo} variante="fadeUp" duracion={300} delay={150 + idx * 80}>
-                  <div className="bg-white rounded-2xl border border-[#d5dce7] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+          {citasFiltradas.map((cita, idx) => {
+            const codigo = cita.codigo_referencia
+            return (
+              <PageTransition key={codigo} variante="fadeUp" duracion={300} delay={150 + idx * 80}>
+                <div className="bg-white rounded-2xl border border-[#d5dce7] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
 
-                    {/* Cabecera — click para expandir */}
-                    <IonItem
-                      button
-                      detail={false}
-                      onClick={() => {
-                        setCitaExpandida(citaExpandida === codigo ? null : codigo)
-                        setConfirmDelete(null)
-                      }}
-                      className="py-1 [--background-hover:#f7f9fc]"
-                    >
-                      <div className="flex-1 min-w-0 py-3">
-                        <div className="flex items-center gap-2.5 mb-2">
-                          <p className="text-[17px] font-semibold text-[#1a2332] truncate m-0">
-                            {cita.nombre}
-                          </p>
-                          <BadgeEstado fecha={cita.fecha} />
-                        </div>
-                        <p className="text-[14px] text-[#7a8a9a] leading-relaxed m-0">
-                          {cita.especialidad} · {formatearFecha(cita.fecha)} · {cita.hora}
+                  {/* Cabecera — click para expandir */}
+                  <IonItem
+                    button
+                    detail={false}
+                    onClick={() => {
+                      setCitaExpandida(citaExpandida === codigo ? null : codigo)
+                      setConfirmDelete(null)
+                    }}
+                    className="py-1 [--background-hover:#f7f9fc]"
+                  >
+                    <div className="flex-1 min-w-0 py-3">
+                      <div className="flex items-center gap-2.5 mb-2">
+                        <p className="text-[17px] font-semibold text-[#1a2332] truncate m-0">
+                          {cita.nombre}
                         </p>
-                        <p className="text-[12px] font-mono text-[#a0adb8] mt-1.5 m-0">#{codigo}</p>
+                        {/* CORREGIDO: Ahora se envía el estado obligatorio al componente badge */}
+                        <BadgeEstado estado={cita.estado} fecha={cita.fecha} />
                       </div>
-                      <IonIcon
-                        icon={chevronForwardOutline}
-                        className={`w-5 h-5 shrink-0 text-[#c8d3dc] transition-transform duration-200 ${
-                          citaExpandida === codigo ? 'rotate-90' : ''
-                        }`}
-                      />
-                    </IonItem>
+                      <p className="text-[14px] text-[#7a8a9a] leading-relaxed m-0">
+                        {cita.especialidad} · {formatearFecha(cita.fecha)} · {cita.hora.slice(0, 5)}
+                      </p>
+                      <p className="text-[12px] font-mono text-[#a0adb8] mt-1.5 m-0">#{codigo}</p>
+                    </div>
+                    <IonIcon
+                      icon={chevronForwardOutline}
+                      className={`w-5 h-5 shrink-0 text-[#c8d3dc] transition-transform duration-200 ${
+                        citaExpandida === codigo ? 'rotate-90' : ''
+                      }`}
+                    />
+                  </IonItem>
 
-                    {/* Detalle expandido */}
-                    {citaExpandida === codigo && (
-                      <div className="border-t border-[#eef4f9]">
-                        <div className="px-6 py-4 flex flex-col gap-3.5">
-                          <div className="flex flex-col gap-0.5">
-                            <span className="text-[11px] font-semibold text-[#7a8a9a] uppercase tracking-wider">Médico</span>
-                            <span className="text-[15px] font-medium text-[#1a2332]">{cita.medico}</span>
-                          </div>
-                          <div className="flex flex-col gap-0.5">
-                            <span className="text-[11px] font-semibold text-[#7a8a9a] uppercase tracking-wider">RUT</span>
-                            <span className="text-[15px] font-medium text-[#1a2332]">{cita.rut}</span>
-                          </div>
-                          <div className="flex flex-col gap-0.5">
-                            <span className="text-[11px] font-semibold text-[#7a8a9a] uppercase tracking-wider">Correo</span>
-                            <span className="text-[15px] font-medium text-[#1a2332]">{cita.email}</span>
-                          </div>
-                          <div className="flex flex-col gap-0.5">
-                            <span className="text-[11px] font-semibold text-[#3aada0] uppercase tracking-wider">Fecha</span>
-                            <span className="text-[15px] font-medium text-[#1a2332]">{formatearFecha(cita.fecha)}</span>
-                          </div>
-                          <div className="flex flex-col gap-0.5">
-                            <span className="text-[11px] font-semibold text-[#3aada0] uppercase tracking-wider">Hora</span>
-                            <span className="text-[15px] font-medium text-[#1a2332]">{cita.hora}</span>
-                          </div>
+                  {/* Detalle expandido */}
+                  {citaExpandida === codigo && (
+                    <div className="border-t border-[#eef4f9]">
+                      <div className="px-6 py-4 flex flex-col gap-3.5">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[11px] font-semibold text-[#7a8a9a] uppercase tracking-wider">Médico</span>
+                          <span className="text-[15px] font-medium text-[#1a2332]">{cita.medico}</span>
                         </div>
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[11px] font-semibold text-[#7a8a9a] uppercase tracking-wider">RUT</span>
+                          <span className="text-[15px] font-medium text-[#1a2332]">{cita.rut}</span>
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[11px] font-semibold text-[#7a8a9a] uppercase tracking-wider">Correo</span>
+                          <span className="text-[15px] font-medium text-[#1a2332]">{cita.email}</span>
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[11px] font-semibold text-[#3aada0] uppercase tracking-wider">Fecha</span>
+                          <span className="text-[15px] font-medium text-[#1a2332]">{formatearFecha(cita.fecha)}</span>
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-[11px] font-semibold text-[#3aada0] uppercase tracking-wider">Hora</span>
+                          <span className="text-[15px] font-medium text-[#1a2332]">{cita.hora.slice(0, 5)} hrs</span>
+                        </div>
+                      </div>
 
-                        {/* Acciones */}
-                        {confirmDelete === codigo ? (
-                          <div className="px-6 pb-5 pt-2 flex flex-col gap-3">
-                            <p className="text-[13px] text-[#e05c5c] font-medium text-center m-0">
-                              ¿Confirmar cancelación de esta cita?
-                            </p>
-                            <div className="grid grid-cols-2 gap-3">
-                              <BotonPrimario
-                                onClick={() => handleCancelar(codigo)}
-                                fullWidth
-                                className="bg-[#e05c5c]! border-[#e05c5c]! hover:bg-[#c94a4a]! hover:border-[#c94a4a]! py-3! text-[13px]! rounded-xl!"
-                              >
-                                Sí, cancelar
-                              </BotonPrimario>
-                              <BotonPrimario
-                                onClick={() => setConfirmDelete(null)}
-                                variante="outline"
-                                fullWidth
-                                className="py-3! text-[13px]! rounded-xl!"
-                              >
-                                No, volver
-                              </BotonPrimario>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="px-6 pb-5 pt-2 grid grid-cols-2 gap-3">
+                      {/* Acciones */}
+                      {confirmDelete === codigo ? (
+                        <div className="px-6 pb-5 pt-2 flex flex-col gap-3">
+                          <p className="text-[13px] text-[#e05c5c] font-medium text-center m-0">
+                            ¿Confirmar cancelación de esta cita?
+                          </p>
+                          <div className="grid grid-cols-2 gap-3">
                             <BotonPrimario
-                              to={`/modificar/${codigo}?origen=admin`}
+                              onClick={() => handleCancelar(codigo)}
+                              fullWidth
+                              className="bg-[#e05c5c]! border-[#e05c5c]! hover:bg-[#c94a4a]! hover:border-[#c94a4a]! py-3! text-[13px]! rounded-xl!"
+                            >
+                              Sí, cancelar
+                            </BotonPrimario>
+                            <BotonPrimario
+                              onClick={() => setConfirmDelete(null)}
                               variante="outline"
                               fullWidth
                               className="py-3! text-[13px]! rounded-xl!"
                             >
-                              <span className="flex items-center justify-center gap-1.5">
-                                <IonIcon icon={createOutline} className="w-3.5 h-3.5" />
-                                Modificar
-                              </span>
-                            </BotonPrimario>
-                            <BotonPrimario
-                              onClick={() => setConfirmDelete(codigo)}
-                              variante="outline"
-                              fullWidth
-                              className="border-[#e05c5c]/30! text-[#e05c5c]! hover:bg-red-50! py-3! text-[13px]! rounded-xl!"
-                            >
-                              <span className="flex items-center justify-center gap-1.5">
-                                <IonIcon icon={closeCircleOutline} className="w-3.5 h-3.5" />
-                                Cancelar
-                              </span>
+                              No, volver
                             </BotonPrimario>
                           </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </PageTransition>
-              ))}
-            </IonList>
-          )}
+                        </div>
+                      ) : (
+                        <div className="px-6 pb-5 pt-2 grid grid-cols-2 gap-3">
+                          {cita.estado === 'Agendada' && (
+                            <>
+                              <BotonPrimario
+                                to={`/modificar/${codigo}?origen=admin`}
+                                variante="outline"
+                                fullWidth
+                                className="py-3! text-[13px]! rounded-xl!"
+                              >
+                                <span className="flex items-center justify-center gap-1.5">
+                                  <IonIcon icon={createOutline} className="w-3.5 h-3.5" />
+                                  Modificar
+                                </span>
+                              </BotonPrimario>
+                              <BotonPrimario
+                                onClick={() => setConfirmDelete(codigo)}
+                                variante="outline"
+                                fullWidth
+                                className="border-[#e05c5c]/30! text-[#e05c5c]! hover:bg-red-50! py-3! text-[13px]! rounded-xl!"
+                              >
+                                <span className="flex items-center justify-center gap-1.5">
+                                  <IonIcon icon={closeCircleOutline} className="w-3.5 h-3.5" />
+                                  Cancelar
+                                </span>
+                              </BotonPrimario>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </PageTransition>
+            )
+          })}
+        </IonList>
+      )}
 
-        </div>
-      </IonContent>
-    </IonPage>
-  )
+    </div>
+  </IonContent>
+</IonPage>)
 }

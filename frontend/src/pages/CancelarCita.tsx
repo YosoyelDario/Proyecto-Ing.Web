@@ -7,6 +7,8 @@ import PageTransition from '../components/PageTransition'
 import FilaDetalle    from '../components/FilaDetalle'
 import RutInput       from '../components/Rutinput'
 import { formatearFecha, type Cita } from '../services/citaServices'
+import { consultarCitaPorCodigo } from '../services/citaServices'
+import { apiFetch } from '../services/AuthServices'
 
 /* ── Iconos SVG inline ───────────────────────────────────────────────────── */
 const IconoCancelar = () => (
@@ -39,10 +41,10 @@ const IconoSobre = () => (
   </svg>
 )
 
-/* ── Pasos del flujo ─────────────────────────────────────────────────────── */
+// Pasos del flujo 
 type Paso = 'verificar' | 'confirmar' | 'exito'
 
-/* ── Componente principal ────────────────────────────────────────────────── */
+//Componente principal 
 export default function CancelarCita() {
   const { codigo } = useParams<{ codigo: string }>()
 
@@ -50,32 +52,77 @@ export default function CancelarCita() {
   const [rut,       setRut]       = useState('')
   const [errorRut,  setErrorRut]  = useState(false)
   const [buscado,   setBuscado]   = useState(false)
+  const [loading,    setLoading]    = useState(false)
   const [cita,      setCita]      = useState<Cita | null>(null)
 
-  /* ── Verificar RUT ───────────────────────────────────────────────────── */
-  const handleVerificar = () => {
-    const citas = JSON.parse(localStorage.getItem('citas_agendadas') || '{}')
-    const resultado = citas[codigo ?? '']
-    setBuscado(true)
+  // Limpiar formato de rut
+  const limpiarRut = (s: string) => s.replace(/[.\-]/g, '').trim().toLowerCase()
 
-    if (resultado && resultado.rut === rut.replace(/\./g, '').trim()) {
+  // Verificar cita y RUT
+  const handleVerificar = async () => {
+    if (!codigo || !rut.trim()) return
+    setLoading(true)
+    setErrorRut(false)
+    setBuscado(false)
+
+    try {
+      // Consultar cita real a postgre mediante la api
+      const resultado = await consultarCitaPorCodigo(codigo.toUpperCase())
+
+      if (!resultado) {
+        setErrorRut(true)
+        setBuscado(true)
+        return
+      }
+
+      // Comparamos los RUTs saneados (el unificado de la base de datos contra el input)
+      const rutCitaBD = resultado.rut || ''
+      if (limpiarRut(rutCitaBD) !== limpiarRut(rut)) {
+        setErrorRut(true)
+        setBuscado(true)
+        return
+      }
+
+      // Si calzan, guardamos temporalmente el objeto en el estado y avanzamos
       setCita(resultado)
       setErrorRut(false)
+      setBuscado(true)
       setPaso('confirmar')
-    } else {
-      setErrorRut(true)
+    } catch (err) {
+      console.error('Error al verificar identidad para cancelar:', err)
+      alert('Error de comunicación con el servidor. Reintente.')
+    } finally {
+      setLoading(false)
     }
   }
 
-  /* ── Confirmar cancelación ───────────────────────────────────────────── */
-  const handleCancelar = () => {
-    const citas = JSON.parse(localStorage.getItem('citas_agendadas') || '{}')
-    delete citas[codigo ?? '']
-    localStorage.setItem('citas_agendadas', JSON.stringify(citas))
-    setPaso('exito')
+  // Confirmar cancelación
+  const handleCancelar = async () => {
+    if (!codigo) return
+    setLoading(true)
+
+    try {
+      // Apuntamos al endpoint PATCH de cancelacion
+      const respuesta = await apiFetch(`/api/citas/${codigo.toUpperCase()}/cancelar`, {
+        method: 'PATCH'
+      })
+
+      if (!respuesta.ok) {
+        const data = await respuesta.json().catch(() => null)
+        alert(data?.error || 'No se pudo cancelar la hora médica.')
+        return
+      }
+
+      setPaso('exito')
+    } catch (err) {
+      console.error('Error al ejecutar cancelación:', err)
+      alert('Error en el servidor al intentar procesar la cancelación.')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  /* ── Render ──────────────────────────────────────────────────────────── */
+  // Render 
   return (
     <IonPage>
       <IonContent fullscreen className="bg-[#f4faf9]">
@@ -172,11 +219,11 @@ export default function CancelarCita() {
                     <p className="text-[11px] font-semibold text-[#a0adb8] uppercase tracking-wider pt-3 pb-1">
                       Se cancelará la siguiente cita
                     </p>
-                    <FilaDetalle icono="" label="Especialidad" valor={cita.especialidad} />
-                    <FilaDetalle icono="" label="Médico"       valor={cita.medico} />
-                    <FilaDetalle icono="" label="Fecha"         valor={formatearFecha(cita.fecha)} />
-                    <FilaDetalle icono="" label="Hora"          valor={cita.hora} />
-                    <FilaDetalle icono="" label="Nombre"        valor={cita.nombre} />
+                    <FilaDetalle icono="" label="Especialidad" valor={cita.especialidad ?? ''} />
+                    <FilaDetalle icono="" label="Médico" valor={cita.medico ?? ''} />
+                    <FilaDetalle icono="" label="Fecha" valor={cita.fecha ? formatearFecha(cita.fecha.split('T')[0]) : ''} />
+                    <FilaDetalle icono="" label="Hora" valor={cita.hora ?? ''} />
+                    <FilaDetalle icono="" label="Nombre" valor={cita.nombre ?? ''} />
                   </div>
 
                   {/* Aviso final */}

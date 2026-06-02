@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import BotonPrimario   from '../../components/BotonPrimario'
 import BotonVolver     from '../../components/BotonVolver'
 import PageTransition  from '../../components/PageTransition'
-import { AuthService } from '../../services/AuthServices'
+import { AuthService, apiFetch } from '../../services/AuthServices'
 
 interface CitaDetalle {
   especialidad: string
@@ -14,6 +14,7 @@ interface CitaDetalle {
   rut:          string
   nombre:       string
   email:        string
+  estado?:       'Agendada' | 'Completada' | 'Cancelada' | 'NoAsiste'
 }
 
 interface Estadisticas {
@@ -76,7 +77,7 @@ export default function AdminPanel() {
   })
 
   useEffect(() => {
-    if (!AuthService.esAdminValido()) {
+    if (!AuthService.esAdmin()) {
       navigate('/', { replace: true })
       return
     }
@@ -86,21 +87,37 @@ export default function AdminPanel() {
 
   useEffect(() => {
     if (!autenticado) return
-    const citas = JSON.parse(localStorage.getItem('citas_agendadas') || '{}') as Record<string, CitaDetalle>
-    const hoy   = new Date().toISOString().split('T')[0]
-    const valores = Object.values(citas)
+    const cargarEstadisticasServidor = async () => {
+      try {
+        const response = await apiFetch('/api/citas/all')
+        if (!response.ok) return
+        
+        const listaCitas: CitaDetalle[] = await response.json()
+        const hoy = new Date().toISOString().split('T')[0]
 
-    const porEspecialidad: Record<string, number> = {}
-    let proximas = 0
-    let pasadas  = 0
+        const porEspecialidad: Record<string, number> = {}
+        let proximas = 0
+        let pasadas  = 0
 
-    for (const c of valores) {
-      if (c.fecha >= hoy) proximas++
-      else pasadas++
-      porEspecialidad[c.especialidad] = (porEspecialidad[c.especialidad] || 0) + 1
+        for (const c of listaCitas) {
+          if (c.estado === 'Cancelada' || c.estado === 'NoAsiste'){
+          pasadas++}
+          else if (c.fecha >= hoy){
+            proximas++}
+          else{
+            pasadas++
+          } 
+
+          porEspecialidad[c.especialidad] = (porEspecialidad[c.especialidad] || 0) + 1
+        }
+
+        setStats({ total: listaCitas.length, proximas, pasadas, porEspecialidad })
+      } catch (error) {
+        console.error("Error al obtener estadísticas del servidor:", error)
+      }
     }
 
-    setStats({ total: valores.length, proximas, pasadas, porEspecialidad })
+    cargarEstadisticasServidor()
   }, [autenticado])
 
   if (cargando || !autenticado) return null

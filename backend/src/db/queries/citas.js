@@ -22,7 +22,9 @@ const getCitasPorUsuario = async (idUsuario) => {
   return result.rows
 }
 
-// ── GET: cita por código de referencia (para invitados o admin) ──────────
+// ── GET: cita por código de referencia (para invitados o admin ) ──────────
+  // -- Si rut_paciente es null (registrado), extrae automáticamente el RUT de la tabla usuario.
+  // -- Si no, usa el rut_paciente directo (invitado).
 const getCitaPorCodigo = async (codigo) => {
   const result = await pool.query(
     `SELECT
@@ -32,15 +34,17 @@ const getCitaPorCodigo = async (codigo) => {
       c.hora,
       c.estado,
       c.id_paciente,
-      c.rut_paciente,
-      c.nombre_paciente,
-      c.email_paciente,
       c.id_medico,
       p.nombre     AS medico,
-      e.nombre     AS especialidad
+      e.nombre     AS especialidad,
+
+      COALESCE(c.rut_paciente, u.rut) AS rut,
+      COALESCE(c.nombre_paciente, u.nombre_completo) AS nombre,
+      COALESCE(c.email_paciente, u.email) AS email
     FROM cita c
-    JOIN profesional p ON c.id_medico = p.id
-    JOIN especialidad e ON p.id_especialidad = e.id
+    LEFT JOIN usuario u ON c.id_paciente = u.id
+    INNER JOIN profesional p ON c.id_medico = p.id
+    INNER JOIN especialidad e ON p.id_especialidad = e.id
     WHERE c.codigo_referencia = $1`,
     [codigo]
   )
