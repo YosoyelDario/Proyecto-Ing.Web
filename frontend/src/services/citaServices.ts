@@ -19,6 +19,7 @@ export interface Cita {
   fecha: string
   hora: string
   estado: string
+  id_medico: number
   medico: string
   especialidad: string
   // Datos paciente

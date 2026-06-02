@@ -25,6 +25,7 @@ import '../styles/ModificarCita.css'
 
 // Tipos 
 interface CitaDetalle {
+  id_medico:    number
   especialidad: string
   medico:       string
   fecha:        string
@@ -33,23 +34,6 @@ interface CitaDetalle {
   nombre:       string
   email:        string
 }
-
-// Data de horarios 
-const HORARIOS_DISPONIBLES: Record<string, string[]> = {
-  'm1_2026-05-10': ['09:00', '09:30', '11:00'],
-  'm1_2026-05-11': ['14:00', '15:30'],
-  'm3_2026-05-10': ['10:00', '10:30'],
-  'm2_2026-06-15': ['10:00', '11:30', '15:00'],
-  'm3_2026-06-10': ['09:00', '11:30', '14:30', '16:00'],
-  'm3_2026-06-11': ['10:00', '15:00']
-}
-
-const MEDICOS = [
-  { id: 'm1', nombre: 'Dr. Roberto Sánchez', especialidad: 'Medicina General' },
-  { id: 'm2', nombre: 'Dra. Ana López',      especialidad: 'Medicina General' },
-  { id: 'm3', nombre: 'Dr. Carlos Vega',     especialidad: 'Pediatría' },
-  { id: 'm4', nombre: 'Dra. María Paz',      especialidad: 'Dermatología' },
-]
 
 type Paso = 'editar' | 'exito'
 
@@ -111,6 +95,7 @@ export default function ModificarCita() {
         if (resultado) {
           // Adaptamos la respuesta de la API a la interfaz CitaDetalle del formulario
           const citaMapeada: CitaDetalle = {
+            id_medico:    resultado.id_medico,
             especialidad: resultado.especialidad,
             medico:       resultado.medico,
             fecha:        resultado.fecha.split('T')[0], // Limpiamos marcas ISO de Postgres
@@ -138,21 +123,45 @@ export default function ModificarCita() {
 
   // Buscar bloques horarios disponibles según el médico elegido
   useEffect(() => {
-    if (!citaOriginal || !nuevaFecha) {
-      setHorasDisponibles([])
-      setNuevaHora('')
-      return
-    }
-    const medico = MEDICOS.find(m => m.nombre === citaOriginal.medico)
-    if (!medico) { setHorasDisponibles([]); setNuevaHora(''); return }
+      async function consultarHorasBackend() {
+        // Si no hay cita cargada o no se ha elegido una fecha, limpiamos los estados
+        if (!citaOriginal || !nuevaFecha) {
+          setHorasDisponibles([])
+          setNuevaHora('')
+          return
+        }
 
-    const key   = `${medico.id}_${nuevaFecha}`
-    const horas = HORARIOS_DISPONIBLES[key] || []
-    setHorasDisponibles(horas)
-    setNuevaHora(prev => horas.includes(prev) ? prev : '')
+        // Tomamos el ID del médico desde la cita devuelta por el backend
+        const medicoId = citaOriginal.id_medico
+        if (!medicoId) {
+          setHorasDisponibles([])
+          setNuevaHora('')
+          return
+        }
+
+        try {
+        const url = `/api/citas/disponibilidad?id_medico=${medicoId}&fecha=${nuevaFecha}`
+        const respuesta = await apiFetch(url, { method: 'GET' })
+
+        if (respuesta.ok) {
+          const data = await respuesta.json().catch(() => ({}));
+          const horas = data.horarios || []
+          setHorasDisponibles(horas)
+          setNuevaHora(prev => horas.includes(prev) ? prev : '')
+        } else {
+          setHorasDisponibles([])
+          setNuevaHora('')
+        }
+      } catch (err) {
+        console.error('Error al consultar disponibilidad real:', err)
+        setHorasDisponibles([])
+        setNuevaHora('')
+      }
+    }
+
+    consultarHorasBackend()
   }, [nuevaFecha, citaOriginal])
 
-  // Guardar modificación (se envia la peticion al backend) 
   // Guardar modificación (se envia la peticion al backend) 
   const handleGuardar = async () => {
     if (!citaOriginal || !nuevaFecha || !nuevaHora || !codigo) return
