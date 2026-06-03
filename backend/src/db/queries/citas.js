@@ -169,6 +169,15 @@ const cancelarCita = async (id, idUsuarioEditor) => {
   return result.rows[0] || null
 }
 
+// ── DELETE: eliminar cita permanentemente (solo admin) ───────────────────
+const eliminarCita = async (id) => {
+  const result = await pool.query(
+    `DELETE FROM cita WHERE id = $1 RETURNING *`,
+    [id]
+  )
+  return result.rows[0] || null
+}
+
 // ── Helper: genera código alfanumérico de 8 chars ────────────────────────
 function generarCodigo() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
@@ -187,4 +196,5 @@ module.exports = {
   crearCita,
   modificarCita,
   cancelarCita,
+  eliminarCita,
 }
