@@ -11,9 +11,6 @@ importers:
       '@ionic/react':
         specifier: 8.8.2
         version: 8.8.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      '@ionic/react-router':
-        specifier: 8.8.2
-        version: 8.8.2(react-dom@19.2.4(react@19.2.4))(react-router-dom@7.15.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-router@7.15.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)
       '@tailwindcss/vite':
         specifier: 4.2.2
         version: 4.2.2(vite@8.0.14(@types/node@24.12.0)(jiti@2.7.0))
@@ -209,14 +206,6 @@ packages:
   '@ionic/core@8.8.2':
     resolution: {integrity: sha512-br0XaVX/mct0d+ArQk7Gg6R8iLsfcgGdSVs+554iv5U4TjmqVIbmkF+o4IZSe2WkulUHnLVF20/EJ1ZH00aTnw==}
     engines: {node: '>= 16'}
-
-  '@ionic/react-router@8.8.2':
-    resolution: {integrity: sha512-PB3YgtDq5BTXWhaHZxULMYGm6zf0A115WsjDu1qYR7ltrgxW0REzzSA8C+0EYCY93BZxFfyzeg3P7FuJhohPmg==}
-    peerDependencies:
-      react: '>=16.8.6'
-      react-dom: '>=16.8.6'
-      react-router: ^5.0.1
-      react-router-dom: ^5.0.1
 
   '@ionic/react@8.8.2':
     resolution: {integrity: sha512-b2kMns556wocZ5JMoo5PZMRjNkgmQKOgxb5rIdrhgJMrLtkQ/smQi7dn3Sp9Hhy5tI3oY2ooyCMjABKe1PbKww==}
@@ -1457,15 +1446,6 @@ snapshots:
     dependencies:
       '@stencil/core': 4.43.0
       ionicons: 8.0.13
-      tslib: 2.8.1
-
-  '@ionic/react-router@8.8.2(react-dom@19.2.4(react@19.2.4))(react-router-dom@7.15.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-router@7.15.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react@19.2.4)':
-    dependencies:
-      '@ionic/react': 8.8.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      react: 19.2.4
-      react-dom: 19.2.4(react@19.2.4)
-      react-router: 7.15.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      react-router-dom: 7.15.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       tslib: 2.8.1
 
   '@ionic/react@8.8.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
