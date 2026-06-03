@@ -1,4 +1,5 @@
 const pool = require('../db/pool')
+const { validarRegionComuna } = require('../utils/ubicaciones')
 
 // ── GET /api/usuarios/me  (perfil del usuario autenticado) ───────────────
 const obtenerPerfil = async (req, res) => {
@@ -21,6 +22,11 @@ const actualizarPerfil = async (req, res) => {
   if (!region || !comuna) {
     return res.status(400).json({ error: 'Se requieren región y comuna.' })
   }
+
+  if (!validarRegionComuna(region, comuna)) {
+    return res.status(400).json({ error: 'Región o comuna no válida. Selecciona una combinación real de Chile.' })
+  }
+
   try {
     const result = await pool.query(
       `UPDATE usuario SET region = $1, comuna = $2, updated_at = NOW()

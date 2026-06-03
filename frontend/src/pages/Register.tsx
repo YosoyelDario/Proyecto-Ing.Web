@@ -68,7 +68,15 @@ export default function Register() {
     if (!nombre.trim() || !rut.trim() || !email.trim()) return
     if (password.length < 8) return
     if (password !== confirmPassword) return
-    if (!region || !comuna) return
+    if (!region || !comuna) {
+      setErrorRegistro('Debes seleccionar región y comuna válidas.')
+      return
+    }
+
+    if (!Object.keys(regionesComunas).includes(region) || !regionesComunas[region]?.includes(comuna)) {
+      setErrorRegistro('Debes seleccionar una región y comuna válidas.')
+      return
+    }
 
     try {
       await AuthService.registrarUsuario({ rut, nombre_completo: nombre, email, password, region, comuna })

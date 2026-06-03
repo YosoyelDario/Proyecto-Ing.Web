@@ -2,9 +2,14 @@ const bcrypt = require('bcrypt')
 const jwt    = require('jsonwebtoken')
 const pool   = require('../db/pool')
 const { buscarUsuarioPorEmail } = require('../db/queries/usuarios')
+const { validarRegionComuna } = require('../utils/ubicaciones')
 
 const registrarUsuario = async (req, res) => {
   const { rut, nombre_completo, email, password, region, comuna } = req.body
+
+  if (!validarRegionComuna(region, comuna)) {
+    return res.status(400).json({ error: 'Región o comuna no válida. Selecciona una combinación real de Chile.' })
+  }
 
   try {
     const salt          = await bcrypt.genSalt(10)
