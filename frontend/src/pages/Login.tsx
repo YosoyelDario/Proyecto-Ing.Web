@@ -5,10 +5,8 @@ import {
   IonContent,
   IonHeader,
   IonToolbar,
-  IonButtons,
   IonTitle,
   IonButton,
-  IonIcon,
   IonCard,
   IonCardContent,
   IonText,
@@ -17,11 +15,11 @@ import {
   IonRow,
   IonCol,
 } from '@ionic/react'
-import { arrowBack } from 'ionicons/icons'
 import { Link, useNavigate } from 'react-router-dom'
 import PageTransition from '../components/PageTransition'
 import EmailInput     from '../components/Emailinput'
 import PasswordInput  from '../components/PasswordInput'
+import BotonVolver from '../components/BotonVolver'
 import BotonPrimario  from '../components/BotonPrimario'
 import '../styles/Login.css'
 import { AuthService } from '../services/AuthServices'
@@ -60,12 +58,9 @@ export default function Login() {
       {/* ── Header Ionic con botón volver ── */}
       <IonHeader className="ion-no-border login-header">
         <IonToolbar>
-          <IonButtons slot="start">
-            <IonButton className="login-btn-volver" onClick={() => navigate('/')}>
-              <IonIcon slot="start" icon={arrowBack} />
-              Inicio
-            </IonButton>
-          </IonButtons>
+          <div className="absolute top-4 left-4 z-10">
+            <BotonVolver to="/" label="Inicio" />
+          </div>
           <IonTitle className="text-[15px] font-medium tracking-wide">
             
           </IonTitle>

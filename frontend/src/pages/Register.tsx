@@ -1,10 +1,9 @@
 import { useState, useMemo, useEffect } from 'react'
 import { AuthService } from '../services/AuthServices'
 import {
-  IonPage, IonContent, IonHeader, IonToolbar, IonButtons, IonButton,
-  IonIcon, IonCard, IonCardContent, IonGrid, IonRow, IonCol, IonText, IonNote,
+  IonPage, IonContent, IonHeader, IonToolbar, 
+  IonCard, IonCardContent, IonGrid, IonRow, IonCol, IonText, IonNote,
 } from '@ionic/react'
-import { arrowBack } from 'ionicons/icons'
 import { Link, useNavigate } from 'react-router-dom'
 import LogoSantoDomingo from '../components/LogoSantoDomingo'
 import InputTexto       from '../components/InputTexto'
@@ -12,6 +11,7 @@ import RutInput         from '../components/Rutinput'
 import EmailInput       from '../components/Emailinput'
 import PasswordInput    from '../components/PasswordInput'
 import SelectInput      from '../components/Selectinput'
+import BotonVolver from '../components/BotonVolver'
 import BotonPrimario    from '../components/BotonPrimario'
 import PageTransition   from '../components/PageTransition'
 import '../styles/Register.css'
@@ -91,12 +91,9 @@ export default function Register() {
     <IonPage className="register-page">
       <IonHeader className="ion-no-border register-header">
         <IonToolbar className="safe-area-top">
-          <IonButtons slot="start">
-            <IonButton className="register-btn-volver" onClick={() => navigate('/')}>
-              <IonIcon slot="start" icon={arrowBack} />
-              Inicio
-            </IonButton>
-          </IonButtons>
+          <div className="absolute top-4 left-4 z-10">
+            <BotonVolver to="/" label="Inicio" />
+          </div>
         </IonToolbar>
       </IonHeader>
 

@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt')
 const jwt    = require('jsonwebtoken')
 const pool   = require('../db/pool')
-const { buscarUsuarioPorEmail } = require('../db/queries/usuarios')
+const { buscarUsuarioPorEmail, buscarUsuarioPorId } = require('../db/queries/usuarios')
 const { validarRegionComuna } = require('../utils/ubicaciones')
 
 const registrarUsuario = async (req, res) => {
@@ -83,4 +83,10 @@ const loginUsuario = async (req, res) => {
   }
 }
 
-module.exports = { registrarUsuario, loginUsuario }
+const logoutUsuario = async (req, res) => {
+  // En este diseño con JWT sin blacklist, el logout es responsabilidad del cliente
+  // (eliminar el token). Aquí devolvemos 200 para confirmar cierre de sesión.
+  res.json({ mensaje: 'Sesión cerrada' })
+}
+
+module.exports = { registrarUsuario, loginUsuario, logoutUsuario }

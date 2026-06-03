@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from 'react'
 import {
-  IonPage, IonContent, IonHeader, IonToolbar, IonButtons,
-  IonButton, IonIcon, IonCard, IonCardContent, IonGrid, IonRow, IonCol,
+  IonPage, IonContent, IonHeader, IonToolbar,
+  IonCard, IonCardContent, IonGrid, IonRow, IonCol,
   IonText, IonNote,
 } from '@ionic/react'
-import { arrowBack } from 'ionicons/icons'
 import { useNavigate } from 'react-router-dom'
+import BotonVolver from '../components/BotonVolver'
 import BotonPrimario  from '../components/BotonPrimario'
 import CalendarPicker from '../components/CalendarPicker'
 import PageTransition from '../components/PageTransition'
@@ -183,12 +183,9 @@ export default function Agendar() {
     <IonPage className="agendar-page">
       <IonHeader className="ion-no-border agendar-header">
         <IonToolbar>
-          <IonButtons slot="start">
-            <IonButton className="agendar-btn-volver" onClick={() => navigate(-1)}>
-              <IonIcon slot="start" icon={arrowBack} />
-              Volver
-            </IonButton>
-          </IonButtons>
+          <div className="absolute top-4 left-4 z-10">
+            <BotonVolver to="/" label="Inicio" />
+          </div>
         </IonToolbar>
       </IonHeader>
 

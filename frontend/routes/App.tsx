@@ -12,6 +12,7 @@ import ConfirmacionCita from '../src/pages/ConfirmacionCita'
 import AdminPanel      from '../src/pages/admin/AdminPanel'
 import GestionCitas    from '../src/pages/admin/GestionCitas'
 import Dashboard       from '../src/pages/Dashboard'
+import CambiarPassword from '../src/pages/CambiarPassword'
 import RutaProtegida   from '../src/components/RutaProtegida'
 
 export default function App() {
@@ -33,6 +34,11 @@ export default function App() {
         <Route path="/dashboard" element={
           <RutaProtegida>
             <Dashboard />
+          </RutaProtegida>
+        } />
+        <Route path="/cambiar-password" element={
+          <RutaProtegida>
+            <CambiarPassword />
           </RutaProtegida>
         } />
 

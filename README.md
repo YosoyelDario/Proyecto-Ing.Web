@@ -110,7 +110,7 @@ Se han desarrollado las pantallas principales asegurando coherencia con la arqui
   * `/components`: Almacena componentes de UI reutilizables.
   * `/routes`: Define la lógica de enrutamiento y las validaciones de las rutas protegidas.
   * `/services`: Carpeta preparada para la futura integración con el backend y llamadas a la API.
-
+## [EP 2.1] Creación del servidor en Node.js con Express
 ## [EP 2.2] Configuración y modelado de la base de datos
 
 Se diseñó y modeló una base de datos relacional normalizada en el motor ... que garantiza integridad de datos, escalabilidad y rastrabilidad de operaciones.
@@ -132,3 +132,13 @@ Se modeló la BD a usar considerando 8 entidades como se observa en el modelo re
 6. Recomienzo utilizar pnpm porque es mas seguro, para instalar packages tanto en frontend como backend.
 7. Unicamente esta la posibilidad de crear cuentas, si lo quieren probar, deben duplicar el .env example y borrar el "example", posteriormente modificar el DB_PASSWORD=tu_password (porque seugramente tengas lo mismo, y si no, sabes lo que estas haciendo xd)
 8. Prueben a crear un usuario, pueden revisar la completitud tanto en pg4admin, haciendo click derecho en las tablas y viendo la data de la tabla usuario, o sino con F12 en el navegador
+
+## [EP 2.3] Desarrollo de API REST
+
+## [EP 2.4] Consumo de API REST desde Ionic
+
+## [EP 2.5] Implementación de autenticación con JWT
+
+## [EP 2.6] Validación de usuarios y manejo de sesiones
+
+## [EP 2.7] Pruebas funcionales

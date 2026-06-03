@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   IonPage, IonContent, IonHeader, IonToolbar,
-  IonButtons, IonButton, IonIcon, IonCard, IonCardContent, IonText, IonNote
+  IonCard, IonCardContent, IonText, IonNote
 } from '@ionic/react'
-import { arrowBack } from 'ionicons/icons'
+import BotonVolver from '../components/BotonVolver'
 import BotonPrimario from '../components/BotonPrimario'
 import PageTransition from '../components/PageTransition'
 import { AuthService, apiFetch } from '../services/AuthServices'
@@ -92,12 +92,9 @@ export default function Dashboard() {
     <IonPage>
       <IonHeader className="ion-no-border">
         <IonToolbar>
-          <IonButtons slot="start">
-            <IonButton onClick={() => navigate('/')}>
-              <IonIcon slot="start" icon={arrowBack} />
-              Inicio
-            </IonButton>
-          </IonButtons>
+          <div className="absolute top-4 left-4 z-10">
+            <BotonVolver to="/" label="Inicio" />
+          </div>
         </IonToolbar>
       </IonHeader>
 
@@ -135,6 +132,11 @@ export default function Dashboard() {
                 </div>
               </IonCardContent>
             </IonCard>
+
+            {/* ── Botón cambiar contraseña ── */}
+            <BotonPrimario to="/cambiar-password" variante="solido" fullWidth className="mb-4">
+              Cambiar contraseña
+            </BotonPrimario>
 
             {/* ── Botón agendar ── */}
             <BotonPrimario to="/agendar" variante="solido" fullWidth className="mb-8">
