@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
 import {
   IonPage, IonContent, IonHeader, IonToolbar,
   IonCard, IonCardContent, IonText, IonNote
@@ -12,7 +11,6 @@ import PageTransition from '../components/PageTransition'
 import { apiFetch } from '../services/AuthServices'
 
 export default function CambiarPassword() {
-  const navigate = useNavigate()
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -46,6 +44,14 @@ export default function CambiarPassword() {
         method: 'PATCH',
         body: JSON.stringify({ currentPassword, newPassword }),
       })
+
+      // Manejar errores HTTP explícitamente (apiFetch solo lanza en 401/403)
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({}))
+        setError(body.error || 'Error al cambiar la contraseña.')
+        return
+      }
+
       const data = await response.json()
       setSuccess(data.mensaje || 'Contraseña actualizada correctamente.')
       setCurrentPassword('')
