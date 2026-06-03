@@ -1,0 +1,688 @@
+openapi: 3.0.3
+info:
+  title: API Santo Domingo
+  version: 2.0.0
+  description: API para agenda de citas médicas del proyecto Santo Domingo.
+servers:
+  - url: http://localhost:3000
+    description: Servidor local de desarrollo
+paths:
+  /:
+    get:
+      summary: Health check
+      description: Verifica que la API esté funcionando.
+      responses:
+        '200':
+          description: API funcionando
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                  version:
+                    type: string
+  /api/auth/register:
+    post:
+      summary: Registrar usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Usuario registrado exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                  usuario:
+                    $ref: '#/components/schemas/UserSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /api/auth/login:
+    post:
+      summary: Iniciar sesión
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Inicio de sesión correcto
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  usuario:
+                    $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/auth/logout:
+    post:
+      summary: Cerrar sesión
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Sesión cerrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/citas/disponibilidad:
+    get:
+      summary: Obtener horarios disponibles para un médico en una fecha
+      parameters:
+        - name: id_medico
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: fecha
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Disponibilidad de horarios
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  horarios:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /api/citas/mis-citas:
+    get:
+      summary: Listar citas del usuario autenticado
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de citas del usuario
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CitaResumen'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/citas/all:
+    get:
+      summary: Listar todas las citas (solo admin)
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de todas las citas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CitaResumenAdmin'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/citas/{codigo}:
+    get:
+      summary: Obtener cita por código de referencia
+      parameters:
+        - name: codigo
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detalle de la cita
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CitaDetalle'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      summary: Actualizar fecha y hora de una cita
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: codigo
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CitaUpdateRequest'
+      responses:
+        '200':
+          description: Cita actualizada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                  cita:
+                    $ref: '#/components/schemas/CitaDetalle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/citas/{codigo}/cancelar:
+    patch:
+      summary: Cancelar una cita
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: codigo
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Cita cancelada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                  cita:
+                    $ref: '#/components/schemas/CitaDetalle'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/citas:
+    post:
+      summary: Crear nueva cita
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/CitaCreateAuthRequest'
+                - $ref: '#/components/schemas/CitaCreateGuestRequest'
+      responses:
+        '201':
+          description: Cita creada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                  codigo_referencia:
+                    type: string
+                  cita:
+                    $ref: '#/components/schemas/CitaDetalle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/usuarios/me:
+    get:
+      summary: Obtener perfil del usuario autenticado
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Perfil de usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    patch:
+      summary: Actualizar región y comuna del usuario
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegionComunaRequest'
+      responses:
+        '200':
+          description: Perfil actualizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                  usuario:
+                    $ref: '#/components/schemas/UserProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    delete:
+      summary: Eliminar cuenta del usuario autenticado
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Cuenta eliminada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/usuarios/me/password:
+    patch:
+      summary: Cambiar contraseña del usuario autenticado
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordChangeRequest'
+      responses:
+        '200':
+          description: Contraseña actualizada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/usuarios/admin:
+    post:
+      summary: Crear usuario administrador
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Usuario administrador creado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+                  usuario:
+                    $ref: '#/components/schemas/UserProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /api/especialidades:
+    get:
+      summary: Listar especialidades médicas
+      responses:
+        '200':
+          description: Lista de especialidades
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Especialidad'
+  /api/especialidades/{id}/medicos:
+    get:
+      summary: Listar médicos por especialidad
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de médicos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Medico'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+  /api/regiones:
+    get:
+      summary: Listar regiones y comunas disponibles
+      responses:
+        '200':
+          description: Lista de regiones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    region:
+                      type: string
+                    comunas:
+                      type: array
+                      items:
+                        type: string
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - rut
+        - nombre_completo
+        - email
+        - password
+        - region
+        - comuna
+      properties:
+        rut:
+          type: string
+          example: '12.345.678-9'
+        nombre_completo:
+          type: string
+          example: 'Juan Pérez'
+        email:
+          type: string
+          format: email
+          example: 'juan@example.com'
+        password:
+          type: string
+          format: password
+          example: 'MiPass123!'
+        region:
+          type: string
+          example: 'Metropolitana'
+        comuna:
+          type: string
+          example: 'Santiago'
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: 'juan@example.com'
+        password:
+          type: string
+          format: password
+          example: 'MiPass123!'
+    UserSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+        rut:
+          type: string
+        email:
+          type: string
+          format: email
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+        rut:
+          type: string
+        nombre_completo:
+          type: string
+        email:
+          type: string
+          format: email
+        region:
+          type: string
+        comuna:
+          type: string
+        is_admin:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+    CitaResumen:
+      type: object
+      properties:
+        id:
+          type: integer
+        codigo_referencia:
+          type: string
+        fecha:
+          type: string
+          format: date
+        hora:
+          type: string
+          example: '09:30'
+        estado:
+          type: string
+        medico:
+          type: string
+        especialidad:
+          type: string
+        id_medico:
+          type: integer
+    CitaResumenAdmin:
+      allOf:
+        - $ref: '#/components/schemas/CitaResumen'
+        - type: object
+          properties:
+            rut:
+              type: string
+            nombre:
+              type: string
+            email:
+              type: string
+    CitaDetalle:
+      type: object
+      properties:
+        id:
+          type: integer
+        codigo_referencia:
+          type: string
+        fecha:
+          type: string
+          format: date
+        hora:
+          type: string
+        estado:
+          type: string
+        id_paciente:
+          type: integer
+          nullable: true
+        id_medico:
+          type: integer
+        medico:
+          type: string
+        especialidad:
+          type: string
+        rut:
+          type: string
+        nombre:
+          type: string
+        email:
+          type: string
+          format: email
+    CitaCreateAuthRequest:
+      type: object
+      required:
+        - id_medico
+        - fecha
+        - hora
+      properties:
+        id_medico:
+          type: integer
+        fecha:
+          type: string
+          format: date
+          example: '2026-06-10'
+        hora:
+          type: string
+          example: '10:00'
+    CitaCreateGuestRequest:
+      type: object
+      required:
+        - id_medico
+        - fecha
+        - hora
+        - rut
+        - nombre
+        - email
+      properties:
+        id_medico:
+          type: integer
+        fecha:
+          type: string
+          format: date
+          example: '2026-06-10'
+        hora:
+          type: string
+          example: '10:00'
+        rut:
+          type: string
+          example: '12.345.678-9'
+        nombre:
+          type: string
+          example: 'María Gómez'
+        email:
+          type: string
+          format: email
+          example: 'maria@example.com'
+    CitaUpdateRequest:
+      type: object
+      required:
+        - fecha
+        - hora
+      properties:
+        fecha:
+          type: string
+          format: date
+          example: '2026-06-12'
+        hora:
+          type: string
+          example: '11:00'
+    RegionComunaRequest:
+      type: object
+      required:
+        - region
+        - comuna
+      properties:
+        region:
+          type: string
+          example: 'Metropolitana'
+        comuna:
+          type: string
+          example: 'Providencia'
+    PasswordChangeRequest:
+      type: object
+      required:
+        - currentPassword
+        - newPassword
+      properties:
+        currentPassword:
+          type: string
+          format: password
+        newPassword:
+          type: string
+          format: password
+  responses:
+    BadRequest:
+      description: Petición inválida
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    Unauthorized:
+      description: No autorizado
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    Forbidden:
+      description: Acceso denegado
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+    Conflict:
+      description: Conflicto de datos
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
