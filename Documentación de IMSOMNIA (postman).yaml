@@ -1,0 +1,694 @@
+type: collection.insomnia.rest/5.0
+schema_version: "5.1"
+name: Proyecto ingeniería WEB
+meta:
+  id: wrk_3ea1769f20274394a86934386a269c53
+  created: 1780460067911
+  modified: 1780460067911
+  description: ""
+collection:
+  - name: Proyecto ingeniería WEB
+    meta:
+      id: fld_f1c543da3c0c4c9e9afea6a3337d88de
+      created: 1780460067913
+      modified: 1780530196192
+      sortKey: -1780460063031
+      description: |-
+        ### Welcome to Postman! This is your first collection. 
+
+        Collections are your starting point for building and testing APIs. You can use this one to:
+
+        • Group related requests
+        • Test your API in real-world scenarios
+        • Document and share your requests
+
+        Update the name and overview whenever you’re ready to make it yours.
+
+        [Learn more about Postman Collections.](https://learning.postman.com/docs/collections/collections-overview/)
+    children:
+      - name: citas
+        meta:
+          id: fld_9297427dff0a4b6fac17b9c4fe31f10a
+          created: 1780460067914
+          modified: 1780539845636
+          sortKey: -1780460063030
+          description: ""
+        children:
+          - url: http://localhost:3000/api/citas/9VH3F6JX
+            name: (solo admin) eliminarCita
+            meta:
+              id: req_83475177c5d448198d76fb87d6d6f14c
+              created: 1780460067915
+              modified: 1780539828617
+              isPrivate: false
+              description: >-
+                This is a GET request and it is used to "get" data from an
+                endpoint. There is no request body for a GET request, but you
+                can use query parameters to help specify the resource you want
+                data on (e.g., in this request, we have `id=1`).
+
+
+                A successful GET response will have a `200 OK` status, and
+                should include some kind of response body - for example, HTML
+                web content or JSON data.
+              sortKey: -1780460063029
+            method: DELETE
+            authentication:
+              type: bearer
+              token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywicnV0IjoiMjEuNTYzLjk2MC02Iiwibm9tYnJlX2NvbXBsZXRvIjoiSm9hcXXDrW4gQ29ybmVqbyBGZXJuw6FuZGV6IiwiZW1haWwiOiJqb2FxdWluY29ybmVqb2YuMTBAZ21haWwuY29tIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc4MDUzMDE3MSwiZXhwIjoxNzgwNTU4OTcxfQ.jBoEmbEToLDWQ3eYVHeEZvLxO1QuHBdct5lelChMAXs
+            scripts:
+              afterResponse: |-
+                insomnia.test("Status code is 200", function () {
+                    insomnia.response.to.have.status(200);
+                });
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/api/citas/disponibilidad?id_medico=3&fecha=2026-06-08
+            name: Obtener Disponibilidad
+            meta:
+              id: req_ef3ebe67f005491888b5793f8d2bb3c7
+              created: 1780529897061
+              modified: 1780539828617
+              isPrivate: false
+              description: ""
+              sortKey: -1780529897061
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "http://localhost:3000/api/citas/mis-citas    "
+            name: Listar citas
+            meta:
+              id: req_8bbc9ab0e2ab483ab0a1107ea0738aa2
+              created: 1780533288510
+              modified: 1780539828617
+              isPrivate: false
+              description: ""
+              sortKey: -1780533288510
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            authentication:
+              type: bearer
+              token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywicnV0IjoiMjEuNTYzLjk2MC02Iiwibm9tYnJlX2NvbXBsZXRvIjoiSm9hcXXDrW4gQ29ybmVqbyBGZXJuw6FuZGV6IiwiZW1haWwiOiJqb2FxdWluY29ybmVqb2YuMTBAZ21haWwuY29tIiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3ODA1MzM0MzYsImV4cCI6MTc4MDU2MjIzNn0.2wMaw_zApRMQxvYoggOCkKxpogEXIBJI1I_M1EmgN0Y
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/api/citas/all
+            name: (solo admin) listasCitas
+            meta:
+              id: req_4a5e292702934e33bcc11ecbda1a5c4a
+              created: 1780533458508
+              modified: 1780539828616
+              isPrivate: false
+              description: ""
+              sortKey: -1780533458508
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            authentication:
+              type: bearer
+              token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywicnV0IjoiMjEuNTYzLjk2MC02Iiwibm9tYnJlX2NvbXBsZXRvIjoiSm9hcXXDrW4gQ29ybmVqbyBGZXJuw6FuZGV6IiwiZW1haWwiOiJqb2FxdWluY29ybmVqb2YuMTBAZ21haWwuY29tIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc4MDUzMzUyNiwiZXhwIjoxNzgwNTYyMzI2fQ.mn7GoqDB13zkd23kmHkP0TbeqrjnC3o5UvNWI0l4XJ4
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/api/citas/L78CQH6B
+            name: Obtener Cita por codigo
+            meta:
+              id: req_ca72bc260b024e89b5c3dc6e2fd8ab3b
+              created: 1780533549205
+              modified: 1780539828617
+              isPrivate: false
+              description: ""
+              sortKey: -1780533549205
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            authentication:
+              type: none
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: "http://localhost:3000/api/citas "
+            name: Crear nueva cita
+            meta:
+              id: req_620182c7f0ee4190a2392ea94c5c1533
+              created: 1780533667713
+              modified: 1780539828617
+              isPrivate: false
+              description: ""
+              sortKey: -1780533667713
+            method: POST
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                	"id_medico": 1,
+                	"fecha": "08-06-2026",
+                	"hora": "9:00",
+                	"rut": "21.563.960-6",
+                	"nombre": "Joaquín Cornejo Fernández",
+                	"email": "joaquincornejof.10@gmail.com"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/api/citas/EWF7E4MU
+            name: actualizar Cita
+            meta:
+              id: req_faaa35e7b0c345e6b67a63ff23bfad2d
+              created: 1780533989946
+              modified: 1780539828617
+              isPrivate: false
+              description: ""
+              sortKey: -1780533989946
+            method: PATCH
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                	"fecha": "10-06-2026", 
+                	"hora": "15:00",
+                	"codigo": "EWF7E4MU"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/api/citas/EWF7E4MU/cancelar
+            name: Cancelar Cita
+            meta:
+              id: req_e240dae038f044829dc95f20db725f53
+              created: 1780534214289
+              modified: 1780539828617
+              isPrivate: false
+              description: ""
+              sortKey: -1780534214289
+            method: PATCH
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+      - name: auth
+        meta:
+          id: fld_4bdd7270b9ae481b9ae92009a12338ca
+          created: 1780460067918
+          modified: 1780525910940
+          sortKey: -1780460063130
+          description: ""
+        children:
+          - url: http://localhost:3000/api/auth/register
+            name: register
+            meta:
+              id: req_801b4351d0a546c4b3a261a0db28ccae
+              created: 1780460067919
+              modified: 1780525910940
+              isPrivate: false
+              description: ""
+              sortKey: -1780460063026
+            method: POST
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                        "rut":            "15546114-4",
+                        "nombre_completo": "Francisco Octavio Segundo",
+                        "email":          "mail@gmail.com",
+                        "password":     "pass1234",
+                        "region":   "Coquimbo",
+                        "comuna":   "Canela"
+
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/api/auth/login
+            name: login
+            meta:
+              id: req_e5de4bb40a744fc0b39226338cb0403b
+              created: 1780493081256
+              modified: 1780538968968
+              isPrivate: false
+              description: ""
+              sortKey: -1780460062981.9062
+            method: POST
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                        "email":          "joaquincornejof.10@gmail.com",
+                        "password":     "franciscoCarrasco"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/api/auth/logout
+            name: logout
+            meta:
+              id: req_f49526e1aee74dc69e49743a8b711405
+              created: 1780493085633
+              modified: 1780525910940
+              isPrivate: false
+              description: ""
+              sortKey: -1780460062959.8594
+            method: POST
+            body:
+              mimeType: application/json
+              text: ""
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: Authorization
+                value: Bearer
+                  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicnV0IjoiMTU1NDYxMTQtNCIsIm5vbWJyZV9jb21wbGV0byI6IkZyYW5jaXNjbyBPY3RhdmlvIFNlZ3VuZG8iLCJlbWFpbCI6Im1pbG92YW5jb2xvY29sb0BnbWFpbC5jb20iLCJpc19hZG1pbiI6dHJ1ZSwiaWF0IjoxNzgwNDkzMjQ4LCJleHAiOjE3ODA1MjIwNDh9.9wE1QnwaCld1oriJ6M7Wz7pwXtISf50n_n6NxWtFCw0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+      - name: profesionales
+        meta:
+          id: fld_37fba2b1ddd34ba19d80eba7756a0e0c
+          created: 1780461821921
+          modified: 1780537810308
+          sortKey: -1780460063027.5
+          description: ""
+        children:
+          - url: http://localhost:3000/api/especialidades/1/medicos
+            name: Listar medicos por especialidad
+            meta:
+              id: req_3a972057a7bf48598b144a7155fc71b9
+              created: 1780537795589
+              modified: 1780540653781
+              isPrivate: false
+              description: ""
+              sortKey: -1780537798110.5
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/api/especialidades
+            name: Listar especialidades disponibles
+            meta:
+              id: req_caaae0e32d344ce6aaf669a9b4a8c99b
+              created: 1780537800632
+              modified: 1780540577693
+              isPrivate: false
+              description: ""
+              sortKey: -1780537800632
+            method: GET
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            authentication:
+              type: bearer
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/api/profesionales
+            name: (solo admin) Crear un profesional
+            meta:
+              id: req_5b693a7946984d8ca66c59a7434f1373
+              created: 1780537804696
+              modified: 1780540193997
+              isPrivate: false
+              description: ""
+              sortKey: -1780537804696
+            method: POST
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                	"rut": "19.438.337-1",
+                	"nombre": "Matias Fernandez",
+                	"id_especialidad": 3
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            authentication:
+              type: bearer
+              token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywicnV0IjoiMjEuNTYzLjk2MC02Iiwibm9tYnJlX2NvbXBsZXRvIjoiSm9hcXXDrW4gQ29ybmVqbyBGZXJuw6FuZGV6IiwiZW1haWwiOiJqb2FxdWluY29ybmVqb2YuMTBAZ21haWwuY29tIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc4MDUzOTEwNywiZXhwIjoxNzgwNTY3OTA3fQ.bn47Qan07PKFE6EXuY3v1-hlbTaxy29ow65WPIbw_Pg
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/api/profesionales/16
+            name: (solo admin) Actualizar profesional
+            meta:
+              id: req_ea0f92371eb341bc9c45da1987e4a996
+              created: 1780537814352
+              modified: 1780540479363
+              isPrivate: false
+              description: ""
+              sortKey: -1780537814352
+            method: PATCH
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                	"nombre": "Francisco Milovan",
+                	"id_especialidad": 1
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            authentication:
+              type: bearer
+              token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywicnV0IjoiMjEuNTYzLjk2MC02Iiwibm9tYnJlX2NvbXBsZXRvIjoiSm9hcXXDrW4gQ29ybmVqbyBGZXJuw6FuZGV6IiwiZW1haWwiOiJqb2FxdWluY29ybmVqb2YuMTBAZ21haWwuY29tIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc4MDU0MDM0NSwiZXhwIjoxNzgwNTY5MTQ1fQ.ylOMo6ZPpqjSGZjQGO87Pgv3GC4vilOeDWalgOhxWOs
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/api/profesionales/17
+            name: (solo admin) Eliminar un profesional
+            meta:
+              id: req_4e70d68ab13645b98c6e78761dee2b37
+              created: 1780537822213
+              modified: 1780540264015
+              isPrivate: false
+              description: ""
+              sortKey: -1780537822213
+            method: DELETE
+            headers:
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            authentication:
+              type: bearer
+              token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywicnV0IjoiMjEuNTYzLjk2MC02Iiwibm9tYnJlX2NvbXBsZXRvIjoiSm9hcXXDrW4gQ29ybmVqbyBGZXJuw6FuZGV6IiwiZW1haWwiOiJqb2FxdWluY29ybmVqb2YuMTBAZ21haWwuY29tIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc4MDU0MDI1NiwiZXhwIjoxNzgwNTY5MDU2fQ.8CFyE1G_d6Qc_r6NZg12_T58R3znWpGsOH102v-F7NA
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+      - name: usuarios
+        meta:
+          id: fld_640cdb0a371744449b3022a166364d0a
+          created: 1780461867781
+          modified: 1780525910940
+          sortKey: -1780460062950.625
+          description: ""
+        children:
+          - url: http://localhost:3000/api/usuarios/me
+            name: Actualizar comuna y/o region
+            meta:
+              id: req_aebd6937d33440c1a920a8529e1d11f3
+              created: 1780461920140
+              modified: 1780539828617
+              isPrivate: false
+              description: ""
+              sortKey: -1780461924610
+            method: PATCH
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                	"region": "Coquimbo",
+                	"comuna": "Canela"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            authentication:
+              type: bearer
+              token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywicnV0IjoiMjEuNTYzLjk2MC02Iiwibm9tYnJlX2NvbXBsZXRvIjoiSm9hcXXDrW4gQ29ybmVqbyBGZXJuw6FuZGV6IiwiZW1haWwiOiJqb2FxdWluY29ybmVqb2YuMTBAZ21haWwuY29tIiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3ODA1MzU2NjksImV4cCI6MTc4MDU2NDQ2OX0.6JyFM58DiHU5Ic4kTxHG0yuhoZdeFpYq8fxamescP_U
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/api/usuarios/me/password
+            name: cambiarContraseña
+            meta:
+              id: req_24e9f3501e484fd8b20ab2535017c7b0
+              created: 1780493093623
+              modified: 1780539828617
+              isPrivate: false
+              description: ""
+              sortKey: -1780461924810
+            method: PATCH
+            body:
+              mimeType: application/json
+              text: |-
+                {
+                        "currentPassword":     "mish2",
+                				"newPassword":     "franciscoCarrasco"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+            authentication:
+              type: bearer
+              token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywicnV0IjoiMjEuNTYzLjk2MC02Iiwibm9tYnJlX2NvbXBsZXRvIjoiSm9hcXXDrW4gQ29ybmVqbyBGZXJuw6FuZGV6IiwiZW1haWwiOiJqb2FxdWluY29ybmVqb2YuMTBAZ21haWwuY29tIiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3ODA1MzU3NDMsImV4cCI6MTc4MDU2NDU0M30.T7o9n7OLeJto8weQ9Ntfql2iTYCPSC81Lg1wPrF2170
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/api/usuarios/me
+            name: borrarCuentaPropia
+            meta:
+              id: req_676eb77fd496495e81a366b4d7772368
+              created: 1780500958432
+              modified: 1780539828617
+              isPrivate: false
+              description: ""
+              sortKey: -1780461924510
+            method: DELETE
+            body:
+              mimeType: multipart/form-data
+            headers:
+              - name: Content-Type
+                value: multipart/form-data
+            authentication:
+              type: bearer
+              token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OSwicnV0IjoiMTU1NDYxMTQtNCIsIm5vbWJyZV9jb21wbGV0byI6IkZyYW5jaXNjbyBPY3RhdmlvIFNlZ3VuZG8iLCJlbWFpbCI6Im1pbG92YW5jb2xvY29sb0BnbWFpbC5jb20iLCJpc19hZG1pbiI6ZmFsc2UsImlhdCI6MTc4MDUzNzcxNSwiZXhwIjoxNzgwNTY2NTE1fQ.x80S3rj09vGRm5aU7MD0qRSf70-mRYoDlA_YTIxyJhU
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/api/usuarios/me
+            name: Ver mi perfil
+            meta:
+              id: req_e2cc16b7e0d64f14aa460867b71543eb
+              created: 1780501089217
+              modified: 1780539828617
+              isPrivate: false
+              description: ""
+              sortKey: -1780461924710
+            method: GET
+            body:
+              mimeType: application/json
+              text: ""
+            headers:
+              - name: Content-Type
+                value: application/json
+            authentication:
+              type: bearer
+              token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywicnV0IjoiMjEuNTYzLjk2MC02Iiwibm9tYnJlX2NvbXBsZXRvIjoiSm9hcXXDrW4gQ29ybmVqbyBGZXJuw6FuZGV6IiwiZW1haWwiOiJqb2FxdWluY29ybmVqb2YuMTBAZ21haWwuY29tIiwiaXNfYWRtaW4iOmZhbHNlLCJpYXQiOjE3ODA1MzUzMTUsImV4cCI6MTc4MDU2NDExNX0.8BVWusaTWWmiIxUYVyf1gYWcpSA0COqZojf_vq7m8_E
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+          - url: http://localhost:3000/api/usuarios/admin
+            name: (solo admin) Hacer usuario admin
+            meta:
+              id: req_6353f80c2f7b4cfa866d0ad67c6f363d
+              created: 1780535902887
+              modified: 1780539828617
+              isPrivate: false
+              description: ""
+              sortKey: -1780535902887
+            method: POST
+            body:
+              mimeType: application/json
+              text: |-
+                
+                {
+                	"rut": "23870067-1",
+                	"nombre_completo": "Bresman Garzon Vargas", 
+                	"email": "bresmangarzon@gmail.com",
+                	"password": "bresman",
+                	"region": "Valparaíso",
+                	"comuna": "Hijuelas"
+                }
+            headers:
+              - name: Content-Type
+                value: application/json
+              - name: User-Agent
+                value: insomnia/12.6.0
+                description: ""
+                disabled: false
+            authentication:
+              type: bearer
+              token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywicnV0IjoiMjEuNTYzLjk2MC02Iiwibm9tYnJlX2NvbXBsZXRvIjoiSm9hcXXDrW4gQ29ybmVqbyBGZXJuw6FuZGV6IiwiZW1haWwiOiJqb2FxdWluY29ybmVqb2YuMTBAZ21haWwuY29tIiwiaXNfYWRtaW4iOnRydWUsImlhdCI6MTc4MDUzNjE1NSwiZXhwIjoxNzgwNTY0OTU1fQ.RzaUGVT2MP5zoytO8Ikqn8OLzvbJ0j2_5AE84WG8gVY
+            settings:
+              renderRequestBody: true
+              encodeUrl: true
+              followRedirects: global
+              cookies:
+                send: true
+                store: true
+              rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_2f14adc689a225b1d0ff79dd47a8ac2fc34084b6
+    created: 1780460068416
+    modified: 1780530196190
+environments:
+  name: Base Environment
+  meta:
+    id: env_2f14adc689a225b1d0ff79dd47a8ac2fc34084b6
+    created: 1780460067922
+    modified: 1780530196191
+    isPrivate: false
