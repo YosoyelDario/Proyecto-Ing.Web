@@ -102,7 +102,7 @@ export default function Home() {
                   <BotonPrimario to="/dashboard" variante="solido" fullWidth ariaLabel="Ver mi perfil y citas">
                     Mi perfil
                   </BotonPrimario>
-                  <BotonPrimario variante="outline" fullWidth onClick={handleCerrarSesion} ariaLabel="Cerrar sesión">
+                  <BotonPrimario variante="outline" fullWidth onClick={handleCerrarSesion} as="a" ariaLabel="Cerrar sesión">
                     Cerrar sesión
                   </BotonPrimario>
                 </>

@@ -4,13 +4,14 @@ import { Link } from 'react-router-dom'
 interface BotonPrimarioProps {
   children: React.ReactNode
   to?: string
-  onClick?: (e?: React.FormEvent) => void
+  onClick?: React.MouseEventHandler<HTMLButtonElement | HTMLAnchorElement>
   variante?: 'solido' | 'outline' | 'texto'
   fullWidth?: boolean
   type?: 'button' | 'submit' | 'reset'
   disabled?: boolean
   ariaLabel?: string
   className?: string
+  as?: 'button' | 'a' // <-- Añadimos esta prop para controlar el elemento renderizado
 }
 
 const base = `
@@ -56,6 +57,7 @@ export default function BotonPrimario({
   disabled = false,
   ariaLabel,
   className = '',
+  as = 'button', // <-- Por defecto siempre será 'button' para proteger tus formularios
 }: BotonPrimarioProps) {
   const clases = [
     base,
@@ -66,6 +68,7 @@ export default function BotonPrimario({
 
   const tapStyle = { WebkitTapHighlightColor: 'transparent' } as React.CSSProperties
 
+  // 1. Si tiene 'to', se comporta como un Link de React Router
   if (to) {
     return (
       <Link
@@ -73,7 +76,6 @@ export default function BotonPrimario({
         aria-label={ariaLabel}
         className={clases}
         style={tapStyle}
-        // Evita que React Router herede colores de <a> del navegador
         tabIndex={disabled ? -1 : undefined}
         aria-disabled={disabled}
       >
@@ -82,6 +84,24 @@ export default function BotonPrimario({
     )
   }
 
+  // 2. Si explícitamente pides as="a", se renderiza como etiqueta <a> (Caso Cerrar Sesión)
+  if (as === 'a') {
+    return (
+      <a
+        role="button"
+        onClick={disabled ? undefined : onClick}
+        aria-label={ariaLabel}
+        className={clases}
+        style={tapStyle}
+        tabIndex={disabled ? -1 : 0}
+        aria-disabled={disabled}
+      >
+        {children}
+      </a>
+    )
+  }
+
+  // 3. Por defecto (Formularios / Submits), sigue siendo un <button> tradicional
   return (
     <button
       type={type}

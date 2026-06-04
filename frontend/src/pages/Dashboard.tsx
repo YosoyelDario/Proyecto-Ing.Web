@@ -104,9 +104,9 @@ export default function Dashboard() {
 
             {/* ── Encabezado ── */}
             <IonText>
-              <h1 className="text-[26px] font-semibold text-[#3aada0] mb-1">Mi perfil</h1>
+              <h1 className="text-[26px] font-semibold text-[#3aada0]! mb-1">Mi perfil </h1>
             </IonText>
-            <IonNote className="text-[14px] text-[#7a8a9a] block mb-8">
+            <IonNote className="text-[20px] text-[#7a8a9a] block mb-8">
               Bienvenido, {usuario.nombre_completo}
             </IonNote>
 

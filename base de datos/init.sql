@@ -133,11 +133,11 @@ CREATE TABLE cita (
     UNIQUE (id_medico, fecha, hora),
 
   -- modelo mixto: o tiene cuenta o es invitado, nunca los dos
-  CONSTRAINT chk_cita_paciente
-    CHECK (
-      (id_paciente IS NOT NULL AND rut_paciente IS NULL) OR
-      (id_paciente IS NULL     AND rut_paciente IS NOT NULL)
-    ),
+  CONSTRAINT chk_cita_paciente CHECK (
+  id_paciente IS NOT NULL
+  OR
+  (rut_paciente IS NOT NULL AND nombre_paciente IS NOT NULL AND email_paciente IS NOT NULL)
+),
 
   CONSTRAINT chk_cita_estado
     CHECK (estado IN ('Agendada', 'Completada', 'Cancelada', 'NoAsiste'))

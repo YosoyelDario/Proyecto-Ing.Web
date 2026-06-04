@@ -6,6 +6,7 @@ const {
   crearCita,
   modificarCita,
   cancelarCita,
+  eliminarCita,
 } = require('../db/queries/citas')
 
 // ── GET /api/citas/mis-citas  (usuario autenticado) ──────────────────────
@@ -51,7 +52,6 @@ const obtenerDisponibilidad = async (req, res) => {
   if (!id_medico || !fecha) {
     return res.status(400).json({ error: 'Se requieren id_medico y fecha.' })
   }
-  // Validar formato de fecha
   if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
     return res.status(400).json({ error: 'Formato de fecha inválido. Use YYYY-MM-DD.' })
   }
@@ -72,7 +72,6 @@ const crearNuevaCita = async (req, res) => {
     return res.status(400).json({ error: 'Faltan campos obligatorios: id_medico, fecha, hora.' })
   }
 
-  // Determinar si es usuario autenticado o invitado
   const esAutenticado = !!req.usuario
 
   if (!esAutenticado && (!rut || !nombre || !email)) {
@@ -81,8 +80,16 @@ const crearNuevaCita = async (req, res) => {
 
   try {
     const payload = esAutenticado
-      ? { id_paciente: req.usuario.id, id_medico, fecha, hora }
-      : { rut_paciente: rut, nombre_paciente: nombre, email_paciente: email, id_medico, fecha, hora }
+  ? { 
+      id_paciente:     req.usuario.id,
+      rut_paciente:    req.usuario.rut,
+      nombre_paciente: req.usuario.nombre_completo,
+      email_paciente:  req.usuario.email,
+      id_medico, 
+      fecha, 
+      hora 
+    }
+  : { rut_paciente: rut, nombre_paciente: nombre, email_paciente: email, id_medico, fecha, hora }
 
     const cita = await crearCita(payload)
     res.status(201).json({
@@ -99,7 +106,7 @@ const crearNuevaCita = async (req, res) => {
   }
 }
 
-// ── PATCH /api/citas/:codigo  (modificar fecha/hora) ─────────────────────────
+// ── PATCH /api/citas/:codigo  (modificar fecha/hora) ─────────────────────
 const actualizarCita = async (req, res) => {
   const { fecha, hora } = req.body
   const { codigo } = req.params
@@ -109,19 +116,13 @@ const actualizarCita = async (req, res) => {
   }
 
   try {
-    //Buscamos la cita usando el parámetro correcto de la URL
     const citaActual = await getCitaPorCodigo(codigo)
-
     if (!citaActual) {
       return res.status(404).json({ error: 'Cita no encontrada.' })
     }
 
     const idEditor = req.usuario?.id || null
-    
-    // Ejecutamos la query de actualización real en PostgreSQL
     const actualizada = await modificarCita(citaActual.id, fecha, hora, idEditor)
-    
-    // Respondemos con éxito (200 OK)
     res.json({ mensaje: 'Cita modificada exitosamente.', cita: actualizada })
   } catch (err) {
     if (err.code === '23505') {
@@ -142,7 +143,6 @@ const cancelarCitaHandler = async (req, res) => {
       return res.status(409).json({ error: 'La cita ya está cancelada.' })
     }
 
-    // Verificar que el usuario tenga permisos
     const usuario = req.usuario
     if (usuario && !usuario.is_admin && cita.id_paciente !== usuario.id) {
       return res.status(403).json({ error: 'No tiene permiso para cancelar esta cita.' })
@@ -156,6 +156,20 @@ const cancelarCitaHandler = async (req, res) => {
   }
 }
 
+// ── DELETE /api/citas/:codigo  (solo admin) ──────────────────────────────
+const eliminarCitaHandler = async (req, res) => {
+  try {
+    const cita = await getCitaPorCodigo(req.params.codigo)
+    if (!cita) return res.status(404).json({ error: 'Cita no encontrada.' })
+
+    const eliminada = await eliminarCita(cita.id)
+    res.json({ mensaje: 'Cita eliminada permanentemente.', cita: eliminada })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Error al eliminar la cita.' })
+  }
+}
+
 module.exports = {
   listarCitasUsuario,
   listarTodasCitas,
@@ -164,4 +178,5 @@ module.exports = {
   crearNuevaCita,
   actualizarCita,
   cancelarCitaHandler,
+  eliminarCitaHandler,
 }

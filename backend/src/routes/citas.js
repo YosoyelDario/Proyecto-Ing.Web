@@ -7,6 +7,7 @@ const {
   crearNuevaCita,
   actualizarCita,
   cancelarCitaHandler,
+  eliminarCitaHandler,
 } = require('../controllers/citasController')
 const { verificarToken, tokenOpcional, soloAdmin } = require('../middleware/auth')
 
@@ -30,5 +31,8 @@ router.patch('/:codigo', tokenOpcional, actualizarCita)
 
 // PATCH /api/citas/:codigo/cancelar                  (autenticado O invitado)
 router.patch('/:codigo/cancelar', tokenOpcional, cancelarCitaHandler)
+
+// DELETE /api/citas/:codigo                          (solo admin eliminarCita)
+router.delete('/:codigo', verificarToken, soloAdmin, eliminarCitaHandler)
 
 module.exports = router
