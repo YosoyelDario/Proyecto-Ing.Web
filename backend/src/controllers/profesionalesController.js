@@ -27,14 +27,14 @@ const listarMedicosPorEspecialidad = async (req, res) => {
 
 // crearProfesional
 const crearProfesional = async (req, res) => {
-  const { nombre, id_especialidad } = req.body
-  if (!nombre || !id_especialidad) {
-    return res.status(400).json({ error: 'Faltan campos obligatorios: nombre, id_especialidad.' })
+  const { rut, nombre, id_especialidad } = req.body
+  if (!rut || !nombre || !id_especialidad) {
+    return res.status(400).json({ error: 'Faltan campos obligatorios: rut, nombre, id_especialidad.' })
   }
   try {
     const result = await pool.query(
-      `INSERT INTO profesional (nombre, id_especialidad) VALUES ($1, $2) RETURNING *`,
-      [nombre, id_especialidad]
+      `INSERT INTO profesional (rut, nombre, id_especialidad) VALUES ($1, $2, $3) RETURNING *`,
+      [rut, nombre, id_especialidad]
     )
     res.status(201).json({ mensaje: 'Profesional creado.', profesional: result.rows[0] })
   } catch (err) {
