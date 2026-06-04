@@ -135,10 +135,600 @@ Se modeló la BD a usar considerando 8 entidades como se observa en el modelo re
 
 ## [EP 2.3] Desarrollo de API REST
 
+La API REST fue desarrollada con **Express 5** sobre Node.js. Todos los endpoints retornan respuestas en formato **JSON** y utilizan los códigos HTTP estándar (`200`, `201`, `400`, `401`, `403`, `404`, `409`, `500`). La URL base del servidor es `http://localhost:3000`.
+
+La autenticación se maneja mediante **Bearer Token JWT** en el header `Authorization`. 
+Los niveles de acceso requeridos para interactuar con la interfaz se definen bajo tres categorías:
+
+- Público: El endpoint no requiere credenciales de autenticación (aunque algunos pueden aceptar token de forma opcional).
+
+- Usuario: El endpoint requiere la provisión de un token JWT válido en la cabecera del request.
+
+- Administrador: El endpoint exige un token JWT válido que contenga privilegios de rol administrativo.
+
+---
+
+### `/api/auth` — Autenticación
+
+| Método | Endpoint | Acceso | Descripción |
+|--------|----------|--------|-------------|
+| `POST` | `/api/auth/register` | Público | Registra un nuevo usuario paciente |
+| `POST` | `/api/auth/login` | Público | Inicia sesión y retorna un JWT |
+| `POST` | `/api/auth/logout` | Usuario | Cierra la sesión (invalida token en cliente) |
+
+**`POST /api/auth/register`**
+```json
+// Request body
+{
+  "rut": "12345678-9",
+  "nombre_completo": "Juan Pérez",
+  "email": "juan@correo.cl",
+  "password": "miContraseña123",
+  "region": "Valparaíso",
+  "comuna": "Limache"
+}
+// Response 201
+{ "mensaje": "Usuario registrado", "usuario": { "id": 1, "rut": "12345678-9", "email": "juan@correo.cl" } }
+```
+
+**`POST /api/auth/login`**
+```json
+// Request body
+{ "email": "juan@correo.cl", "password": "miContraseña123" }
+// Response 200
+{ "token": "<jwt>", "usuario": { "id": 1, "rut": "...", "nombre_completo": "...", "email": "...", "region": "...", "comuna": "...", "is_admin": false } }
+```
+
+---
+
+### `/api/citas` — Gestión de Citas
+
+| Método | Endpoint | Acceso | Descripción |
+|--------|----------|--------|-------------|
+| `GET` | `/api/citas/disponibilidad?id_medico=&fecha=` | Público | Retorna horarios disponibles para un médico en una fecha |
+| `GET` | `/api/citas/mis-citas` | Usuario | Retorna las citas del usuario en sesión |
+| `GET` | `/api/citas/all` | Administrador | Retorna todas las citas del sistema |
+| `GET` | `/api/citas/:codigo` | Público | Retorna el detalle de una cita por su código de referencia |
+| `POST` | `/api/citas` | Público (token Opcional) | Crea una nueva cita (soporta paciente con cuenta o invitado) |
+| `PATCH` | `/api/citas/:codigo` | Público (token Opcional) | Modifica la fecha y hora de una cita existente |
+| `PATCH` | `/api/citas/:codigo/cancelar` | Público (token Opcional) | Cancela una cita por su código de referencia |
+| `DELETE` | `/api/citas/:codigo` | Administrador | Elimina permanentemente una cita del sistema |
+
+**`POST /api/citas`** — Paciente con cuenta (token presente):
+```json
+// Request body (los datos del paciente se extraen del JWT)
+{ "id_medico": 2, "fecha": "2025-08-15", "hora": "10:30" }
+// Response 201
+{ "mensaje": "Cita agendada exitosamente.", "codigo_referencia": "AB3X9K2M", "cita": { ... } }
+```
+**`POST /api/citas`** — Paciente invitado (sin token):
+```json
+// Request body
+{ "id_medico": 2, "fecha": "2025-08-15", "hora": "10:30", "rut": "12345678-9", "nombre": "Juan Pérez", "email": "juan@correo.cl" }
+```
+
+**`PATCH /api/citas/:codigo`**
+```json
+// Request body
+{ "fecha": "2025-08-20", "hora": "11:00" }
+// Response 200
+{ "mensaje": "Cita modificada exitosamente.", "cita": { ... } }
+```
+
+---
+
+### `/api/especialidades` y `/api/profesionales` — Catálogo médico
+
+| Método | Endpoint | Acceso | Descripción |
+|--------|----------|--------|-------------|
+| `GET` | `/api/especialidades` |  Público | Lista todas las especialidades disponibles |
+| `GET` | `/api/especialidades/:id/medicos` |  Público | Lista los médicos de una especialidad |
+| `POST` | `/api/profesionales` | Administrador | Crea un nuevo profesional |
+| `PATCH` | `/api/profesionales/:id` | Administrador | Actualiza los datos de un profesional |
+| `DELETE` | `/api/profesionales/:id` | Administrador | Elimina un profesional |
+
+---
+
+### `/api/usuarios` — Gestión de Usuarios
+
+| Método | Endpoint | Acceso | Descripción |
+|--------|----------|--------|-------------|
+| `GET` | `/api/usuarios/me` | Usuario | Retorna el perfil del usuario en sesión |
+| `PATCH` | `/api/usuarios/me` | Usuario | Actualiza región y comuna del perfil |
+| `PATCH` | `/api/usuarios/me/password` | Usuario | Cambia la contraseña del usuario |
+| `POST` | `/api/usuarios/admin` | Administrador | Crea un nuevo usuario con rol administrador |
+| `DELETE` | `/api/usuarios/me` | Usuario | Elimina la cuenta del usuario en sesión |
+
+---
+
+### `/api/regiones` — Ubicaciones
+
+| Método | Endpoint | Acceso | Descripción |
+|--------|----------|--------|-------------|
+| `GET` | `/api/regiones` | Público | Retorna el listado de regiones y comunas de Chile |
+
+---
+
+### Manejo de errores
+
+Todos los endpoints manejan errores de forma consistente:
+
+| Código | Situación |
+|--------|-----------|
+| `400` | Campos obligatorios faltantes o datos inválidos (ej. RUT/email ya registrado, región/comuna inválida) |
+| `401` | Token no proporcionado o sesión expirada |
+| `403` | Token inválido o intento de acceso a recurso de otro usuario / sin rol admin |
+| `404` | Recurso no encontrado (cita, profesional, usuario) |
+| `409` | Conflicto de datos (horario ya reservado, cita ya cancelada) |
+| `500` | Error interno del servidor |
+
+
+
 ## [EP 2.4] Consumo de API REST desde Ionic
 
-## [EP 2.5] Implementación de autenticación con JWT
+## EP 2.4 — Consumo de la API REST desde Ionic con React
 
-## [EP 2.6] Validación de usuarios y manejo de sesiones
+### Tecnología utilizada
+
+Se utilizó **Axios** en lugar de `fetch` nativo. La razón principal es que Axios provee un sistema de interceptores formal, simplifica el manejo de errores HTTP (rechaza automáticamente respuestas 4xx/5xx en lugar de resolverlas) y permite centralizar la lógica de autenticación en un único lugar.
+
+---
+
+### Arquitectura de servicios
+
+Todos los servicios están organizados en dos archivos dentro de `frontend/src/services/`:
+
+| Archivo | Responsabilidad |
+|---|---|
+| `AuthServices.ts` | Instancia Axios, interceptores, gestión de JWT y sesión |
+| `citaServices.ts` | Funciones de consumo de todos los endpoints de citas y especialidades |
+
+Se define una única instancia compartida de Axios (`apiClient`) con la URL base configurada mediante variable de entorno (`VITE_API_URL`). Todas las páginas consumen esta instancia, garantizando que los interceptores se apliquen siempre.
+
+---
+
+### Interceptores
+
+Se implementaron dos interceptores sobre la instancia de Axios:
+
+**Interceptor de Request** — Antes de cada petición, lee el token del `sessionStorage` y lo adjunta automáticamente en la cabecera `Authorization: Bearer <token>`. Si no hay sesión activa, la cabecera se omite y la petición continúa normalmente (útil para rutas públicas).
+
+**Interceptor de Response** — Centraliza el manejo de errores HTTP para todas las peticiones:
+- **401**: token expirado → limpia la sesión local y emite un evento global (`auth_error`) para que la app redirija al login.
+- **403 con mensaje de token inválido**: token corrupto → mismo comportamiento que el 401.
+- **403 sin token**: falta de permisos reales (ej: usuario no admin) → rechaza con mensaje descriptivo sin cerrar sesión.
+- **Otros errores**: extrae el mensaje del cuerpo de la respuesta o usa el mensaje genérico de Axios.
+
+---
+
+### Gestión de tokens JWT
+
+El ciclo completo del JWT se maneja en `AuthService` sin librerías externas:
+
+- **Decodificación**: el payload del JWT (parte central entre los dos puntos) se decodifica en base64 para leer los datos del usuario y la fecha de expiración (`exp`), sin necesidad de verificar la firma en el cliente.
+- **Verificación de expiración**: se compara el campo `exp` del payload con la hora actual antes de cada uso del token, evitando peticiones innecesarias al servidor cuando ya expiró localmente.
+- **Persistencia**: el token y los datos del usuario se guardan en `sessionStorage`, que se limpia automáticamente al cerrar la pestaña o el navegador, a diferencia de `localStorage` que persiste indefinidamente.
+- **Cierre de sesión**: consume el endpoint `POST /api/auth/logout` del backend y limpia el `sessionStorage` independientemente del resultado, garantizando que la sesión local siempre quede cerrada.
+
+---
+
+### Manejo de errores
+
+Los errores HTTP quedan centralizados en el interceptor de respuesta, por lo que las páginas y funciones de servicio no necesitan inspeccionar `response.status` manualmente. Solo se capturan casos puntuales que no son errores de aplicación, como el 404 al consultar una cita por código, que se trata como "cita no encontrada" y retorna `null` en lugar de lanzar una excepción.
+
+---
+
+### Rutas según nivel de autenticación
+
+| Tipo | Ejemplos | Comportamiento |
+|---|---|---|
+| **Pública** | `getEspecialidades`, `getHorariosDisponibles` | Sin token, o con token si hay sesión activa |
+| **Token opcional** | `crearCita`, `modificarCita`, `cancelarCita` | El backend asocia la cita al usuario si hay token, o acepta datos de invitado si no |
+| **Autenticada** | `getMisCitas` | Requiere token válido; 401 cierra sesión automáticamente |
+| **Solo admin** | `getAllCitas`, `eliminarCita` | Requiere token con `is_admin: true`; 403 rechaza la acción |
+
+## EP 2.5 — Implementación de Autenticación con JWT
+
+Se implementó un sistema de autenticación completo basado en **JSON Web Tokens (JWT)**, que cubre el registro e inicio de sesión de usuarios, la protección de rutas en el frontend, y la diferenciación de acceso según rol.
+
+
+
+### Estructura de archivos relacionados
+
+```
+backend/
+├── src/
+│   ├── controllers/
+│   │   └── authController.js       # Lógica de registro, login y perfil
+│   ├── middleware/
+│   │   └── auth.js                 # Middleware de verificación JWT
+│   ├── routes/
+│   │   └── auth.js                 # Rutas públicas y protegidas de autenticación
+│   └── db/
+│       └── queries/
+│           └── usuarios.js         # Consultas SQL de usuarios
+
+frontend/
+└── src/
+    ├── pages/
+    │   ├── Login.tsx
+    │   └── Register.tsx
+    ├── routes/
+    │   └── PrivateRoute.tsx        # Rutas protegidas por rol
+    └── services/
+        └── authService.ts          # Consumo de la API de autenticación
+```
+
+
+
+### Formulario de registro e inicio de sesión
+
+El formulario de **registro** incluye los siguientes campos con validación visual:
+
+| Campo                   | Tipo     | Validación                                    |
+|-------------------------|----------|-----------------------------------------------|
+| RUT                     | text     | Requerido, único en BD (constraint `UNIQUE`)  |
+| Nombre completo         | text     | Requerido                                     |
+| Correo electrónico      | email    | Requerido, único en BD (constraint `UNIQUE`)  |
+| Región                  | select   | Validada contra `regiones.json` en backend    |
+| Comuna                  | select   | Validada contra la región elegida en backend  |
+| Contraseña              | password | Requerida, hasheada con bcrypt antes de guardar |
+| Confirmación contraseña | password | Cotejada en el frontend                       |
+
+El backend valida región y comuna contra el archivo regiones.json con todas las comunas de Chile antes de insertar
+
+El formulario de **inicio de sesión** solicita correo y contraseña. Tras autenticarse, el backend retorna el token JWT,  el frontend redireccióna automáticamente al panel correspondiente según el rol del usuario.
+
+
+
+### Rutas protegidas en el frontend
+
+Las rutas se dividen en tres niveles:
+ 
+- **Públicas**: accesibles sin autenticación (`/login`, `/register`, búsqueda de especialidades, consulta de cita por código).
+- **Protegidas**: requieren token JWT válido (`/mis-citas`, `/perfil`).
+- **Solo admin**: requieren `is_admin: true` en el payload del token (`/admin`, gestión de profesionales, ver todas las citas).
+
+En el backend esto se refleja directamente en las rutas:
+ 
+```js
+// routes/citas.js
+router.get('/mis-citas',  verificarToken,              listarCitasUsuario)  // autenticado
+router.get('/all',        verificarToken, soloAdmin,   listarTodasCitas)    // solo admin
+router.get('/:codigo',                                 obtenerCitaPorCodigo)// público
+router.post('/',          tokenOpcional,               crearNuevaCita)      // autenticado o invitado
+```
+
+
+### Generación y validación de JWT
+
+Al autenticarse exitosamente, se genera un token firmado con `JWT_SECRET` que expira en 8 horas. El payload incluye todos los datos necesarios para el frontend sin consultas adicionales:
+
+```js
+// authController.js — loginUsuario
+const token = jwt.sign(
+  {
+    id:              usuario.id,
+    rut:             usuario.rut,
+    nombre_completo: usuario.nombre_completo,
+    email:           usuario.email,
+    is_admin:        usuario.is_admin,
+  },
+  process.env.JWT_SECRET,
+  { expiresIn: '8h' }
+)
+```
+
+El **middleware `verificarToken`** valida el token en cada petición a rutas protegidas, diferenciando entre token expirado y token inválido:
+ 
+```js
+// middleware/auth.js
+const verificarToken = (req, res, next) => {
+  const authHeader = req.headers['authorization']
+  const token = authHeader && authHeader.split(' ')[1] // Bearer <token>
+ 
+  if (!token) {
+    return res.status(401).json({ error: 'Acceso denegado. Token no proporcionado.' })
+  }
+ 
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    req.usuario = decoded
+    next()
+  } catch (err) {
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: 'Sesión expirada. Por favor inicia sesión nuevamente.', expired: true })
+    }
+    return res.status(403).json({ error: 'Token inválido.' })
+  }
+}
+```
+
+Existe además un middleware **`tokenOpcional`** para rutas que sirven tanto a usuarios autenticados como a invitados (por ejemplo, crear o cancelar una cita). Si no hay token, `req.usuario` queda en `null` y el controlador decide el flujo:
+ 
+```js
+// middleware/auth.js — tokenOpcional
+const tokenOpcional = (req, res, next) => {
+  const authHeader = req.headers['authorization']
+  const token = authHeader && authHeader.split(' ')[1]
+  if (!token) { req.usuario = null; return next() }
+  try {
+    req.usuario = jwt.verify(token, process.env.JWT_SECRET)
+  } catch {
+    req.usuario = null
+  }
+  next()
+}
+```
+
+El token se transmite en el encabezado `Authorization: Bearer <token>` en todas las peticiones autenticadas desde el frontend.
+
+### Diferenciación por roles
+
+El sistema contempla dos roles de usuario:
+
+| Rol     | Permisos                                                                 |
+|---------|--------------------------------------------------------------------------|
+| `usuario` | Acceso a su perfil, gestión de citas propias, búsqueda de profesionales, cambiar contraseña |
+| `admin`   | Gestión completa de usuarios, profesionales, citas y reportes           |
+
+El rol queda registrado en la base de datos al momento del registro y es incluido en el payload del JWT. El middleware `soloAdmin` protege las rutas administrativas:
+ 
+```js
+// middleware/auth.js
+const soloAdmin = (req, res, next) => {
+  if (!req.usuario?.is_admin) {
+    return res.status(403).json({ error: 'Acceso restringido a administradores.' })
+  }
+  next()
+}
+```
+ 
+Los admins se crean mediante el endpoint `POST /api/usuarios/admin`, que solo puede invocar otro admin:
+ 
+```js
+// routes/usuarios.js
+router.post('/admin', verificarToken, soloAdmin, crearUsuarioAdmin)
+```
+
+### Endpoints de autenticación y usuarios
+ 
+| Método | Ruta                        | Descripción                                      | Protección         |
+|--------|-----------------------------|--------------------------------------------------|--------------------|
+| POST   | `/api/auth/register`        | Registro de nuevo usuario                        | Pública            |
+| POST   | `/api/auth/login`           | Inicio de sesión, retorna JWT + datos de usuario | Pública            |
+| POST   | `/api/auth/logout`          | Cierre de sesión (cliente descarta el token)     | `verificarToken`   |
+| GET    | `/api/usuarios/me`          | Obtener perfil del usuario autenticado           | `verificarToken`   |
+| PATCH  | `/api/usuarios/me`          | Actualizar región y comuna                       | `verificarToken`   |
+| PATCH  | `/api/usuarios/me/password` | Cambiar contraseña                               | `verificarToken`   |
+| DELETE | `/api/usuarios/me`          | Eliminar cuenta propia                           | `verificarToken`   |
+| POST   | `/api/usuarios/admin`       | Crear usuario administrador                      | `soloAdmin`        |
+ 
+---
+
+## EP 2.6 — Validación de Usuarios y Manejo de Sesiones
+
+ 
+Se implementaron medidas de seguridad en capas para garantizar la integridad de los datos, el manejo seguro de credenciales y la protección básica ante ataques comunes.
+ 
+
+ 
+### Validación de inputs
+ 
+**En el backend**, todos los campos son validados antes de procesarse:
+ 
+```js
+// authController.js — registro
+if (!validarRegionComuna(region, comuna)) {
+  return res.status(400).json({ error: 'Región o comuna no válida. Selecciona una combinación real de Chile.' })
+}
+ 
+// citasController.js — crear cita
+if (!id_medico || !fecha || !hora) {
+  return res.status(400).json({ error: 'Faltan campos obligatorios: id_medico, fecha, hora.' })
+}
+if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) {
+  return res.status(400).json({ error: 'Formato de fecha inválido. Use YYYY-MM-DD.' })
+}
+ 
+// usuariosController.js — cambiar contraseña
+if (!currentPassword || !newPassword) {
+  return res.status(400).json({ error: 'Faltan campos obligatorios.' })
+}
+```
+ 
+La validación de región/comuna usa `regiones.json`, un mapa completo de las 16 regiones y sus comunas de Chile, impidiendo que se registren ubicaciones inexistentes:
+ 
+```js
+// utils/ubicaciones.js
+const validarRegionComuna = (region, comuna) => {
+  if (!region || !comuna) return false
+  const regiones = getRegiones()
+  return Array.isArray(regiones[region]) && regiones[region].includes(comuna)
+}
+```
+ 
+ 
+### Hash de contraseñas con bcrypt
+ 
+Las contraseñas **nunca se almacenan en texto plano**. Se usa `bcrypt ^6` con sal de 10 rondas en registro, cambio de contraseña y creación de admins:
+ 
+```js
+// authController.js — registro
+const salt          = await bcrypt.genSalt(10)
+const password_hash = await bcrypt.hash(password, salt)
+// Se inserta password_hash en la BD; la contraseña original no se guarda
+```
+ 
+```js
+// authController.js — login
+const passwordValida = await bcrypt.compare(password, usuario.password_hash)
+if (!passwordValida) {
+  return res.status(401).json({ error: 'Correo o contraseña incorrectos.' })
+}
+```
+ 
+```js
+// usuariosController.js — cambiar contraseña
+const passwordValida = await bcrypt.compare(currentPassword, fila.password_hash)
+if (!passwordValida) {
+  return res.status(400).json({ error: 'Contraseña actual incorrecta.' })
+}
+const salt    = await bcrypt.genSalt(10)
+const newHash = await bcrypt.hash(newPassword, salt)
+await pool.query('UPDATE usuario SET password_hash = $1 WHERE id = $2', [newHash, usuarioId])
+```
+ 
+La tabla `usuario` define la columna como `password_hash VARCHAR(72)` (bcrypt produce hasta 72 caracteres) y nunca la expone en ninguna respuesta JSON.
+ 
+
+ 
+### Manejo seguro de credenciales
+ 
+**Variables de entorno**: todas las claves sensibles se gestionan mediante `.env`, que está en `.gitignore` y nunca se sube al repositorio. Se incluye `.env example` con los campos necesarios:
+ 
+```env
+# .env example
+PORT=3000
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=santo_domingo
+DB_USER=postgres
+DB_PASSWORD=tu_password
+JWT_SECRET=token_personalizado
+```
+ 
+**Mensajes genéricos**: ante credenciales incorrectas, el servidor responde con el mismo mensaje independientemente de si el correo existe o no, mitigando la enumeración de usuarios:
+ 
+```js
+// authController.js — si el usuario no existe o la contraseña no coincide:
+return res.status(401).json({ error: 'Correo o contraseña incorrectos.' })
+```
+ 
+**Sin password en respuestas**: las queries de perfil y las respuestas de login excluyen explícitamente `password_hash`:
+ 
+```js
+// db/queries/usuarios.js
+const buscarUsuarioPorEmail = async (email) => {
+  const result = await pool.query(
+    'SELECT id, rut, nombre_completo, email, password_hash, region, comuna, is_admin FROM usuario WHERE email = $1',
+    [email]
+  )
+  return result.rows[0] || null
+  // password_hash se usa solo para bcrypt.compare(), nunca se devuelve al cliente
+}
+ 
+// usuariosController.js — obtenerPerfil
+await pool.query(
+  'SELECT id, rut, nombre_completo, email, region, comuna, is_admin, created_at FROM usuario WHERE id = $1',
+  [req.usuario.id]
+)
+// password_hash no aparece en el SELECT
+```
+ 
+**Logout stateless**: el diseño usa JWT sin blacklist; el cierre de sesión es responsabilidad del cliente (descarta el token). El endpoint `/api/auth/logout` confirma el cierre con `200 OK`:
+ 
+```js
+const logoutUsuario = async (req, res) => {
+  res.json({ mensaje: 'Sesión cerrada' })
+}
+```
+ 
+ 
+### Protección básica contra inyección SQL
+ 
+Se usan **consultas parametrizadas** con `node-postgres (pg)` en el 100% de las interacciones con la base de datos, usando parámetros posicionales `$1, $2, ...`:
+ 
+```js
+// Nunca se concatenan strings en queries — todos los valores van como parámetros
+await pool.query(
+  `INSERT INTO usuario (rut, nombre_completo, email, password_hash, region, comuna)
+   VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, rut, email`,
+  [rut, nombre_completo, email, password_hash, region, comuna]
+)
+ 
+await pool.query(
+  'SELECT id, rut, nombre_completo, email, password_hash FROM usuario WHERE email = $1',
+  [email]
+)
+ 
+await pool.query(
+  `SELECT id, nombre FROM profesional WHERE id_especialidad = $1 ORDER BY nombre`,
+  [req.params.id]
+)
+```
+ 
+La base de datos también refuerza la integridad con constraints a nivel de esquema:
+ 
+```sql
+-- init.sql — constraints que previenen datos inválidos independientemente del backend
+CONSTRAINT chk_cita_estado     CHECK (estado IN ('Agendada', 'Completada', 'Cancelada', 'NoAsiste'))
+CONSTRAINT chk_excepcion_tipo  CHECK (tipo IN ('Licencia', 'Feriado'))
+CONSTRAINT chk_cambios_accion  CHECK (accion IN ('Creacion', 'Modificacion', 'Cancelacion'))
+CONSTRAINT uq_cita_medico_fecha_hora UNIQUE (id_medico, fecha, hora)  -- evita doble reserva
+```
+ 
+**CORS** habilitado mediante el paquete `cors` en `index.js`:
+ 
+```js
+// index.js
+app.use(cors())   // configurable para restringir al origen del frontend en producción
+app.use(express.json())
+```
+ 
+**Error handler global**: captura errores no controlados para evitar exponer stack traces:
+ 
+```js
+// index.js
+app.use((err, _req, res, _next) => {
+  console.error('Error no controlado:', err)
+  res.status(500).json({ error: 'Error interno del servidor.' })
+})
+```
+ 
+ 
+### Dependencias del backend
+ 
+```json
+{
+  "dependencies": {
+    "bcrypt":         "^6.0.0",
+    "cors":           "^2.8.6",
+    "dotenv":         "^17.4.2",
+    "express":        "^5.2.1",
+    "jsonwebtoken":   "^9.0.3",
+    "pg":             "^8.21.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
+```
+ 
+
+### Pasos para ejecutar el backend
+ 
+```bash
+# 1. Instalar dependencias
+cd backend
+npm install       # o pnpm install
+ 
+# 2. Configurar variables de entorno
+cp ".env example" .env
+# Editar .env con tus credenciales de PostgreSQL y JWT_SECRET
+ 
+# 3. Crear la base de datos en PostgreSQL
+psql -U postgres -c "CREATE DATABASE santo_domingo;"
+psql -U postgres -d santo_domingo -f "base de datos/init.sql"
+# El script crea todas las tablas y hace seed de las especialidades iniciales
+ 
+# 4. Iniciar el servidor en modo desarrollo
+npm run dev
+# → Servidor corriendo en http://localhost:3000
+ 
+# 5. Verificar que la API responde
+curl http://localhost:3000/
+# → {"mensaje":"API Santo Domingo funcionando","version":"2.0"}
+```
 
 ## [EP 2.7] Pruebas funcionales

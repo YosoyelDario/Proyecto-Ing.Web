@@ -1,6 +1,16 @@
+import axios from 'axios'
+import type { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
-// ── Decodifica el payload del JWT sin librerías externas ──────────────────
+
+export const apiClient: AxiosInstance = axios.create({
+  baseURL: API_URL,
+  headers: { 'Content-Type': 'application/json' },
+})
+
+// ── Utilidades JWT
+
 function decodeJwtPayload(token: string): Record<string, unknown> | null {
   try {
     const payload = token.split('.')[1]
@@ -11,44 +21,112 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
   }
 }
 
-// ── Verifica si un token ya expiró (sin llamar al servidor) ───────────────
 function tokenHaExpirado(token: string): boolean {
   const payload = decodeJwtPayload(token)
   if (!payload || typeof payload.exp !== 'number') return true
-  // exp es en segundos Unix; Date.now() en milisegundos
   return payload.exp * 1000 < Date.now()
 }
 
+
+apiClient.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    const token = AuthService.obtenerToken()
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error: AxiosError) => Promise.reject(error)
+)
+
+
+apiClient.interceptors.response.use(
+  (response: AxiosResponse) => response,
+  (error: AxiosError) => {
+    const status = error.response?.status
+    const body = error.response?.data as Record<string, unknown> | undefined
+
+    if (status === 401) {
+      AuthService.cerrarSesion()
+      window.dispatchEvent(new CustomEvent('auth_error'))
+      return Promise.reject(
+        new Error((body?.error as string) || 'Sesión expirada. Por favor inicia sesión nuevamente.')
+      )
+    }
+
+    if (status === 403) {
+      return Promise.reject(
+        new Error((body?.error as string) || 'No tienes permisos para realizar esta acción.')
+      )
+    }
+
+    const mensaje =
+      (body?.error as string) ||
+      error.message ||
+      'Error inesperado en la solicitud'
+    return Promise.reject(new Error(mensaje))
+  }
+)
+
+
+export async function apiFetch(
+  url: string,
+  options: RequestInit = {}
+): Promise<Response> {
+  const method = (options.method ?? 'GET') as string
+
+  let data: unknown = undefined
+  if (options.body) {
+    try {
+      data = JSON.parse(options.body as string)
+    } catch {
+      data = options.body
+    }
+  }
+
+  const axiosResponse = await apiClient.request({
+    url,
+    method,
+    data,
+  })
+
+  // Construye una Response estándar para que .ok y .json() funcionen igual
+  const blob = new Blob([JSON.stringify(axiosResponse.data)], {
+    type: 'application/json',
+  })
+  return new Response(blob, {
+    status: axiosResponse.status,
+    statusText: axiosResponse.statusText,
+  })
+}
+
+// ── Servicio de autenticación ─────────────────────────────────────────────
 export const AuthService = {
 
+  // POST /api/auth/register
   registrarUsuario: async (datosUsuario: unknown) => {
-    const response = await fetch(`${API_URL}/api/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(datosUsuario),
-    })
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      throw new Error(errorData.error || 'Error al registrar el usuario')
-    }
-    return response.json()
+    const { data } = await apiClient.post('/api/auth/register', datosUsuario)
+    return data
   },
 
+  // POST /api/auth/login
   loginUsuario: async (email: string, password: string) => {
-    const response = await fetch(`${API_URL}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    })
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      throw new Error(errorData.error || 'Error al iniciar sesión')
-    }
-    return response.json()
+    const { data } = await apiClient.post('/api/auth/login', { email, password })
+    return data
   },
 
-  // Guarda token + usuario + timestamp de expiración en sessionStorage
-  // sessionStorage se borra automáticamente al cerrar la pestaña/navegador
+
+  logoutUsuario: async () => {
+    try {
+      await apiClient.post('/api/auth/logout')
+    } catch {
+      // Ignorar errores de red al hacer logout; la sesión local se limpia igualmente
+    } finally {
+      AuthService.cerrarSesion()
+    }
+  },
+
+  
   guardarSesion: (token: string, usuario: unknown) => {
     const payload = decodeJwtPayload(token)
     const exp = typeof payload?.exp === 'number' ? payload.exp * 1000 : null
@@ -58,22 +136,27 @@ export const AuthService = {
     if (exp) sessionStorage.setItem('session_exp', String(exp))
   },
 
-  obtenerUsuario: () => {
-    // Verificar expiración antes de devolver el usuario
-    if (!AuthService.estaAutenticado()) return null
-    const raw = sessionStorage.getItem('usuario')
-    return raw ? JSON.parse(raw) : null
-  },
-
-  obtenerToken: () => {
+  obtenerToken: (): string | null => {
     const token = sessionStorage.getItem('token')
     if (!token) return null
-    // Verificar expiración del lado del cliente
     if (tokenHaExpirado(token)) {
       AuthService.cerrarSesion()
       return null
     }
     return token
+  },
+
+  obtenerUsuario: () => {
+    if (!AuthService.estaAutenticado()) return null
+    const raw = sessionStorage.getItem('usuario')
+    if (!raw) return null
+    try {
+      return JSON.parse(raw)
+    } catch {
+      // Dato corrupto en storage: limpiar para evitar bucles
+      AuthService.cerrarSesion()
+      return null
+    }
   },
 
   estaAutenticado: (): boolean => {
@@ -96,41 +179,4 @@ export const AuthService = {
     sessionStorage.removeItem('usuario')
     sessionStorage.removeItem('session_exp')
   },
-}
-
-// ── Interceptor centralizado para todas las llamadas a la API ─────────────
-export const apiFetch = async (url: string, options: RequestInit = {}): Promise<Response> => {
-  const token = AuthService.obtenerToken()
-
-  // Si el token expiró, obtenerToken() ya cerró la sesión y devolvió null
-  if (sessionStorage.getItem('token') === null && options.method && options.method !== 'GET') {
-    // Solo redirige si intentaba hacer algo que requería auth
-  }
-
-  const response = await fetch(`${API_URL}${url}`, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
-  })
-
-  // Si el servidor responde con 401 (token expirado o inválido), cerrar sesión
-  if (response.status === 401) {
-    const body = await response.clone().json().catch(() => ({}))
-    AuthService.cerrarSesion()
-    // Redirigir al login solo si no estamos ya ahí
-    if (!window.location.pathname.includes('/login')) {
-      window.location.href = '/login'
-    }
-    // Lanzar error para que el caller lo maneje
-    throw new Error(body.error || 'Sesión expirada')
-  }
-
-  if (response.status === 403) {
-    throw new Error('No tienes permisos para realizar esta acción.')
-  }
-
-  return response
 }

@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
 
 import Home            from '../src/pages/Home'
 import Login           from '../src/pages/Login'
@@ -15,9 +16,24 @@ import Dashboard       from '../src/pages/Dashboard'
 import CambiarPassword from '../src/pages/CambiarPassword'
 import RutaProtegida   from '../src/components/RutaProtegida'
 
+function AuthInterceptor() {
+  const navigate = useNavigate()
+  
+  useEffect(() => {
+    const handleAuthError = () => {
+      navigate('/login', { replace: true })
+    }
+    window.addEventListener('auth_error', handleAuthError)
+    return () => window.removeEventListener('auth_error', handleAuthError)
+  }, [navigate])
+  
+  return null
+}
+
 export default function App() {
   return (
     <BrowserRouter>
+      <AuthInterceptor />
       <Routes>
         {/* ── Públicas ── */}
         <Route path="/"                 element={<Home />} />

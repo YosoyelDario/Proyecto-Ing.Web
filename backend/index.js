@@ -13,24 +13,24 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-// ── Rutas ────────────────────────────────────────────────────────────────
+//rutas
 app.use('/api/auth',      authRouter)
 app.use('/api',           profesionalesRouter)
 app.use('/api',           ubicacionesRouter)
 app.use('/api/citas',     citasRouter)
 app.use('/api/usuarios',  usuariosRouter)
 
-// ── Health check ─────────────────────────────────────────────────────────
+//checkeo de si funciona
 app.get('/', (_req, res) => {
   res.json({ mensaje: 'API Santo Domingo funcionando', version: '2.0' })
 })
 
-// ── 404 genérico ─────────────────────────────────────────────────────────
+//error generico
 app.use((_req, res) => {
   res.status(404).json({ error: 'Endpoint no encontrado.' })
 })
 
-// ── Error handler global ─────────────────────────────────────────────────
+//error global
 app.use((err, _req, res, _next) => {
   console.error('Error no controlado:', err)
   res.status(500).json({ error: 'Error interno del servidor.' })
