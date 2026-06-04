@@ -110,7 +110,126 @@ Se han desarrollado las pantallas principales asegurando coherencia con la arqui
   * `/components`: Almacena componentes de UI reutilizables.
   * `/routes`: Define la lógica de enrutamiento y las validaciones de las rutas protegidas.
   * `/services`: Carpeta preparada para la futura integración con el backend y llamadas a la API.
-## [EP 2.1] Creación del servidor en Node.js con Express
+## [EP 2.1] Creación del Servidor Backend
+
+## Tecnologías utilizadas
+
+- **Runtime:** Node.js v24
+- **Framework:** Express.js v5
+- **Base de datos:** PostgreSQL (via `pg`)
+- **Autenticación:** JSON Web Tokens (`jsonwebtoken`)
+- **Seguridad:** `bcrypt` para hash de contraseñas
+- **Variables de entorno:** `dotenv`
+- **CORS:** `cors`
+- **Desarrollo:** `nodemon`
+
+---
+
+## Estructura del proyecto
+
+```
+backend/
+├── index.js                        # Punto de entrada del servidor
+├── package.json
+├── .env example                    # Variables de entorno de referencia
+└── src/
+    ├── controllers/                # Lógica de negocio por módulo
+    │   ├── authController.js
+    │   ├── citasController.js
+    │   ├── profesionalesController.js
+    │   ├── ubicacionesController.js
+    │   └── usuariosController.js
+    ├── db/
+    │   ├── pool.js                 # Conexión a PostgreSQL
+    │   └── queries/                # Consultas SQL por módulo
+    │       ├── citas.js
+    │       ├── profesionales.js
+    │       ├── ubicaciones.js
+    │       └── usuarios.js
+    ├── middleware/
+    │   └── auth.js                 # JWT: verificarToken, tokenOpcional, soloAdmin
+    ├── routes/                     # Definición de rutas por módulo
+    │   ├── auth.js
+    │   ├── citas.js
+    │   ├── profesionales.js
+    │   ├── ubicaciones.js
+    │   └── usuarios.js
+    ├── utils/
+    │   └── ubicaciones.js          # Validación de región/comuna
+    └── data/
+        └── regiones.json           # Datos de regiones y comunas de Chile
+```
+
+---
+
+## Configuración del servidor (`index.js`)
+
+El servidor está construido sobre **Express.js** y se configura con los siguientes middlewares globales:
+
+- `cors()` — permite solicitudes desde el frontend
+- `express.json()` — parsea el body de las solicitudes en formato JSON
+
+### Rutas registradas
+
+| Prefijo | Router | Descripción |
+|---------|--------|-------------|
+| `/api/auth` | `authRouter` | Registro, login y logout |
+| `/api` | `profesionalesRouter` | Especialidades y profesionales |
+| `/api` | `ubicacionesRouter` | Regiones y comunas |
+| `/api/citas` | `citasRouter` | Gestión de citas médicas |
+| `/api/usuarios` | `usuariosRouter` | Gestión de usuarios |
+
+### Manejo de errores global
+
+El servidor incluye dos manejadores de error al final del pipeline:
+
+- **404** — responde `{ error: 'Endpoint no encontrado.' }` para rutas inexistentes
+- **500** — captura errores no controlados y responde `{ error: 'Error interno del servidor.' }`
+
+### Puerto
+
+El servidor corre en el puerto definido por la variable de entorno `PORT`, o en el puerto `3000` por defecto.
+
+---
+
+## Variables de entorno
+
+Crear un archivo `.env` en la raíz del backend con las siguientes variables (ver `.env example`):
+
+```env
+PORT=3000
+DATABASE_URL=postgresql://usuario:contraseña@localhost:5432/nombre_bd
+JWT_SECRET=tu_clave_secreta
+```
+
+---
+
+## Middlewares de autenticación (`src/middleware/auth.js`)
+
+Se implementaron tres middlewares para proteger las rutas según el nivel de acceso requerido:
+
+| Middleware | Descripción |
+|-----------|-------------|
+| `verificarToken` | Exige Bearer Token válido. Retorna `401` si falta o expiró, `403` si es inválido. |
+| `tokenOpcional` | Acepta solicitudes con o sin token. Si hay token válido, adjunta el usuario a `req.usuario`; si no, continúa con `req.usuario = null`. |
+| `soloAdmin` | Complementa `verificarToken`. Verifica que `req.usuario.is_admin === true`. Retorna `403` si el usuario no es administrador. |
+
+---
+
+## Cómo ejecutar el servidor
+
+```bash
+pnpm install
+
+pnpm run dev
+
+```
+
+El servidor estará disponible en `http://localhost:3000`.
+
+---
+
+
 ## [EP 2.2] Configuración y modelado de la base de datos
 
 Se diseñó y modeló una base de datos relacional normalizada en el motor ... que garantiza integridad de datos, escalabilidad y rastrabilidad de operaciones.
@@ -121,17 +240,6 @@ Se modeló la BD a usar considerando 8 entidades como se observa en el modelo re
 * **Calendario flexible:** Se usó un modelo de horarios recurrentes al cual se le pueden agregar excepciones puntuales (feriados, permisos, licencias, etc).
 * **Código de referencia para citas:** Se usara un formato `YYMMDDCCC` de codigo auto-generado para entregar un codigo referencial a los pacientes diferente al id interno.
 * **Trazabilidad de cambios:** Se implementó la entidadd cambiosCita cuyo objetivo es llevar trazabilidad total de quién, cuándo y qué se cambio en el sistema.
-
-## Si quieren probar esta version con la base de datos sin usar prisma, unicamente postgresql, realizar lo siguiente:
-
-1. Crear Base de datos vacia en postgresql (pg4admin) con el nombre de santo_domingo
-2. El init.sql moverlo al disco local C:
-3. Una vez la base de datos creada, hacer click derecho en santo_domingo (la base de datos) y hacer click en PSQL Tool
-4. Esa linea de comandos, les permitira ejecutar el init.sql (que es la estructura de la base de datos definida en la imagen de arriba), para ejecutar el init, pegar "\i C:/init.sql" y ejecutar
-5. Revisar si en las tablas de la base de datos se creo correctamente.
-6. Recomienzo utilizar pnpm porque es mas seguro, para instalar packages tanto en frontend como backend.
-7. Unicamente esta la posibilidad de crear cuentas, si lo quieren probar, deben duplicar el .env example y borrar el "example", posteriormente modificar el DB_PASSWORD=tu_password (porque seugramente tengas lo mismo, y si no, sabes lo que estas haciendo xd)
-8. Prueben a crear un usuario, pueden revisar la completitud tanto en pg4admin, haciendo click derecho en las tablas y viendo la data de la tabla usuario, o sino con F12 en el navegador
 
 ## [EP 2.3] Desarrollo de API REST
 
@@ -731,4 +839,320 @@ curl http://localhost:3000/
 # → {"mensaje":"API Santo Domingo funcionando","version":"2.0"}
 ```
 
-## [EP 2.7] Pruebas funcionales
+## [EP 2.7] Documentación de Endpoints API REST
+
+> Pruebas funcionales realizadas con **Insomnia**. Todos los endpoints corren sobre `http://localhost:3000`.
+
+---
+
+## 🔐 Autenticación
+
+Los endpoints protegidos requieren un **Bearer Token** en el header `Authorization`.
+
+```
+Authorization: Bearer <token_jwt>
+```
+
+El token se obtiene al hacer login exitoso en `POST /api/auth/login`.
+
+---
+
+## 📁 Auth
+
+### `POST /api/auth/register`
+Registra un nuevo usuario en el sistema.
+
+- **Acceso:** Público
+- **Body:**
+```json
+{
+  "rut": "15546114-4",
+  "nombre_completo": "Francisco Octavio Segundo",
+  "email": "mail@gmail.com",
+  "password": "pass1234",
+  "region": "Coquimbo",
+  "comuna": "Canela"
+}
+```
+- **Respuesta exitosa:** `201 Created`
+
+---
+
+### `POST /api/auth/login`
+Inicia sesión y retorna un token JWT.
+
+- **Acceso:** Público
+- **Body:**
+```json
+{
+  "email": "correo@gmail.com",
+  "password": "tu_contraseña"
+}
+```
+- **Respuesta exitosa:** `200 OK` + `{ token: "eyJ..." }`
+
+---
+
+### `POST /api/auth/logout`
+Cierra la sesión del usuario autenticado.
+
+- **Acceso:** Autenticado (Bearer Token)
+- **Respuesta exitosa:** `200 OK`
+
+---
+
+## 📁 Citas
+
+### `GET /api/citas/disponibilidad`
+Retorna los horarios disponibles de un médico en una fecha específica.
+
+- **Acceso:** Público
+- **Query params:** `id_medico=3&fecha=2026-06-08`
+- **Ejemplo:** `GET /api/citas/disponibilidad?id_medico=3&fecha=2026-06-08`
+- **Respuesta exitosa:** `200 OK` + lista de horarios disponibles
+
+---
+
+### `GET /api/citas/mis-citas`
+Lista las citas del usuario autenticado.
+
+- **Acceso:** Autenticado (Bearer Token)
+- **Respuesta exitosa:** `200 OK` + lista de citas del usuario
+
+---
+
+### `GET /api/citas/all` *(solo admin)*
+Lista todas las citas registradas en el sistema.
+
+- **Acceso:** Admin (Bearer Token)
+- **Respuesta exitosa:** `200 OK` + lista completa de citas
+
+---
+
+### `GET /api/citas/:codigo`
+Obtiene el detalle de una cita por su código de referencia.
+
+- **Acceso:** Público
+- **Ejemplo:** `GET /api/citas/L78CQH6B`
+- **Respuesta exitosa:** `200 OK` + datos de la cita
+- **Error:** `404 Not Found` si el código no existe
+
+---
+
+### `POST /api/citas`
+Crea una nueva cita médica. Puede ser creada por un usuario autenticado o un invitado.
+
+- **Acceso:** Público (invitado requiere rut, nombre y email)
+- **Body (invitado):**
+```json
+{
+  "id_medico": 1,
+  "fecha": "08-06-2026",
+  "hora": "9:00",
+  "rut": "21.563.960-6",
+  "nombre": "Joaquín Cornejo Fernández",
+  "email": "correo@gmail.com"
+}
+```
+- **Respuesta exitosa:** `201 Created` + código de referencia de la cita
+- **Error:** `409 Conflict` si el horario ya está tomado
+
+---
+
+### `PATCH /api/citas/:codigo`
+Actualiza la fecha y hora de una cita existente.
+
+- **Acceso:** Autenticado (Bearer Token)
+- **Ejemplo:** `PATCH /api/citas/EWF7E4MU`
+- **Body:**
+```json
+{
+  "fecha": "10-06-2026",
+  "hora": "15:00"
+}
+```
+- **Respuesta exitosa:** `200 OK` + datos actualizados de la cita
+- **Error:** `409 Conflict` si el nuevo horario ya está tomado
+
+---
+
+### `PATCH /api/citas/:codigo/cancelar`
+Cancela una cita (cambia su estado a "Cancelada"). No elimina el registro.
+
+- **Acceso:** Autenticado u invitado (con código de referencia)
+- **Ejemplo:** `PATCH /api/citas/EWF7E4MU/cancelar`
+- **Respuesta exitosa:** `200 OK` + datos de la cita cancelada
+- **Error:** `409 Conflict` si la cita ya estaba cancelada
+
+---
+
+### `DELETE /api/citas/:codigo` *(solo admin)*
+Elimina permanentemente una cita de la base de datos.
+
+- **Acceso:** Admin (Bearer Token)
+- **Ejemplo:** `DELETE /api/citas/9VH3F6JX`
+- **Respuesta exitosa:** `200 OK` + datos de la cita eliminada
+- **Error:** `404 Not Found` si el código no existe
+
+---
+
+## 📁 Profesionales
+
+### `GET /api/especialidades`
+Lista todas las especialidades médicas disponibles.
+
+- **Acceso:** Público
+- **Respuesta exitosa:** `200 OK` + lista de especialidades
+
+---
+
+### `GET /api/especialidades/:id/medicos`
+Lista los médicos que pertenecen a una especialidad.
+
+- **Acceso:** Público
+- **Ejemplo:** `GET /api/especialidades/1/medicos`
+- **Respuesta exitosa:** `200 OK` + lista de médicos de esa especialidad
+
+---
+
+### `POST /api/profesionales` *(solo admin)*
+Crea un nuevo profesional médico en el sistema.
+
+- **Acceso:** Admin (Bearer Token)
+- **Body:**
+```json
+{
+  "rut": "19.438.337-1",
+  "nombre": "Matias Fernandez",
+  "id_especialidad": 3
+}
+```
+- **Respuesta exitosa:** `201 Created` + datos del profesional creado
+- **Error:** `409 Conflict` si el RUT ya está registrado
+- **Error:** `400 Bad Request` si la especialidad no existe
+
+---
+
+### `PATCH /api/profesionales/:id` *(solo admin)*
+Actualiza el nombre o especialidad de un profesional.
+
+- **Acceso:** Admin (Bearer Token)
+- **Ejemplo:** `PATCH /api/profesionales/16`
+- **Body:**
+```json
+{
+  "nombre": "Francisco Milovan",
+  "id_especialidad": 1
+}
+```
+- **Respuesta exitosa:** `200 OK` + datos actualizados del profesional
+- **Error:** `404 Not Found` si el profesional no existe
+
+---
+
+### `DELETE /api/profesionales/:id` *(solo admin)*
+Elimina un profesional del sistema.
+
+- **Acceso:** Admin (Bearer Token)
+- **Ejemplo:** `DELETE /api/profesionales/17`
+- **Respuesta exitosa:** `200 OK` + datos del profesional eliminado
+- **Error:** `404 Not Found` si el profesional no existe
+- **Error:** `409 Conflict` si el profesional tiene citas asociadas
+
+---
+
+## 📁 Usuarios
+
+### `GET /api/usuarios/me`
+Retorna el perfil del usuario autenticado.
+
+- **Acceso:** Autenticado (Bearer Token)
+- **Respuesta exitosa:** `200 OK` + datos del perfil (id, rut, nombre, email, region, comuna, is_admin)
+
+---
+
+### `PATCH /api/usuarios/me`
+Actualiza la región y/o comuna del usuario autenticado.
+
+- **Acceso:** Autenticado (Bearer Token)
+- **Body:**
+```json
+{
+  "region": "Coquimbo",
+  "comuna": "Canela"
+}
+```
+- **Respuesta exitosa:** `200 OK` + datos actualizados del perfil
+
+---
+
+### `PATCH /api/usuarios/me/password`
+Cambia la contraseña del usuario autenticado.
+
+- **Acceso:** Autenticado (Bearer Token)
+- **Body:**
+```json
+{
+  "currentPassword": "contraseña_actual",
+  "newPassword": "contraseña_nueva"
+}
+```
+- **Respuesta exitosa:** `200 OK` + mensaje de confirmación
+- **Error:** `400 Bad Request` si la contraseña actual es incorrecta
+
+---
+
+### `DELETE /api/usuarios/me`
+Elimina la cuenta del usuario autenticado. También elimina sus citas asociadas.
+
+- **Acceso:** Autenticado (Bearer Token)
+- **Respuesta exitosa:** `200 OK` + mensaje de confirmación
+- **Error:** `404 Not Found` si el usuario no existe
+
+---
+
+### `POST /api/usuarios/admin` *(solo admin)*
+Crea un nuevo usuario con rol de administrador.
+
+- **Acceso:** Admin (Bearer Token)
+- **Body:**
+```json
+{
+  "rut": "23870067-1",
+  "nombre_completo": "Bresman Garzon Vargas",
+  "email": "bresmangarzon@gmail.com",
+  "password": "bresman",
+  "region": "Valparaíso",
+  "comuna": "Hijuelas"
+}
+```
+- **Respuesta exitosa:** `201 Created` + datos del nuevo administrador
+- **Error:** `400 Bad Request` si el RUT o email ya están registrados
+
+---
+
+## 📊 Resumen de Endpoints
+
+| Método | Endpoint | Acceso | Descripción |
+|--------|----------|--------|-------------|
+| POST | `/api/auth/register` | Público | Registrar usuario |
+| POST | `/api/auth/login` | Público | Iniciar sesión |
+| POST | `/api/auth/logout` | Autenticado | Cerrar sesión |
+| GET | `/api/citas/disponibilidad` | Público | Ver horarios disponibles |
+| GET | `/api/citas/mis-citas` | Autenticado | Ver mis citas |
+| GET | `/api/citas/all` | Admin | Ver todas las citas |
+| GET | `/api/citas/:codigo` | Público | Ver cita por código |
+| POST | `/api/citas` | Público | Crear cita |
+| PATCH | `/api/citas/:codigo` | Autenticado | Actualizar cita |
+| PATCH | `/api/citas/:codigo/cancelar` | Autenticado | Cancelar cita |
+| DELETE | `/api/citas/:codigo` | Admin | Eliminar cita |
+| GET | `/api/especialidades` | Público | Listar especialidades |
+| GET | `/api/especialidades/:id/medicos` | Público | Listar médicos por especialidad |
+| POST | `/api/profesionales` | Admin | Crear profesional |
+| PATCH | `/api/profesionales/:id` | Admin | Actualizar profesional |
+| DELETE | `/api/profesionales/:id` | Admin | Eliminar profesional |
+| GET | `/api/usuarios/me` | Autenticado | Ver perfil |
+| PATCH | `/api/usuarios/me` | Autenticado | Actualizar región/comuna |
+| PATCH | `/api/usuarios/me/password` | Autenticado | Cambiar contraseña |
+| DELETE | `/api/usuarios/me` | Autenticado | Eliminar cuenta |
+| POST | `/api/usuarios/admin` | Admin | Crear usuario admin |
