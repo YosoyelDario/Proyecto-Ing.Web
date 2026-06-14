@@ -5,3 +5,15 @@ DB_NAME=santo_domingo
 DB_USER=postgres
 DB_PASSWORD=tu_password
 JWT_SECRET=santo_domingo_2026_clave_super_secreta
+
+
+
+# Configuración del servidor de Correos (Ejemplo con Gmail)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=tu_correo_medico@gmail.com
+SMTP_PASS=tu_clave_de_aplicacion_de_16_letras
+
+# Configuración adicional requerida por CORS
+FRONTEND_URL=http://localhost:5173

@@ -9,6 +9,9 @@ const {
   eliminarCita,
 } = require('../db/queries/citas')
 
+const pool = require('../db/pool');
+const { enviarCorreo, plantillaConfirmacion, plantillaCancelacion, plantillaModificacion } = require('../utils/mailer');
+
 // ── GET /api/citas/mis-citas  (usuario autenticado) ──────────────────────
 const listarCitasUsuario = async (req, res) => {
   try {
@@ -79,19 +82,82 @@ const crearNuevaCita = async (req, res) => {
   }
 
   try {
+    // CORRECCIÓN AQUÍ: Si tiene cuenta, los campos de invitado DEBEN viajar como null
     const payload = esAutenticado
-  ? { 
-      id_paciente:     req.usuario.id,
-      rut_paciente:    req.usuario.rut,
-      nombre_paciente: req.usuario.nombre_completo,
-      email_paciente:  req.usuario.email,
-      id_medico, 
-      fecha, 
-      hora 
-    }
-  : { rut_paciente: rut, nombre_paciente: nombre, email_paciente: email, id_medico, fecha, hora }
+      ? { 
+          id_paciente:     req.usuario.id,
+          rut_paciente:    null,
+          nombre_paciente: null,
+          email_paciente:  null,
+          id_medico, 
+          fecha, 
+          hora 
+        }
+      : { 
+          id_paciente:     null,
+          rut_paciente:    rut, 
+          nombre_paciente: nombre, 
+          email_paciente:  email, 
+          id_medico, 
+          fecha, 
+          hora 
+        }
 
     const cita = await crearCita(payload)
+
+    // OBTENER INFORMACIÓN DEL MÉDICO Y ESPECIALIDAD PARA EL CORREO ELECTRONICO
+    const { rows } = await pool.query(
+      `SELECT p.nombre AS medico, e.nombre AS especialidad 
+       FROM profesional p 
+       JOIN especialidad e ON p.id_especialidad = e.id 
+       WHERE p.id = $1`,
+      [id_medico]
+    )
+    const infoMedico = rows[0] || { medico: 'Profesional', especialidad: 'General' }
+
+    // DETERMINAR DESTINATARIO DEL CORREO
+    const emailDestino = esAutenticado ? req.usuario.email : email
+    let estadoNotif = 'Fallido'
+
+    // LOGICA DE ENVÍO EXTERNO DE EMAIL
+    try {
+      if (emailDestino) {
+        const fechaFormateada = typeof cita.fecha === 'object' 
+          ? cita.fecha.toISOString().split('T')[0] 
+          : cita.fecha;
+
+        await enviarCorreo(
+          emailDestino,
+          `Confirmación de Reserva Médica - Cód: ${cita.codigo_referencia}`,
+          plantillaConfirmacion({
+            codigo: cita.codigo_referencia,
+            medico: infoMedico.medico,
+            especialidad: infoMedico.especialidad,
+            fecha: fechaFormateada,
+            hora: String(hora).slice(0, 5)
+          })
+        );
+        estadoNotif = 'Enviado';
+      }
+    } catch (mailErr) {
+      console.error('Error enviando correo SMTP Confirmación:', mailErr.message);
+    }
+
+    // REGISTRAR EN LA TABLA DE NOTIFICACIONES (REQUISITO EF 1)
+    try {
+      await pool.query(
+        `INSERT INTO notificacion (id_cita, motivo, mensaje, estado) 
+         VALUES ($1, 'Confirmacion', $2, $3)`,
+        [
+          cita.id,
+          `Notificación de confirmación procesada para ${emailDestino}`,
+          estadoNotif
+        ]
+      );
+    } catch (dbErr) {
+      console.error('Error al poblar entidad notificacion en creación:', dbErr.message);
+    }
+
     res.status(201).json({
       mensaje: 'Cita agendada exitosamente.',
       codigo_referencia: cita.codigo_referencia,
@@ -121,8 +187,61 @@ const actualizarCita = async (req, res) => {
       return res.status(404).json({ error: 'Cita no encontrada.' })
     }
 
+    if (citaActual.estado !== 'Agendada') {
+      return res.status(409).json({
+        error: 'La cita no puede modificarse porque ya está cancelada o cerrada.',
+      })
+    }
+
     const idEditor = req.usuario?.id || null
     const actualizada = await modificarCita(citaActual.id, fecha, hora, idEditor)
+
+    if (!actualizada) {
+      return res.status(409).json({
+        error: 'La cita no puede modificarse porque ya está cancelada o cerrada.',
+      })
+    }
+
+    const emailDestino = citaActual.email
+    let estadoNotif = 'Fallido'
+
+    try {
+      if (emailDestino) {
+        const fechaFormateada = typeof actualizada.fecha === 'object'
+          ? actualizada.fecha.toISOString().split('T')[0]
+          : actualizada.fecha
+
+        await enviarCorreo(
+          emailDestino,
+          `Modificación de Hora Médica - Cód: ${citaActual.codigo_referencia}`,
+          plantillaModificacion({
+            codigo: citaActual.codigo_referencia,
+            medico: citaActual.medico || 'Profesional',
+            especialidad: citaActual.especialidad || 'Medicina General',
+            fecha: fechaFormateada,
+            hora: String(actualizada.hora || hora).slice(0, 5),
+          })
+        )
+        estadoNotif = 'Enviado'
+      }
+    } catch (mailErr) {
+      console.error('Error enviando correo SMTP Modificación:', mailErr.message)
+    }
+
+    try {
+      await pool.query(
+        `INSERT INTO notificacion (id_cita, motivo, mensaje, estado) 
+         VALUES ($1, 'Modificacion', $2, $3)`,
+        [
+          citaActual.id,
+          `Notificación de reprogramación procesada para ${emailDestino}`,
+          estadoNotif,
+        ]
+      )
+    } catch (dbErr) {
+      console.error('Error al poblar entidad notificacion en modificación:', dbErr.message)
+    }
+
     res.json({ mensaje: 'Cita modificada exitosamente.', cita: actualizada })
   } catch (err) {
     if (err.code === '23505') {
@@ -149,6 +268,48 @@ const cancelarCitaHandler = async (req, res) => {
     }
 
     const cancelada = await cancelarCita(cita.id, usuario?.id || null)
+
+    // GRACIAS A TU COALESCE: Extraemos directamente 'email' de forma segura
+    const emailDestino = cita.email; 
+    let estadoNotif = 'Fallido'
+
+    // LÓGICA DE ENVÍO EXTERNO DE EMAIL (CANCELACIÓN)
+    try {
+      if (emailDestino) {
+        const fechaFormateada = typeof cita.fecha === 'object' 
+          ? cita.fecha.toISOString().split('T')[0] 
+          : cita.fecha;
+
+        await enviarCorreo(
+          emailDestino,
+          `Cancelación de Hora Médica - Cód: ${cita.codigo_referencia}`,
+          plantillaCancelacion({
+            codigo: cita.codigo_referencia,
+            fecha: fechaFormateada,
+            hora: String(cita.hora).slice(0, 5)
+          })
+        );
+        estadoNotif = 'Enviado';
+      }
+    } catch (mailErr) {
+      console.error('Error enviando correo SMTP Cancelación:', mailErr.message);
+    }
+
+    // REGISTRAR EN LA TABLA DE NOTIFICACIONES (REQUISITO EF 1)
+    try {
+      await pool.query(
+        `INSERT INTO notificacion (id_cita, motivo, mensaje, estado) 
+         VALUES ($1, 'Cancelacion', $2, $3)`,
+        [
+          cita.id,
+          `Notificación de cancelación procesada para ${emailDestino}`,
+          estadoNotif
+        ]
+      );
+    } catch (dbErr) {
+      console.error('Error al poblar entidad notificacion en cancelación:', dbErr.message);
+    }
+
     res.json({ mensaje: 'Cita cancelada exitosamente.', cita: cancelada })
   } catch (err) {
     console.error(err)
