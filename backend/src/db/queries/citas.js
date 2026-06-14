@@ -136,7 +136,7 @@ const crearCita = async ({ id_paciente, rut_paciente, nombre_paciente, email_pac
 const modificarCita = async (id, nuevaFecha, nuevaHora, idUsuarioEditor) => {
   const result = await pool.query(
     `UPDATE cita SET fecha = $1, hora = $2, updated_at = NOW()
-     WHERE id = $3
+     WHERE id = $3 AND estado = 'Agendada'
      RETURNING *`,
     [nuevaFecha, nuevaHora, id]
   )

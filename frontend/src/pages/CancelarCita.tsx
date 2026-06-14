@@ -60,7 +60,7 @@ export default function CancelarCita() {
 
   // Verificar cita y RUT
   const handleVerificar = async () => {
-    if (!codigo || !rut.trim()) return
+    if (!codigo || !rut.trim() || loading) return
     setLoading(true)
     setErrorRut(false)
     setBuscado(false)
@@ -98,7 +98,7 @@ export default function CancelarCita() {
 
   // Confirmar cancelación
   const handleCancelar = async () => {
-    if (!codigo) return
+    if (!codigo || loading) return
     setLoading(true)
 
     try {
@@ -184,11 +184,11 @@ export default function CancelarCita() {
                 <div className="flex flex-col gap-3 pt-1">
                   <BotonPrimario
                     onClick={handleVerificar}
-                    disabled={rut.trim() === ''}
+                    disabled={rut.trim() === '' || loading}
                     fullWidth
                     className="py-5! text-base! tracking-wider! mt-2 rounded-xl bg-red-500! border-red-500! hover:bg-red-600! hover:border-red-600!"
                   >
-                    Verificar y continuar
+                    {loading ? 'Verificando...' : 'Verificar y continuar'}
                   </BotonPrimario>
                   <BotonPrimario
                     to="/consultar"
@@ -238,14 +238,16 @@ export default function CancelarCita() {
                   <div className="px-6 pb-6 flex flex-col gap-3">
                     <BotonPrimario
                       onClick={handleCancelar}
+                      disabled={loading}
                       fullWidth
                       className="bg-[#e05c5c]! border-[#e05c5c]! hover:bg-[#c94a4a]! hover:border-[#c94a4a]! py-5! text-base! tracking-wider! mt-2 rounded-xl"
                     >
-                      Sí, cancelar mi cita
+                      {loading ? 'Cancelando cita...' : 'Sí, cancelar mi cita'}
                     </BotonPrimario>
                     <BotonPrimario
                       onClick={() => setPaso('verificar')}
                       variante="outline"
+                      disabled={loading}
                       fullWidth
                       className="py-5! text-base! tracking-wider! mt-2"
                     >
