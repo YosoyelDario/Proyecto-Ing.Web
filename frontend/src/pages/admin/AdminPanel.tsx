@@ -67,13 +67,6 @@ function TarjetaAcceso({ icono, titulo, descripcion, onClick }: {
   )
 }
 
-<TarjetaAcceso
-  icono={<IconoMedicos />}
-  titulo="Gestión de Profesionales"
-  descripcion="Agregar, editar o eliminar médicos y agendas"
-  onClick={() => navigate('/admin/medicos')}
-/>
-
 function ChipStat({ label, valor, color }: { label: string; valor: number; color: string }) {
   return (
     <div className="flex flex-col items-center justify-center bg-white rounded-2xl border border-[#d5dce6] py-4 px-3 gap-1">
@@ -182,6 +175,12 @@ export default function AdminPanel() {
                     titulo="Gestión de Citas"
                     descripcion="Ver, modificar y cancelar citas de pacientes"
                     onClick={() => navigate('/admin/gestion')}
+                  />
+                  <TarjetaAcceso
+                    icono={<IconoMedicos />}
+                    titulo="Gestión de Profesionales"
+                    descripcion="Agregar, editar o eliminar médicos y agendas"
+                    onClick={() => navigate('/admin/medicos')}
                   />
                 </div>
               </section>
