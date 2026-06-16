@@ -32,6 +32,14 @@ const IconoGestion = () => (
   </svg>
 )
 
+const IconoMedicos = () => (
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3aada0" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
+    <circle cx="9" cy="7" r="4" />
+    <path d="M19 8v6M16 11h6" />
+  </svg>
+)
+
 function TarjetaAcceso({ icono, titulo, descripcion, onClick }: {
   icono: React.ReactNode
   titulo: string
@@ -59,6 +67,13 @@ function TarjetaAcceso({ icono, titulo, descripcion, onClick }: {
   )
 }
 
+<TarjetaAcceso
+  icono={<IconoMedicos />}
+  titulo="Gestión de Profesionales"
+  descripcion="Agregar, editar o eliminar médicos y agendas"
+  onClick={() => navigate('/admin/medicos')}
+/>
+
 function ChipStat({ label, valor, color }: { label: string; valor: number; color: string }) {
   return (
     <div className="flex flex-col items-center justify-center bg-white rounded-2xl border border-[#d5dce6] py-4 px-3 gap-1">
@@ -70,20 +85,17 @@ function ChipStat({ label, valor, color }: { label: string; valor: number; color
 
 export default function AdminPanel() {
   const navigate = useNavigate()
-  const [autenticado, setAutenticado] = useState(false)
-  const [cargando, setCargando]       = useState(true)
+  const [autenticado] = useState(() => AuthService.esAdmin())
+  const cargando = false
   const [stats, setStats] = useState<Estadisticas>({
     total: 0, proximas: 0, pasadas: 0, porEspecialidad: {},
   })
 
   useEffect(() => {
-    if (!AuthService.esAdmin()) {
+    if (!autenticado) {
       navigate('/', { replace: true })
-      return
     }
-    setAutenticado(true)
-    setCargando(false)
-  }, [navigate])
+  }, [autenticado, navigate])
 
   useEffect(() => {
     if (!autenticado) return

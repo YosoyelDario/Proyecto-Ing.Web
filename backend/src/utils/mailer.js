@@ -89,5 +89,36 @@ const plantillaModificacion = (cita) => `
     <p style="color:#a8c5c2;font-size:11px;margin-top:32px">Municipalidad de Santo Domingo · Sistema de Citas Médicas</p>
   </div>
 `
+const plantillaRegistro = (nombre) => `
+  <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#f4faf9;border-radius:12px">
+    <h2 style="color:#3aada0;margin-bottom:8px">🎉 Cuenta Creada Exitosamente</h2>
+    <p style="color:#5a7e7b;margin-bottom:24px">Hola ${nombre}, tu cuenta en el sistema de agendamiento médico de la Municipalidad de Santo Domingo ha sido creada.</p>
+    <p style="color:#7a8a9a;font-size:13px;margin-top:24px">Ya puedes iniciar sesión para agendar, modificar o cancelar tus citas.</p>
+    <p style="color:#a8c5c2;font-size:11px;margin-top:32px">Municipalidad de Santo Domingo · Sistema de Citas Médicas</p>
+  </div>
+`
 
-module.exports = { enviarCorreo, plantillaConfirmacion, plantillaCancelacion, plantillaModificacion }
+const plantillaLogin = (nombre, fecha) => `
+  <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#f4faf9;border-radius:12px">
+    <h2 style="color:#3aada0;margin-bottom:8px">🔔 Nuevo Inicio de Sesión</h2>
+    <p style="color:#5a7e7b;margin-bottom:24px">Hola ${nombre}, hemos detectado un nuevo inicio de sesión en tu cuenta.</p>
+    <div style="background:white;border-radius:8px;padding:24px;border:1px solid #d5dce6">
+      <table style="width:100%;border-collapse:collapse">
+        <tr><td style="padding:8px 0;color:#7a8a9a;font-size:13px">FECHA Y HORA</td>
+            <td style="padding:8px 0;font-weight:500;color:#1a2332;">${fecha}</td></tr>
+      </table>
+    </div>
+    <p style="color:#7a8a9a;font-size:13px;margin-top:24px">Si no fuiste tú, te recomendamos cambiar tu contraseña inmediatamente.</p>
+    <p style="color:#a8c5c2;font-size:11px;margin-top:32px">Municipalidad de Santo Domingo · Sistema de Citas Médicas</p>
+  </div>
+`
+
+// Actualizar el module.exports
+module.exports = { 
+  enviarCorreo, 
+  plantillaConfirmacion, 
+  plantillaCancelacion, 
+  plantillaModificacion,
+  plantillaRegistro,
+  plantillaLogin
+}

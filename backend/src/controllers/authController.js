@@ -3,6 +3,7 @@ const jwt    = require('jsonwebtoken')
 const pool   = require('../db/pool')
 const { buscarUsuarioPorEmail, buscarUsuarioPorId } = require('../db/queries/usuarios')
 const { validarRegionComuna } = require('../utils/ubicaciones')
+const { enviarCorreo, plantillaRegistro, plantillaLogin } = require('../utils/mailer')
 
 const registrarUsuario = async (req, res) => {
   const { rut, nombre_completo, email, password, region, comuna } = req.body
@@ -22,6 +23,16 @@ const registrarUsuario = async (req, res) => {
       [rut, nombre_completo, email, password_hash, region, comuna]
     )
 
+    try {
+      await enviarCorreo(
+        email,
+        'Bienvenido al Sistema de Citas - Municipalidad de Santo Domingo',
+        plantillaRegistro(nombre_completo)
+      )
+    } catch (mailErr) {
+      console.error('Error enviando correo SMTP Registro:', mailErr.message)
+    }
+
     res.status(201).json({ mensaje: 'Usuario registrado', usuario: result.rows[0] })
   } catch (error) {
     if (error.code === '23505') {
@@ -37,21 +48,18 @@ const loginUsuario = async (req, res) => {
   const { email, password } = req.body
 
   try {
-    // 1. Buscar usuario por email (consulta parametrizada)
     const usuario = await buscarUsuarioPorEmail(email)
 
     if (!usuario) {
       return res.status(401).json({ error: 'Correo o contraseña incorrectos.' })
     }
 
-    // 2. Comparar contraseña con el hash guardado
     const passwordValida = await bcrypt.compare(password, usuario.password_hash)
 
     if (!passwordValida) {
       return res.status(401).json({ error: 'Correo o contraseña incorrectos.' })
     }
 
-    // 3. Generar JWT con los datos del usuario
     const token = jwt.sign(
       {
         id:             usuario.id,
@@ -63,6 +71,17 @@ const loginUsuario = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '8h' }
     )
+
+    try {
+      const fechaActual = new Date().toLocaleString('es-CL', { timeZone: 'America/Santiago' })
+      await enviarCorreo(
+        usuario.email,
+        'Nuevo inicio de sesión detectado',
+        plantillaLogin(usuario.nombre_completo, fechaActual)
+      )
+    } catch (mailErr) {
+      console.error('Error enviando correo SMTP Login:', mailErr.message)
+    }
 
     res.json({
       token,
@@ -84,8 +103,6 @@ const loginUsuario = async (req, res) => {
 }
 
 const logoutUsuario = async (req, res) => {
-  // En este diseño con JWT sin blacklist, el logout es responsabilidad del cliente
-  // (eliminar el token). Aquí devolvemos 200 para confirmar cierre de sesión.
   res.json({ mensaje: 'Sesión cerrada' })
 }
 
