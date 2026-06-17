@@ -1246,3 +1246,5 @@ Y referenciarlas en `docker-compose.yml` con `${VARIABLE}`.
   funcione correctamente al recargar la página.
 - `VITE_API_URL` se inyecta en tiempo de build (no en runtime), por lo que
   cualquier cambio requiere reconstruir la imagen del frontend.
+- A considerar en `docker-compose.yml`, el `POSTGRES_PASSWORD` y el `DB_PASSWORD` deben ser las claves propias de 
+  cada usuario.
