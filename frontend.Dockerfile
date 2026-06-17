@@ -1,71 +1,36 @@
-services:
+# ── Etapa 1: build ───────────────────────────────────────────────────────────
+FROM node:24-alpine AS builder
 
-  # ── PostgreSQL ──────────────────────────────────────────────────────────────
-  db:
-    image: postgres:16-alpine
-    container_name: santo_domingo_db
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: santo_domingo
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: tu_password        # cambiar en producción
-    volumes:
-      # Persistencia de datos entre reinicios
-      - postgres_data:/var/lib/postgresql/data
-      # Script de inicialización: crea las tablas al primer arranque
-      - ./base de datos/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d santo_domingo"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+WORKDIR /app
 
-  # ── Backend (Express) ───────────────────────────────────────────────────────
-  backend:
-    build:
-      context: ./backend
-      dockerfile: ../backend.Dockerfile
-    container_name: santo_domingo_backend
-    restart: unless-stopped
-    depends_on:
-      db:
-        condition: service_healthy      # espera a que PostgreSQL esté listo
-    environment:
-      PORT: 3000
-      # "db" es el nombre del servicio anterior; Docker lo resuelve internamente
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_NAME: santo_domingo
-      DB_USER: postgres
-      DB_PASSWORD: tu_password          # debe coincidir con POSTGRES_PASSWORD
-      JWT_SECRET: santo_domingo_2026_clave_super_secreta   # cambiar en producción
-      FRONTEND_URL: http://localhost:5173
-      # Configuración SMTP (completar con credenciales reales)
-      SMTP_HOST: smtp.gmail.com
-      SMTP_PORT: 587
-      SMTP_SECURE: "false"
-      SMTP_USER: tu_correo@gmail.com
-      SMTP_PASS: tu_clave_de_aplicacion
-    ports:
-      - "3000:3000"
+# Copiar manifiesto de dependencias
+COPY package.json package-lock.json* pnpm-lock.yaml* ./
 
-  # ── Frontend (Vite build + nginx) ───────────────────────────────────────────
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: ../frontend.Dockerfile
-      args:
-        # URL que el BROWSER del usuario usa para llegar al backend.
-        # Con todo en localhost, el puerto 3000 está mapeado al host.
-        VITE_API_URL: http://localhost:3000
-    container_name: santo_domingo_frontend
-    restart: unless-stopped
-    depends_on:
-      - backend
-    ports:
-      - "5173:80"                       # acceder en http://localhost:5173
+# Instalar TODAS las dependencias (incluyendo devDependencies para el build)
+RUN npm install
 
-volumes:
-  postgres_data:
+# Copiar el resto del código fuente
+COPY . .
+
+# Variable de entorno para que Vite sepa dónde está el backend en producción.
+# Con Docker Compose en la misma máquina, el browser del usuario accede
+# al backend por localhost:3000 (puerto mapeado al host).
+ARG VITE_API_URL=http://localhost:3000
+ENV VITE_API_URL=$VITE_API_URL
+
+# Compilar la aplicación (tsc + vite build → dist/)
+RUN npm run build
+
+# ── Etapa 2: servidor nginx ───────────────────────────────────────────────────
+FROM nginx:alpine
+
+# Copiar el build generado por Vite al directorio que sirve nginx
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Configuración de nginx adaptada a React Router (SPA)
+# Sin esto, cualquier ruta distinta de "/" devuelve 404 al recargar la página.
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

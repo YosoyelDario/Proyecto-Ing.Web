@@ -15,7 +15,7 @@ import GestionCitas    from '../src/pages/admin/GestionCitas'
 import Dashboard       from '../src/pages/Dashboard'
 import CambiarPassword from '../src/pages/CambiarPassword'
 import RutaProtegida   from '../src/components/RutaProtegida'
-import { GestionMedicos } from '../src/pages/admin/GestionMedicos'
+
 
 function AuthInterceptor() {
   const navigate = useNavigate()
@@ -58,13 +58,6 @@ export default function App() {
             <CambiarPassword />
           </RutaProtegida>
         } />
-
-        {/* ── Solo admin ── */}
-        <Route path="/admin/medicos" element={
-  <RutaProtegida soloAdmin>
-    <GestionMedicos />
-  </RutaProtegida>
-} />
         <Route path="/admin" element={
           <RutaProtegida soloAdmin>
             <AdminPanel />
