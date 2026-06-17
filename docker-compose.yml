@@ -8,12 +8,12 @@ services:
     environment:
       POSTGRES_DB: santo_domingo
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: tu_password        # cambiar en producción
+      POSTGRES_PASSWORD: tu_password       # cambiar en producción
     volumes:
       # Persistencia de datos entre reinicios
       - postgres_data:/var/lib/postgresql/data
       # Script de inicialización: crea las tablas al primer arranque
-      - ./base de datos/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - "./base de datos/init.sql:/docker-entrypoint-initdb.d/init.sql:ro"
     ports:
       - "5432:5432"
     healthcheck:
@@ -46,8 +46,8 @@ services:
       SMTP_HOST: smtp.gmail.com
       SMTP_PORT: 587
       SMTP_SECURE: "false"
-      SMTP_USER: tu_correo@gmail.com
-      SMTP_PASS: tu_clave_de_aplicacion
+      SMTP_USER: pruebacentromedsd@gmail.com
+      SMTP_PASS: igbvohvuitnwnngr
     ports:
       - "3000:3000"
 
