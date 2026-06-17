@@ -1,9 +1,13 @@
 const pool = require('../pool')
 
+// ─── Especialidades ───────────────────────────────────────────────────────────
+
 const getEspecialidades = async () => {
   const result = await pool.query('SELECT id, nombre FROM especialidad ORDER BY nombre')
   return result.rows
 }
+
+// ─── Profesionales ────────────────────────────────────────────────────────────
 
 const getTodosProfesionales = async () => {
   const result = await pool.query(
@@ -59,7 +63,7 @@ const actualizarProfesional = async (id, campos) => {
 
   if (entradas.length === 0) return null
 
-  const sets   = entradas.map(([k], i) => `${k} = $${i + 1}`)
+  const sets    = entradas.map(([k], i) => `${k} = $${i + 1}`)
   const valores = entradas.map(([, v]) => v)
 
   const result = await pool.query(
@@ -80,6 +84,77 @@ const eliminarProfesional = async (id) => {
   return result.rows[0] ?? null
 }
 
+// ─── Agenda semanal (dia_laboral) ─────────────────────────────────────────────
+
+const getAgendaMedico = async (idMedico) => {
+  const result = await pool.query(
+    `SELECT id, dia_semana, hora_inicio, hora_fin, duracion_minutos
+     FROM   dia_laboral
+     WHERE  id_medico = $1
+     ORDER  BY dia_semana`,
+    [idMedico]
+  )
+  return result.rows
+}
+
+/**
+ * Reemplaza completamente la agenda semanal de un médico:
+ * elimina todos sus dia_laboral actuales e inserta los nuevos.
+ */
+const guardarAgendaSemanal = async (idMedico, horarios) => {
+  await pool.query('DELETE FROM dia_laboral WHERE id_medico = $1', [idMedico])
+
+  if (!horarios || horarios.length === 0) return []
+
+  const insertados = []
+  for (const h of horarios) {
+    const result = await pool.query(
+      `INSERT INTO dia_laboral (id_medico, dia_semana, hora_inicio, hora_fin, duracion_minutos)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (id_medico, dia_semana) DO UPDATE
+         SET hora_inicio = EXCLUDED.hora_inicio,
+             hora_fin    = EXCLUDED.hora_fin,
+             duracion_minutos = EXCLUDED.duracion_minutos
+       RETURNING *`,
+      [idMedico, h.dia_semana, h.hora_inicio, h.hora_fin, h.duracion_minutos]
+    )
+    insertados.push(result.rows[0])
+  }
+  return insertados
+}
+
+// ─── Excepciones (feriados / licencias) ──────────────────────────────────────
+
+const getExcepcionesMedico = async (idMedico) => {
+  const result = await pool.query(
+    `SELECT id, fecha, hora_inicio, hora_fin, duracion_minutos, tipo, motivo
+     FROM   excepcion_dia_laboral
+     WHERE  id_medico = $1
+     ORDER  BY fecha DESC`,
+    [idMedico]
+  )
+  return result.rows
+}
+
+const crearExcepcion = async (idMedico, { fecha, hora_inicio, hora_fin, duracion_minutos, tipo, motivo }) => {
+  const result = await pool.query(
+    `INSERT INTO excepcion_dia_laboral
+       (id_medico, fecha, hora_inicio, hora_fin, duracion_minutos, tipo, motivo)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
+     RETURNING *`,
+    [idMedico, fecha, hora_inicio || null, hora_fin || null, duracion_minutos || null, tipo, motivo || null]
+  )
+  return result.rows[0]
+}
+
+const eliminarExcepcion = async (idExcepcion) => {
+  const result = await pool.query(
+    `DELETE FROM excepcion_dia_laboral WHERE id = $1 RETURNING *`,
+    [idExcepcion]
+  )
+  return result.rows[0] ?? null
+}
+
 module.exports = {
   getEspecialidades,
   getTodosProfesionales,
@@ -88,4 +163,9 @@ module.exports = {
   crearProfesional,
   actualizarProfesional,
   eliminarProfesional,
+  getAgendaMedico,
+  guardarAgendaSemanal,
+  getExcepcionesMedico,
+  crearExcepcion,
+  eliminarExcepcion,
 }

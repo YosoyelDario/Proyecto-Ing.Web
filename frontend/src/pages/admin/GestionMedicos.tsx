@@ -129,6 +129,18 @@ export const GestionMedicos = () => {
   }
 
   const guardarMedico = async () => {
+    // Validación básica antes de enviar
+    if (!formMedico.rut.trim() || !formMedico.nombre.trim()) {
+      alert('Por favor completa el RUT y el nombre del profesional.')
+      return
+    }
+
+    // Verificar sesión activa antes de intentar la operación
+    if (!AuthService.estaAutenticado()) {
+      alert('Tu sesión expiró. Por favor inicia sesión nuevamente.')
+      return
+    }
+
     try {
       if (medicoSeleccionado) {
         await actualizarMedico(medicoSeleccionado.id, { 
@@ -142,7 +154,7 @@ export const GestionMedicos = () => {
       await cargarDatos()
     } catch (error: any) {
       console.error('Error guardando médico:', error)
-      const mensaje = error.response?.data?.error || 'Error al guardar el profesional. Verifica los datos.'
+      const mensaje = error.message || error.response?.data?.error || 'Error al guardar el profesional. Verifica los datos.'
       alert(mensaje)
     }
   }
@@ -154,7 +166,7 @@ export const GestionMedicos = () => {
       await cargarDatos()
     } catch (error: any) {
       console.error('Error eliminando médico:', error)
-      const mensaje = error.response?.data?.error || 'No se puede eliminar: el profesional tiene citas asociadas.'
+      const mensaje = error.message || error.response?.data?.error || 'No se puede eliminar: el profesional tiene citas asociadas.'
       alert(mensaje)
     }
   }
@@ -380,35 +392,65 @@ export const GestionMedicos = () => {
           <div className="p-6 flex flex-col gap-4 font-['DM_Sans',sans-serif]">
             <div className="flex flex-col gap-1.5">
               <label className="text-[13px] font-medium text-[#1a2332]">RUT</label>
-              <IonInput
+              <input
+                type="text"
                 value={formMedico.rut}
-                onIonInput={e => setFormMedico({ ...formMedico, rut: e.detail.value! })}
+                onChange={e => setFormMedico({ ...formMedico, rut: e.target.value })}
                 disabled={!!medicoSeleccionado}
-                className="bg-white border border-[#d5dce7] rounded-xl px-4 py-2 text-[14px]"
                 placeholder="12345678-9"
+                style={{
+                  background: 'white',
+                  border: '1px solid #d5dce7',
+                  borderRadius: '12px',
+                  padding: '10px 16px',
+                  fontSize: '14px',
+                  width: '100%',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                  opacity: medicoSeleccionado ? 0.6 : 1,
+                }}
               />
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="text-[13px] font-medium text-[#1a2332]">Nombre Completo</label>
-              <IonInput
+              <input
+                type="text"
                 value={formMedico.nombre}
-                onIonInput={e => setFormMedico({ ...formMedico, nombre: e.detail.value! })}
-                className="bg-white border border-[#d5dce7] rounded-xl px-4 py-2 text-[14px]"
+                onChange={e => setFormMedico({ ...formMedico, nombre: e.target.value })}
                 placeholder="Dr. Juan Pérez"
+                style={{
+                  background: 'white',
+                  border: '1px solid #d5dce7',
+                  borderRadius: '12px',
+                  padding: '10px 16px',
+                  fontSize: '14px',
+                  width: '100%',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
               />
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="text-[13px] font-medium text-[#1a2332]">Especialidad</label>
-              <IonSelect
+              <select
                 value={formMedico.id_especialidad}
-                onIonChange={e => setFormMedico({ ...formMedico, id_especialidad: Number(e.detail.value) })}
-                interface="action-sheet"
-                className="bg-white border border-[#d5dce7] rounded-xl px-4 py-2 text-[14px]"
+                onChange={e => setFormMedico({ ...formMedico, id_especialidad: Number(e.target.value) })}
+                style={{
+                  background: 'white',
+                  border: '1px solid #d5dce7',
+                  borderRadius: '12px',
+                  padding: '10px 16px',
+                  fontSize: '14px',
+                  width: '100%',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                  cursor: 'pointer',
+                }}
               >
                 {especialidades.map(e => (
-                  <IonSelectOption key={e.id} value={e.id}>{e.nombre}</IonSelectOption>
+                  <option key={e.id} value={e.id}>{e.nombre}</option>
                 ))}
-              </IonSelect>
+              </select>
             </div>
             <BotonPrimario onClick={guardarMedico} className="mt-4 py-3! rounded-xl!">Guardar Profesional</BotonPrimario>
           </div>
