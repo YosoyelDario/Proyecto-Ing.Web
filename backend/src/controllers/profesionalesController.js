@@ -1,4 +1,5 @@
-const profesionalesModel = require('../models/profesionales')
+// Modificar la primera línea de profesionalesController.js:
+const profesionalesModel = require('../db/queries/profesionales');
 
 // ─── Especialidades ───────────────────────────────────────────────────────────
 
