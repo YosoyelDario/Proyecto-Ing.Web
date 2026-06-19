@@ -31,14 +31,13 @@ const IconoGestion = () => (
     <path d="M9 14l2 2 4-4" />
   </svg>
 )
-
-const IconoMedicos = () => (
+{/*const IconoMedicos = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3aada0" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2" />
     <circle cx="9" cy="7" r="4" />
     <path d="M19 8v6M16 11h6" />
   </svg>
-)
+) */}
 
 function TarjetaAcceso({ icono, titulo, descripcion, onClick }: {
   icono: React.ReactNode
@@ -176,12 +175,14 @@ export default function AdminPanel() {
                     descripcion="Ver, modificar y cancelar citas de pacientes"
                     onClick={() => navigate('/admin/gestion')}
                   />
-                  <TarjetaAcceso
+
+                  {/*                   <TarjetaAcceso
                     icono={<IconoMedicos />}
                     titulo="Gestión de Profesionales"
                     descripcion="Agregar, editar o eliminar médicos y agendas"
                     onClick={() => navigate('/admin/medicos')}
-                  />
+                  />*/}
+
                 </div>
               </section>
             </PageTransition>
