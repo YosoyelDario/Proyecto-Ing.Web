@@ -21,7 +21,7 @@ Proyecto-Ing.Web-main/
 ## Requisitos previos
 
 - Docker Desktop instalado y corriendo
-- Puerto 3000, 5173 y 5432 disponibles en la máquina
+- Puerto 3000, 5173 y 5433 disponibles en la máquina
 
 ## Levantar los servicios
 

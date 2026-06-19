@@ -1,5 +1,6 @@
 const express = require('express')
 const cors    = require('cors')
+const helmet = require('helmet');
 const rateLimit = require('express-rate-limit')
 require('dotenv').config()
 
@@ -10,6 +11,7 @@ const citasRouter         = require('./src/routes/citas')
 const usuariosRouter      = require('./src/routes/usuarios')
 
 const app = express()
+app.use(helmet());
 
 // Configuración estricta de CORS
 const corsOptions = {
