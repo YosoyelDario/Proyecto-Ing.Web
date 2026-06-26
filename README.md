@@ -1223,7 +1223,7 @@ docker compose logs -f backend # ver logs en tiempo real
 
 ## Variables de entorno
 
-Las variables sensibles están en `docker-compose.yml`. Para producción real
+Las variables sensibles están en `docker-compose.yml`. Para la producción real
 se recomienda moverlas a un archivo `.env` en la raíz:
 
 ```env
@@ -1248,3 +1248,5 @@ Y referenciarlas en `docker-compose.yml` con `${VARIABLE}`.
   cualquier cambio requiere reconstruir la imagen del frontend.
 - A considerar en `docker-compose.yml`, el `POSTGRES_PASSWORD` y el `DB_PASSWORD` deben ser las claves propias de 
   cada usuario.
+- Acceso (Usuario Administrador)
+  Para acceder al panel de administrador del sistema , se considera que uno debe crearse un usuario primero y luego en la base de datos uno debe hacerse administrador (campo is_admin).
