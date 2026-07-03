@@ -46,8 +46,8 @@ services:
       SMTP_HOST: smtp.gmail.com
       SMTP_PORT: 587
       SMTP_SECURE: "false"
-      SMTP_USER: pruebacentromedsd@gmail.com
-      SMTP_PASS: igbvohvuitnwnngr
+      SMTP_USER: direccion_de_correo_electronico #ejemplo pruebacentromd@gmail.com
+      SMTP_PASS: clave_de_16_caracteres #se activa al haber activado verificacion en dos pasos en el correo, se puede obtener una contraseña para otras aplicaciones.
     ports:
       - "3000:3000"
 
